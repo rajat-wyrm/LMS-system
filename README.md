@@ -85,7 +85,7 @@ LMS-system/
 ## Getting Started
 
 ### Prerequisites
-- Node.js **v18+** (Node 20 LTS recommended)
+- **Node.js** v18+ (Node 20 LTS recommended)
 - **PostgreSQL 14+** (or a hosted Supabase / Neon / RDS instance)
 - **Redis 6+** (local Docker works fine)
 - npm or pnpm
@@ -101,11 +101,17 @@ This installs root, `backend`, `course-compass-main`, and `admin` workspaces in 
 
 ### 2. Configure environment
 
+Before running the application, ensure your `.env` files are correctly configured.
+
 #### `backend/.env`
+Create a `.env` in the `backend/` directory:
 ```env
 PORT=5000
 NODE_ENV=development
+# For local PostgreSQL:
 DATABASE_URL="postgresql://postgres:password@localhost:5432/lms"
+# For external Supabase PostgreSQL:
+# DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
 REDIS_URL="redis://localhost:6379"
 JWT_SECRET=replace-with-a-long-random-string
 JWT_EXPIRES_IN=7d
@@ -137,8 +143,8 @@ This launches all three apps concurrently:
 |-------------------|---------------------------|
 | Backend API       | http://localhost:5000     |
 | API Docs (Swagger)| http://localhost:5000/api-docs |
-| Student Portal    | http://localhost:3000     |
-| Admin Console     | http://localhost:3001     |
+| Student Portal    | http://localhost:3000 (or http://localhost:8081) |
+| Admin Console     | http://localhost:3001 (or http://localhost:5173) |
 
 ---
 

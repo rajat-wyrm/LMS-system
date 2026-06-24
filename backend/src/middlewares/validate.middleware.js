@@ -10,7 +10,11 @@ const validate = (schema) => async (req, res, next) => {
     return next();
   } catch (error) {
     if (error instanceof z.ZodError) {
+<<<<<<< HEAD
       const errorMessage = error.errors.map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+=======
+      const errorMessage = (error.issues || error.errors).map(err => `${err.path.join('.')}: ${err.message}`).join(', ');
+>>>>>>> 32b6107 (initial commit)
       return res.status(400).json({ success: false, error: errorMessage });
     }
     return res.status(400).json({ success: false, error: 'Validation Error' });

@@ -1,0 +1,12 @@
+2026-05-25 13:34:38 [ERROR]: 500 - Cannot set property query of #<IncomingMessage> which has only a getter - /api/courses/cmpksxpl20001xwvrvpeu9kf0 - OPTIONS - ::1
+2026-05-25 13:34:38 [ERROR]: 500 - Cannot set property query of #<IncomingMessage> which has only a getter - /api/auth/me - OPTIONS - ::1
+2026-05-25 13:34:48 [ERROR]: 500 - Cannot set property query of #<IncomingMessage> which has only a getter - /api/auth/login - OPTIONS - ::1
+2026-05-25 13:34:51 [ERROR]: 500 - Cannot set property query of #<IncomingMessage> which has only a getter - /api/auth/login - OPTIONS - ::1
+2026-05-25 13:35:24 [ERROR]: 500 - Cannot set property query of #<IncomingMessage> which has only a getter - /api/auth/register - OPTIONS - ::1
+2026-05-25 13:35:31 [ERROR]: 500 - Cannot set property query of #<IncomingMessage> which has only a getter - /api/auth/register - OPTIONS - ::1
+2026-05-25 13:35:32 [ERROR]: 500 - Cannot set property query of #<IncomingMessage> which has only a getter - /api/auth/register - OPTIONS - ::1
+2026-05-25 13:35:32 [ERROR]: 500 - Cannot set property query of #<IncomingMessage> which has only a getter - /api/auth/register - OPTIONS - ::1
+2026-05-25 13:35:32 [ERROR]: 500 - Cannot set property query of #<IncomingMessage> which has only a getter - /api/auth/register - OPTIONS - ::1
+2026-05-25 13:35:33 [ERROR]: 500 - Cannot set property query of #<IncomingMessage> which has only a getter - /api/auth/register - OPTIONS - ::1
+2026-05-25 13:35:33 [ERROR]: 500 - Cannot set property query of #<IncomingMessage> which has only a getter - /api/auth/register - OPTIONS - ::1
+2026-05-25 13:35:40 [ERROR]: 500 - Cannot set property query of #<IncomingMessage> which has only a getter - /api/auth/register - OPTIONS - ::1

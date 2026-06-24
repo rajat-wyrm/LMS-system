@@ -1,10 +1,12 @@
-const { prisma } = require('../config/db'); // Trigger restart for history endpoint
+const { prisma } = require('../config/db');
+const redisClient = require('../services/redis.service');
 
 // @desc    Get dashboard statistics for admin
 // @route   GET /api/admin/stats
 // @access  Private/Admin
 exports.getDashboardStats = async (req, res, next) => {
   try {
+
     const totalUsers = await prisma.user.count();
     const totalStudents = await prisma.user.count({ where: { role: 'user' } });
     const totalInstructors = await prisma.user.count({ where: { role: 'instructor' } });
@@ -22,6 +24,98 @@ exports.getDashboardStats = async (req, res, next) => {
     const totalRevenue = allEnrollments.reduce((sum, enr) => sum + (enr.course?.price || 0), 0);
 
     // Get recent 5 users for activity feed
+
+    // ── Basic counts ────────────────────────────────────────────────────────
+    const [totalUsers, totalStudents, totalInstructors, totalAdmins,
+           totalCourses, totalEnrollments, activeEnrollments,
+           pendingUsers, pendingCourses] = await Promise.all([
+      prisma.user.count(),
+      prisma.user.count({ where: { role: 'user' } }),
+      prisma.user.count({ where: { role: 'instructor' } }),
+      prisma.user.count({ where: { role: 'admin' } }),
+      prisma.course.count(),
+      prisma.enrollment.count(),
+      prisma.enrollment.count({ where: { status: 'active' } }),
+      prisma.user.count({ where: { status: 'pending' } }),
+      prisma.course.count({ where: { status: 'pending' } }),
+    ]);
+
+    // ── 1. Weekly enrollments (last 7 days) ─────────────────────────────────
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const weeklyEnrollments = await prisma.enrollment.count({
+      where: { createdAt: { gte: sevenDaysAgo } }
+    });
+
+    // ── 2. Course completion rate ────────────────────────────────────────────
+    const completedEnrollments = await prisma.enrollment.count({
+      where: { status: 'completed' }
+    });
+    const completionRate =
+  totalEnrollments === 0
+    ? 0
+    : Number(
+        ((completedEnrollments / totalEnrollments) * 100).toFixed(2)
+      );
+
+    // ── 3. Monthly revenue breakdown (last 6 months) ────────────────────────
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const recentEnrollments = await prisma.enrollment.findMany({
+      where: { createdAt: { gte: sixMonthsAgo } },
+      include: { course: { select: { price: true } } },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    // Aggregate revenue by month label (e.g. "Jan 25")
+    const revenueMap = {};
+    recentEnrollments.forEach((enr) => {
+      const d = new Date(enr.createdAt);
+      const label = d.toLocaleString('default', { month: 'short', year: '2-digit' });
+      revenueMap[label] = (revenueMap[label] || 0) + (enr.course?.price || 0);
+    });
+    // Build ordered array covering all 6 months (fill 0 for empty months)
+    const monthlyRevenue = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const label = d.toLocaleString('default', { month: 'short', year: '2-digit' });
+      monthlyRevenue.push({ month: label, revenue: revenueMap[label] || 0 });
+    }
+    const totalRevenue = recentEnrollments.reduce((sum, enr) => sum + (enr.course?.price || 0), 0);
+
+    // Also include all-time revenue
+    const allEnrollments = await prisma.enrollment.findMany({
+      include: { course: { select: { price: true } } }
+    });
+    const allTimeRevenue = allEnrollments.reduce((sum, enr) => sum + (enr.course?.price || 0), 0);
+
+    // ── 4. Student growth over time (new users per month, last 6 months) ────
+    const newStudents = await prisma.user.findMany({
+      where: { role: 'user', createdAt: { gte: sixMonthsAgo } },
+      select: { createdAt: true },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    const growthMap = {};
+    newStudents.forEach((u) => {
+      const d = new Date(u.createdAt);
+      const label = d.toLocaleString('default', { month: 'short', year: '2-digit' });
+      growthMap[label] = (growthMap[label] || 0) + 1;
+    });
+    const studentGrowth = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const label = d.toLocaleString('default', { month: 'short', year: '2-digit' });
+      studentGrowth.push({ month: label, students: growthMap[label] || 0 });
+    }
+
+    // ── Recent activity feed ─────────────────────────────────────────────────
+
     const recentUsers = await prisma.user.findMany({
       take: 5,
       orderBy: { createdAt: 'desc' },
@@ -31,6 +125,8 @@ exports.getDashboardStats = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: {
+        // Basic counts
+
         totalUsers,
         totalStudents,
         totalInstructors,
@@ -38,9 +134,20 @@ exports.getDashboardStats = async (req, res, next) => {
         totalCourses,
         totalEnrollments,
         activeEnrollments,
+
         totalRevenue,
         pendingUsers,
         pendingCourses,
+
+        pendingUsers,
+        pendingCourses,
+        // New metrics
+        weeklyEnrollments,
+        completionRate,          // e.g. 34.2  (percentage)
+        completedEnrollments,
+        totalRevenue: allTimeRevenue,
+        monthlyRevenue,          // [ { month: "Jan 25", revenue: 120 }, ... ]
+        studentGrowth,           // [ { month: "Jan 25", students: 12 }, ... ]
         recentUsers
       }
     });
@@ -49,6 +156,38 @@ exports.getDashboardStats = async (req, res, next) => {
   }
 };
 
+// @desc    System health — DB + Redis ping
+// @route   GET /api/admin/health
+// @access  Private/Admin
+exports.getSystemHealth = async (req, res, next) => {
+  const health = { db: 'error', redis: 'error', status: 'degraded' };
+
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    health.db = 'ok';
+  } catch (err) {
+    health.dbError = err.message;
+  }
+
+  try {
+    await redisClient.ping();
+    health.redis = 'ok';
+  } catch (err) {
+    health.redisError = err.message;
+  }
+
+  health.status =
+    health.db === 'ok' && health.redis === 'ok'
+      ? 'ok'
+      : 'degraded';
+
+  const statusCode = health.status === 'ok' ? 200 : 503;
+
+  res.status(statusCode).json({
+    success: health.status === 'ok',
+    data: health,
+  });
+};
 // @desc    Get all users (admin)
 // @route   GET /api/admin/users
 // @access  Private/Admin
@@ -284,3 +423,4 @@ exports.getApprovedCertificates = async (req, res, next) => {
     next(error);
   }
 };
+
