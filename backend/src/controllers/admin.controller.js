@@ -17,6 +17,7 @@ exports.getDashboardStats = async (req, res, next) => {
       activeEnrollments,
       pendingUsers,
       pendingCourses,
+    
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { role: "user" } }),

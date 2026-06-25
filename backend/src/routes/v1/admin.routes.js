@@ -6,12 +6,8 @@ const {
   deleteAdminUser,
   getAdminCourses,
   updateCourseStatus,
-<<<<<<< HEAD
-  deleteAdminCourse
-=======
   deleteAdminCourse,
   getSystemHealth
->>>>>>> 32b6107 (initial commit)
 } = require('../../controllers/admin.controller');
 const { protect, authorize } = require('../../middlewares/auth.middleware');
 
@@ -23,12 +19,11 @@ router.use(authorize('admin')); // All admin routes are admin only
 // Stats
 router.route('/stats').get(getDashboardStats);
 
-<<<<<<< HEAD
-=======
-// System health (DB + Redis)
-router.route('/health').get(getSystemHealth);
 
->>>>>>> 32b6107 (initial commit)
+  // System health (DB + Redis)
+  router.route('/health').get(getSystemHealth);
+
+  
 // User management
 router.route('/users').get(getAdminUsers);
 router.route('/users/:id').put(updateUserStatus).delete(deleteAdminUser);
