@@ -1,36 +1,139 @@
-const { prisma } = require('../config/db'); // Trigger restart for history endpoint
+const { prisma } = require("../config/db");
+const redisClient = require("../services/redis.service");
 
 // @desc    Get dashboard statistics for admin
 // @route   GET /api/admin/stats
 // @access  Private/Admin
 exports.getDashboardStats = async (req, res, next) => {
   try {
-    const totalUsers = await prisma.user.count();
-    const totalStudents = await prisma.user.count({ where: { role: 'user' } });
-    const totalInstructors = await prisma.user.count({ where: { role: 'instructor' } });
-    const totalAdmins = await prisma.user.count({ where: { role: 'admin' } });
-    const totalCourses = await prisma.course.count();
-    const totalEnrollments = await prisma.enrollment.count();
-    const activeEnrollments = await prisma.enrollment.count({ where: { status: 'active' } });
-    const pendingUsers = await prisma.user.count({ where: { status: 'pending' } });
-    const pendingCourses = await prisma.course.count({ where: { status: 'pending' } });
+    // ── Basic counts ────────────────────────────────────────────────────────
+    const [
+      totalUsers,
+      totalStudents,
+      totalInstructors,
+      totalAdmins,
+      totalCourses,
+      totalEnrollments,
+      activeEnrollments,
+      pendingUsers,
+      pendingCourses,
+    ] = await Promise.all([
+      prisma.user.count(),
+      prisma.user.count({ where: { role: "user" } }),
+      prisma.user.count({ where: { role: "instructor" } }),
+      prisma.user.count({ where: { role: "admin" } }),
+      prisma.course.count(),
+      prisma.enrollment.count(),
+      prisma.enrollment.count({ where: { status: "active" } }),
+      prisma.user.count({ where: { status: "pending" } }),
+      prisma.course.count({ where: { status: "pending" } }),
+    ]);
 
-    // Calculate revenue
-    const allEnrollments = await prisma.enrollment.findMany({
-      include: { course: { select: { price: true } } }
+    // ── 1. Weekly enrollments (last 7 days) ─────────────────────────────────
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const weeklyEnrollments = await prisma.enrollment.count({
+      where: { createdAt: { gte: sevenDaysAgo } },
     });
-    const totalRevenue = allEnrollments.reduce((sum, enr) => sum + (enr.course?.price || 0), 0);
 
-    // Get recent 5 users for activity feed
+    // ── 2. Course completion rate ────────────────────────────────────────────
+    const completedEnrollments = await prisma.enrollment.count({
+      where: { status: "completed" },
+    });
+
+    const completionRate =
+      totalEnrollments === 0
+        ? 0
+        : Number(((completedEnrollments / totalEnrollments) * 100).toFixed(2));
+
+    // ── 3. Monthly revenue breakdown (last 6 months) ────────────────────────
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 5);
+    sixMonthsAgo.setDate(1);
+    sixMonthsAgo.setHours(0, 0, 0, 0);
+
+    const recentEnrollments = await prisma.enrollment.findMany({
+      where: { createdAt: { gte: sixMonthsAgo } },
+      include: { course: { select: { price: true } } },
+      orderBy: { createdAt: "asc" },
+    });
+
+    // Aggregate revenue by month label (e.g. "Jan 25")
+    const revenueMap = {};
+    recentEnrollments.forEach((enr) => {
+      const d = new Date(enr.createdAt);
+      const label = d.toLocaleString("default", {
+        month: "short",
+        year: "2-digit",
+      });
+      revenueMap[label] = (revenueMap[label] || 0) + (enr.course?.price || 0);
+    });
+    // Build ordered array covering all 6 months (fill 0 for empty months)
+    const monthlyRevenue = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const label = d.toLocaleString("default", {
+        month: "short",
+        year: "2-digit",
+      });
+      monthlyRevenue.push({ month: label, revenue: revenueMap[label] || 0 });
+    }
+
+    // Also include all-time revenue
+    const allEnrollments = await prisma.enrollment.findMany({
+      include: { course: { select: { price: true } } },
+    });
+    const allTimeRevenue = allEnrollments.reduce(
+      (sum, enr) => sum + (enr.course?.price || 0),
+      0,
+    );
+
+    // ── 4. Student growth over time (new users per month, last 6 months) ────
+    const newStudents = await prisma.user.findMany({
+      where: { role: "user", createdAt: { gte: sixMonthsAgo } },
+      select: { createdAt: true },
+      orderBy: { createdAt: "asc" },
+    });
+
+    const growthMap = {};
+    newStudents.forEach((u) => {
+      const d = new Date(u.createdAt);
+      const label = d.toLocaleString("default", {
+        month: "short",
+        year: "2-digit",
+      });
+      growthMap[label] = (growthMap[label] || 0) + 1;
+    });
+    const studentGrowth = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const label = d.toLocaleString("default", {
+        month: "short",
+        year: "2-digit",
+      });
+      studentGrowth.push({ month: label, students: growthMap[label] || 0 });
+    }
+
+    // ── Recent activity feed ─────────────────────────────────────────────────
     const recentUsers = await prisma.user.findMany({
       take: 5,
-      orderBy: { createdAt: 'desc' },
-      select: { id: true, name: true, email: true, role: true, status: true, createdAt: true }
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
     });
 
     res.status(200).json({
       success: true,
       data: {
+        // Basic counts
         totalUsers,
         totalStudents,
         totalInstructors,
@@ -38,15 +141,48 @@ exports.getDashboardStats = async (req, res, next) => {
         totalCourses,
         totalEnrollments,
         activeEnrollments,
-        totalRevenue,
         pendingUsers,
         pendingCourses,
-        recentUsers
-      }
+        // New metrics
+        weeklyEnrollments,
+        completionRate, // e.g. 34.2  (percentage)
+        completedEnrollments,
+        totalRevenue: allTimeRevenue,
+        monthlyRevenue, // [ { month: "Jan 25", revenue: 120 }, ... ]
+        studentGrowth, // [ { month: "Jan 25", students: 12 }, ... ]
+        recentUsers,
+      },
     });
   } catch (error) {
     next(error);
   }
+};
+
+// @desc    System health — DB + Redis ping
+// @route   GET /api/admin/health
+// @access  Private/Admin
+exports.getSystemHealth = async (req, res, next) => {
+  const health = { db: "error", redis: "error", status: "degraded" };
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    health.db = "ok";
+  } catch (err) {
+    health.dbError = err.message;
+  }
+
+  try {
+    await redisClient.ping();
+    health.redis = "ok";
+  } catch (err) {
+    health.redisError = err.message;
+  }
+
+  health.status =
+    health.db === "ok" && health.redis === "ok" ? "ok" : "degraded";
+  const statusCode = health.status === "ok" ? 200 : 503;
+  res
+    .status(statusCode)
+    .json({ success: health.status === "ok", data: health });
 };
 
 // @desc    Get all users (admin)
@@ -54,7 +190,15 @@ exports.getDashboardStats = async (req, res, next) => {
 // @access  Private/Admin
 exports.getAdminUsers = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', search, role, status } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+      search,
+      role,
+      status,
+    } = req.query;
 
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
@@ -67,14 +211,14 @@ exports.getAdminUsers = async (req, res, next) => {
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } }
+        { name: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
       ];
     }
 
     const orderBy = {};
     if (sortBy) {
-      orderBy[sortBy] = sortOrder === 'asc' ? 'asc' : 'desc';
+      orderBy[sortBy] = sortOrder === "asc" ? "asc" : "desc";
     }
 
     const [users, total] = await Promise.all([
@@ -83,9 +227,16 @@ exports.getAdminUsers = async (req, res, next) => {
         orderBy,
         skip,
         take: limitNumber,
-        select: { id: true, name: true, email: true, role: true, status: true, createdAt: true }
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+          createdAt: true,
+        },
       }),
-      prisma.user.count({ where })
+      prisma.user.count({ where }),
     ]);
 
     res.status(200).json({
@@ -96,8 +247,8 @@ exports.getAdminUsers = async (req, res, next) => {
         total,
         page: pageNumber,
         limit: limitNumber,
-        totalPages: Math.ceil(total / limitNumber)
-      }
+        totalPages: Math.ceil(total / limitNumber),
+      },
     });
   } catch (error) {
     next(error);
@@ -117,7 +268,7 @@ exports.updateUserStatus = async (req, res, next) => {
     const user = await prisma.user.update({
       where: { id: req.params.id },
       data: updateData,
-      select: { id: true, name: true, email: true, role: true, status: true }
+      select: { id: true, name: true, email: true, role: true, status: true },
     });
     res.status(200).json({ success: true, data: user });
   } catch (error) {
@@ -142,7 +293,16 @@ exports.deleteAdminUser = async (req, res, next) => {
 // @access  Private/Admin
 exports.getAdminCourses = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', search, status, category, level } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+      search,
+      status,
+      category,
+      level,
+    } = req.query;
 
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
@@ -156,15 +316,15 @@ exports.getAdminCourses = async (req, res, next) => {
 
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-        { celebrityTeacher: { contains: search, mode: 'insensitive' } }
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
+        { celebrityTeacher: { contains: search, mode: "insensitive" } },
       ];
     }
 
     const orderBy = {};
     if (sortBy) {
-      orderBy[sortBy] = sortOrder === 'asc' ? 'asc' : 'desc';
+      orderBy[sortBy] = sortOrder === "asc" ? "asc" : "desc";
     }
 
     const [courses, total] = await Promise.all([
@@ -175,10 +335,10 @@ exports.getAdminCourses = async (req, res, next) => {
         take: limitNumber,
         include: {
           instructor: { select: { id: true, name: true, email: true } },
-          _count: { select: { enrollments: true } }
-        }
+          _count: { select: { enrollments: true } },
+        },
       }),
-      prisma.course.count({ where })
+      prisma.course.count({ where }),
     ]);
 
     res.status(200).json({
@@ -189,8 +349,8 @@ exports.getAdminCourses = async (req, res, next) => {
         total,
         page: pageNumber,
         limit: limitNumber,
-        totalPages: Math.ceil(total / limitNumber)
-      }
+        totalPages: Math.ceil(total / limitNumber),
+      },
     });
   } catch (error) {
     next(error);
@@ -206,7 +366,7 @@ exports.updateCourseStatus = async (req, res, next) => {
     const course = await prisma.course.update({
       where: { id: req.params.id },
       data: { status },
-      include: { instructor: { select: { id: true, name: true } } }
+      include: { instructor: { select: { id: true, name: true } } },
     });
     res.status(200).json({ success: true, data: course });
   } catch (error) {
@@ -234,13 +394,13 @@ exports.getPendingCertificates = async (req, res, next) => {
     const enrollments = await prisma.enrollment.findMany({
       where: {
         progress: 100,
-        certificateApproved: false
+        certificateApproved: false,
       },
       include: {
         user: { select: { id: true, name: true, email: true } },
-        course: { select: { id: true, title: true } }
+        course: { select: { id: true, title: true } },
       },
-      orderBy: { updatedAt: 'asc' }
+      orderBy: { updatedAt: "asc" },
     });
     res.status(200).json({ success: true, data: enrollments });
   } catch (error) {
@@ -255,7 +415,7 @@ exports.approveCertificate = async (req, res, next) => {
   try {
     const enrollment = await prisma.enrollment.update({
       where: { id: req.params.id },
-      data: { certificateApproved: true }
+      data: { certificateApproved: true },
     });
     res.status(200).json({ success: true, data: enrollment });
   } catch (error) {
@@ -271,13 +431,13 @@ exports.getApprovedCertificates = async (req, res, next) => {
     const enrollments = await prisma.enrollment.findMany({
       where: {
         progress: 100,
-        certificateApproved: true
+        certificateApproved: true,
       },
       include: {
         user: { select: { id: true, name: true, email: true } },
-        course: { select: { id: true, title: true } }
+        course: { select: { id: true, title: true } },
       },
-      orderBy: { updatedAt: 'desc' }
+      orderBy: { updatedAt: "desc" },
     });
     res.status(200).json({ success: true, data: enrollments });
   } catch (error) {
