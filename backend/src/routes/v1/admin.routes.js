@@ -6,7 +6,8 @@ const {
   deleteAdminUser,
   getAdminCourses,
   updateCourseStatus,
-  deleteAdminCourse
+  deleteAdminCourse,
+  getSystemHealth
 } = require('../../controllers/admin.controller');
 const { protect, authorize } = require('../../middlewares/auth.middleware');
 
@@ -18,6 +19,11 @@ router.use(authorize('admin')); // All admin routes are admin only
 // Stats
 router.route('/stats').get(getDashboardStats);
 
+
+  // System health (DB + Redis)
+  router.route('/health').get(getSystemHealth);
+
+  
 // User management
 router.route('/users').get(getAdminUsers);
 router.route('/users/:id').put(updateUserStatus).delete(deleteAdminUser);

@@ -11,26 +11,42 @@ const protect = async (req, res, next) => {
   ) {
     try {
       token = req.headers.authorization.split(' ')[1];
+
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log('Decoded JWT:', decoded);
 
       req.user = await prisma.user.findUnique({
         where: { id: decoded.id },
-        select: { id: true, name: true, email: true, role: true }
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+        },
       });
 
       if (!req.user) {
-        return res.status(401).json({ success: false, error: 'Not authorized, user not found' });
+        return res.status(401).json({
+          success: false,
+          error: 'Not authorized, user not found',
+        });
       }
 
-      next();
+      return next();
     } catch (error) {
-      return res.status(401).json({ success: false, error: 'Not authorized, token failed' });
+      console.error('AUTH ERROR:', error);
+
+      return res.status(401).json({
+        success: false,
+        error: error.message,
+      });
     }
   }
 
-  if (!token) {
-    return res.status(401).json({ success: false, error: 'Not authorized, no token provided' });
-  }
+  return res.status(401).json({
+    success: false,
+    error: 'Not authorized, no token provided',
+  });
 };
 
 // Grant access to specific roles
@@ -39,7 +55,7 @@ const authorize = (...roles) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        error: `Role '${req.user.role}' is not authorized to access this route`
+        error: `Role '${req.user.role}' is not authorized to access this route`,
       });
     }
     next();

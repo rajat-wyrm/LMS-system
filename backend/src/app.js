@@ -11,6 +11,10 @@ const { RedisStore } = require('rate-limit-redis');
 const redisClient = require('./services/redis.service');
 const { prisma } = require('./config/db');
 
+
+const healthRoutes = require('./routes/v1/health.routes');
+
+
 const app = express();
 
 // Initialize Swagger Documentation
@@ -78,6 +82,7 @@ const adminRoutesV1 = require('./routes/v1/admin.routes');
 const profileRoutesV1 = require('./routes/v1/profile.routes');
 const uploadRoutesV1 = require('./routes/v1/upload.routes');
 
+
 // Mount v1 Routes
 app.use('/api/v1/auth', authRoutesV1);
 app.use('/api/v1/courses', courseRoutesV1);
@@ -86,6 +91,9 @@ app.use('/api/v1/users', userRoutesV1);
 app.use('/api/v1/admin', adminRoutesV1);
 app.use('/api/v1/profile', profileRoutesV1);
 app.use('/api/v1/upload', uploadRoutesV1);
+
+app.use('/api/v1/health', healthRoutes);
+
 
 // Maintain backward compatibility by aliasing /api to v1 routes
 app.use('/api/auth', authRoutesV1);
@@ -101,19 +109,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to LMS Backend API' });
 });
 
-// Robust Health Check
-app.get('/health', async (req, res) => {
-  try {
-    // Check DB
-    await prisma.$queryRaw`SELECT 1`;
-    // Check Redis
-    // await redisClient.ping();
-    res.status(200).json({ status: 'ok', db: 'ok', redis: 'ok' });
-  } catch (error) {
-    logger.error({ err: error }, 'Health check failed');
-    res.status(503).json({ status: 'error', details: error.message });
-  }
-});
+
 
 // Global Error Handler
 app.use(errorHandler);
