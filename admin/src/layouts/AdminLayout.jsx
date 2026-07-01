@@ -22,10 +22,12 @@ function AdminLayoutContent() {
     >
       <AdminSidebar />
 
-      <div
-        className="flex-1 flex flex-col min-h-screen transition-[margin-left] duration-[250ms] ease-in-out"
-        style={{ marginLeft: 'var(--sidebar-width)' }}
-      >
+   <div
+  className="flex-1 flex flex-col min-h-screen transition-[margin-left] duration-[250ms] ease-in-out"
+  style={{
+    marginLeft: window.innerWidth < 768 ? 0 : 'var(--sidebar-width)',
+  }}
+>
         <Navbar />
         <main className="flex-1 overflow-y-auto bg-[var(--admin-shell-bg)] p-6">
           <Outlet />
