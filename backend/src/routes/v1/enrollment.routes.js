@@ -1,31 +1,27 @@
 const express = require('express');
 const {
-  enrollInCourse,
-  getMyEnrollments,
-  getEnrollmentByCourse,
-  completeLesson,
-  unenroll,
-  updateEnrollmentMentor
+  enrollInCourse, getMyEnrollments, getEnrollmentByCourse,
+  completeLesson, unenroll, updateEnrollmentMentor
 } = require('../../controllers/enrollment.controller');
 
 const { protect } = require('../../middlewares/auth.middleware');
+const { validate } = require('../../middlewares/validate.middleware');
+const { enrollParamsSchema, lessonParamsSchema, mentorSchema } = require('../../validations/enrollment.validation');
 
 const router = express.Router();
+router.use(protect);
 
-router.use(protect); // All enrollment routes require authentication
-
-router.route('/')
-  .get(getMyEnrollments);
+router.route('/').get(getMyEnrollments);
 
 router.route('/:courseId')
-  .get(getEnrollmentByCourse)
-  .post(enrollInCourse)
-  .delete(unenroll);
+  .get(validate(enrollParamsSchema), getEnrollmentByCourse)
+  .post(validate(enrollParamsSchema), enrollInCourse)
+  .delete(validate(enrollParamsSchema), unenroll);
 
 router.route('/:courseId/mentor')
-  .put(updateEnrollmentMentor);
+  .put(validate(mentorSchema), updateEnrollmentMentor);
 
 router.route('/:courseId/lessons/:lessonId')
-  .put(completeLesson);
+  .put(validate(lessonParamsSchema), completeLesson);
 
 module.exports = router;
