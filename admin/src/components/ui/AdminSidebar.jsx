@@ -104,16 +104,21 @@ const AdminSidebar = () => {
 
   return (
     <aside
-      className={`admin-sidebar h-screen border-r flex flex-col fixed left-0 top-0 z-50 transition-[width] duration-[250ms] ease-in-out ${
-        collapsed ? 'w-[84px]' : 'w-[280px]'
-      }`}
-    >
+  className={`admin-sidebar h-screen border-r flex flex-col fixed top-0 z-50 transition-all duration-300 ${
+    window.innerWidth < 768
+      ? '-left-[280px]'
+      : 'left-0'
+  } ${
+    collapsed ? 'w-[84px]' : 'w-[280px]'
+  }`}
+>
       {/* ── Logo ── */}
       <div
         className={`flex items-center border-b border-[var(--admin-nav-border)] transition-[padding] duration-[250ms] ease-in-out ${
           collapsed ? 'justify-center px-2 py-5' : 'px-5 py-5'
         }`}
       >
+        
         <button
           type="button"
           onClick={() => navigate('/dashboard/admin')}
