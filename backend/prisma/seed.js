@@ -247,7 +247,7 @@ async function main() {
           data: {
             name: c.instructorName,
             email,
-            password: 'password123',
+            password: hashedPassword,
             role: 'instructor',
             status: 'approved'
           }
