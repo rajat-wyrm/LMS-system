@@ -61,6 +61,34 @@ exports.getDashboardStats = async (req, res, next) => {
       0,
     );
 
+    // Revenue trend for last 12 months
+    const revenueMap = {};
+
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+
+      revenueMap[key] = {
+        month: date.toLocaleString("default", { month: "short" }),
+        revenue: 0,
+      };
+    }
+
+    allEnrollments.forEach((enrollment) => {
+      if (!enrollment.createdAt) return;
+
+      const date = new Date(enrollment.createdAt);
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+
+      if (revenueMap[key]) {
+        revenueMap[key].revenue += enrollment.course?.price || 0;
+      }
+    });
+
+    const revenueTrend = Object.values(revenueMap);
+
     // Get recent 5 users for activity feed
     const recentUsers = await prisma.user.findMany({
       take: 5,
@@ -89,6 +117,7 @@ exports.getDashboardStats = async (req, res, next) => {
         completionRate,
         activeEnrollments,
         totalRevenue,
+        revenueTrend,
         pendingUsers,
         pendingCourses,
         recentUsers,
