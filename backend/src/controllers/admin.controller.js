@@ -699,26 +699,73 @@ exports.getAdminUser = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateUserStatus = async (req, res, next) => {
   try {
-    // Whitelist only allowed fields
-    const allowed = ['status', 'role', 'name', 'email'];
-    const updateData = {};
-    for (const key of allowed) {
-      if (req.body[key] !== undefined) updateData[key] = req.body[key];
+    const { status, role, name, email } = req.body;
+
+    if (!status && !role && !name && !email) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide at least one field to update.',
+      });
     }
-    // Prevent demoting self
-    if (req.body.role === 'admin' || (req.params.id === req.user?.id && req.body.status === 'suspended')) {
-      return res.status(403).json({ success: false, error: 'Cannot modify your own account this way' });
+
+    const allowedStatuses = ['pending', 'approved', 'rejected', 'suspended'];
+    const allowedRoles = ['user', 'instructor', 'admin'];
+
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid status.',
+      });
     }
-    const existingUser = await prisma.user.findUnique({ where: { id: req.params.id } });
+
+    if (role && !allowedRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid role.',
+      });
+    }
+
+    if (req.params.id === req.user?.id && (status === 'suspended' || role !== undefined)) {
+      return res.status(403).json({
+        success: false,
+        error: 'Cannot modify your own account this way',
+      });
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { id: req.params.id },
+    });
+
     if (!existingUser) {
-      return res.status(404).json({ success: false, error: 'User not found' });
+      return res.status(404).json({
+        success: false,
+        error: "User not found.",
+      });
     }
-    const user = await prisma.user.update({
+
+    const updateData = {};
+    if (status) updateData.status = status;
+    if (role) updateData.role = role;
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+
+    const updatedUser = await prisma.user.update({
       where: { id: req.params.id },
       data: updateData,
-      select: { id: true, name: true, email: true, role: true, status: true }
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+      },
     });
-    res.status(200).json({ success: true, data: user });
+
+      return res.status(200).json({
+      success: true,
+      message: 'User updated successfully.',
+      data: updatedUser,
+    });
   } catch (error) {
     next(error);
   }
@@ -732,12 +779,26 @@ exports.deleteAdminUser = async (req, res, next) => {
     if (req.params.id === req.user?.id) {
       return res.status(403).json({ success: false, error: 'Cannot delete your own account' });
     }
-    const existingUser = await prisma.user.findUnique({ where: { id: req.params.id } });
+    const existingUser = await prisma.user.findUnique({
+      where: { id: req.params.id },
+    });
+
     if (!existingUser) {
-      return res.status(404).json({ success: false, error: 'User not found' });
+      return res.status(404).json({
+        success: false,
+        error: "User not found.",
+      });
     }
-    await prisma.user.delete({ where: { id: req.params.id } });
-    res.status(200).json({ success: true, data: {} });
+
+    await prisma.user.delete({
+      where: { id: req.params.id },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'User deleted successfully.',
+      data: {},
+    });
   } catch (error) {
     next(error);
   }

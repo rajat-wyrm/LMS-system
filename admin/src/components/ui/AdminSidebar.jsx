@@ -3,8 +3,10 @@ import { createPortal } from 'react-dom';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAdminSidebar } from '../../context/AdminSidebarContext';
+import { clearAdminAuth } from '../../utils/api';
 import {
   LuLayoutDashboard,
+  LuShield,
   LuUsers,
   LuStar,
   LuBookOpen,
@@ -87,6 +89,7 @@ const AdminSidebar = () => {
 
   const links = [
     { name: 'Dashboard',           path: '/dashboard/admin',              icon: LuLayoutDashboard, end: true },
+    { name: 'Users',               path: '/dashboard/admin/users',        icon: LuShield },
     { name: 'Students',            path: '/dashboard/admin/students',     icon: LuUsers },
     { name: 'Celebrity Teachers',  path: '/dashboard/admin/teachers',     icon: LuStar },
     { name: 'Courses',             path: '/dashboard/admin/courses',      icon: LuBookOpen },
@@ -97,7 +100,7 @@ const AdminSidebar = () => {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem('role');
+    clearAdminAuth();
     navigate('/admin-login');
   };
 
