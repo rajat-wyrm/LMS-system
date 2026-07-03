@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { exportToCSV } from '../../../utils/export';
 import AnalyticsHero from '../../../components/admin/analytics/AnalyticsHero';
 import AnalyticsKpiRow from '../../../components/admin/analytics/AnalyticsKpiRow';
@@ -10,6 +10,7 @@ import FunnelAnalytics from '../../../components/admin/analytics/FunnelAnalytics
 import CohortRetention from '../../../components/admin/analytics/CohortRetention';
 import EngagementOverview from '../../../components/admin/analytics/EngagementOverview';
 import LearnerSatisfactionTrendsCard from '../../../components/admin/analytics/LearnerSatisfactionTrendsCard';
+import { satisfactionData } from '../../../components/admin/analytics/analyticsData';
 import { apiFetch } from '../../../api/config';
 
 const Analytics = () => {
@@ -88,7 +89,7 @@ const Analytics = () => {
       <EngagementOverview loading={loading} />
 
       <div className="grid grid-cols-1">
-        <LearnerSatisfactionTrendsCard satisfactionData={analyticsData?.satisfactionData} isLoading={loading} />
+        <LearnerSatisfactionTrendsCard satisfactionData={analyticsData?.satisfactionData ?? satisfactionData} isLoading={loading} />
       </div>
     </div>
   );
