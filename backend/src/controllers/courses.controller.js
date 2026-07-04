@@ -61,6 +61,45 @@ exports.getCourses = async (req, res, next) => {
   }
 };
 
+// @desc    Get trending courses by enrollment count
+// @route   GET /api/courses/trending
+// @access  Public
+exports.getTrendingCourses = async (req, res, next) => {
+  try {
+    const courses = await prisma.course.findMany({
+      where: { status: 'approved' },
+      include: {
+        instructor: {
+          select: { id: true, name: true, email: true }
+        },
+        lessons: true,
+        _count: {
+          select: { enrollments: true }
+        }
+      },
+      orderBy: [
+        {
+          enrollments: {
+            _count: 'desc'
+          }
+        },
+        {
+          createdAt: 'desc'
+        }
+      ],
+      take: 3
+    });
+
+    res.status(200).json({
+      success: true,
+      count: courses.length,
+      data: courses
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get single course
 // @route   GET /api/courses/:id
 // @access  Public
