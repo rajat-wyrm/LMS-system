@@ -1,6 +1,7 @@
 const express = require('express');
 const {
   getCourses,
+  getTrendingCourses,
   getCourse,
   createCourse,
   updateCourse,
@@ -22,6 +23,10 @@ const router = express.Router();
 router.route('/')
   .get(cacheMiddleware(300), getCourses)
   .post(protect, authorize('instructor', 'admin'), validate(courseSchema), createCourse);
+
+  //route trending courses
+router.route('/trending')
+  .get(getTrendingCourses);
 
 router.route('/learning-paths')
   .get(getLearningPaths);
