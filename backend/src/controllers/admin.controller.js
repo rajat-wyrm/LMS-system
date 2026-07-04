@@ -88,6 +88,45 @@ exports.getDashboardStats = async (req, res, next) => {
     });
 
     const revenueTrend = Object.values(revenueMap);
+//STUDENT GROWTH ANALYTICS 
+    const twelveMonthsAgo = new Date();
+    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
+    twelveMonthsAgo.setDate(1);
+    twelveMonthsAgo.setHours(0, 0, 0, 0);
+
+    // Fetch registered students created in the target period (excluding admins/instructors)
+    const recentStudents = await prisma.user.findMany({
+      where: {
+        role: "user", // Matches your totalStudents filter definition
+        createdAt: { gte: twelveMonthsAgo },
+      },
+      select: { createdAt: true },
+    });
+
+    // Generate chronological 12-month baseline map with initial 0 count
+    const studentGrowthMap = {};
+    const timelineCursor = new Date(twelveMonthsAgo);
+
+    for (let i = 0; i < 12; i++) {
+      const key = `${timelineCursor.getFullYear()}-${timelineCursor.getMonth()}`;
+      studentGrowthMap[key] = {
+        label: timelineCursor.toLocaleString("default", { month: "short", year: "numeric" }),
+        count: 0,
+      };
+      timelineCursor.setMonth(timelineCursor.getMonth() + 1);
+    }
+
+    // Populate data numbers into map 
+    recentStudents.forEach((student) => {
+      if (!student.createdAt) return;
+      const date = new Date(student.createdAt);
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+      if (studentGrowthMap[key]) {
+        studentGrowthMap[key].count += 1;
+      }
+    });
+
+    const studentGrowth = Object.values(studentGrowthMap);
 
     // Get recent 5 users for activity feed
     const recentUsers = await prisma.user.findMany({
@@ -118,6 +157,7 @@ exports.getDashboardStats = async (req, res, next) => {
         activeEnrollments,
         totalRevenue,
         revenueTrend,
+        studentGrowth,
         pendingUsers,
         pendingCourses,
         recentUsers,
