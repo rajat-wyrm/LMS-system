@@ -4,6 +4,7 @@ import { Award, BookOpen, Clock, Flame, ChevronLeft, ChevronRight, Trophy, Star,
 import { CourseCard } from "@/components/common/CourseCard";
 import { useAuth } from "@/store/AuthContext";
 import { courseApi } from "@/api/course.api";
+import { getCourseImageUrl } from "@/utils/courseImage";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -30,7 +31,7 @@ const Dashboard = () => {
           ...e.course,
           progress: e.progress || 0,
           lessons: e.course.lessons?.length || 0,
-          thumbnail: e.course.thumbnail || "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&q=80"
+          thumbnail: getCourseImageUrl(e.course.thumbnail)
         })));
         
 
@@ -38,7 +39,7 @@ const Dashboard = () => {
           .filter((c: any) => !enrolledCourseIds.has(c.id))
           .map((c: any) => ({
             ...c,
-            thumbnail: c.thumbnail || "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&q=80",
+            thumbnail: getCourseImageUrl(c.thumbnail),
             level: c.level || "Beginner",
             rating: c.rating || 4.8,
             enrollments: c._count?.enrollments || 0,
