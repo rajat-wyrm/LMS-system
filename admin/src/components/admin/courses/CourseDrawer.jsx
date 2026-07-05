@@ -41,7 +41,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
     category: 'Web Development',
     duration: '',
     language: 'English',
-    status: 'Published', // Draft, Published, Archived
+    status: 'approved', // pending, approved, rejected
     teacher: '',
     price: '',
     discountPrice: '',
@@ -104,7 +104,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
         category: courseToEdit.category || 'Web Development',
         duration: courseToEdit.hours || courseToEdit.duration || '30',
         language: courseToEdit.language || 'English',
-        status: courseToEdit.status || (courseToEdit.active ? 'Published' : 'Draft'),
+       status: courseToEdit.status || (courseToEdit.active ? 'approved' : 'pending'),
         teacher: courseToEdit.teacher || (courseToEdit.mentorName || 'Salman Khan'),
         price: courseToEdit.price || '499',
         discountPrice: courseToEdit.discountPrice || '299',
@@ -127,7 +127,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
         category: 'Web Development',
         duration: '',
         language: 'English',
-        status: 'Published',
+        status: 'approved',
         teacher: teachers[0]?.name || '',
         price: '',
         discountPrice: '',
@@ -230,7 +230,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
       hours: parseInt(form.duration) || 30,
       language: form.language,
       status: submissionStatus,
-      active: submissionStatus === 'Published',
+      active: submissionStatus === 'approved',
       teacher: form.teacher,
       price: form.price || '499',
       discountPrice: form.discountPrice || '299',
@@ -712,12 +712,12 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                   <div>
                     <label className={labelCls}>Publication Status</label>
                     <div className="flex gap-3">
-                      {['Draft', 'Published', 'Archived'].map(state => {
+                      {['pending', 'approved', 'rejected'].map(state => {
                         const styleMap = {
-                          Draft: 'peer-checked:bg-yellow-500/20 peer-checked:border-yellow-500/50 peer-checked:text-yellow-300',
-                          Published: 'peer-checked:bg-emerald-500/20 peer-checked:border-emerald-500/50 peer-checked:text-emerald-300',
-                          Archived: 'peer-checked:bg-gray-500/20 peer-checked:border-gray-500/50 peer-checked:text-gray-300'
-                        };
+  pending: 'peer-checked:bg-yellow-500/20 peer-checked:border-yellow-500/50 peer-checked:text-yellow-300',
+  approved: 'peer-checked:bg-emerald-500/20 peer-checked:border-emerald-500/50 peer-checked:text-emerald-300',
+  rejected: 'peer-checked:bg-gray-500/20 peer-checked:border-gray-500/50 peer-checked:text-gray-300'
+};
                         return (
                           <button
                             key={state}
@@ -755,7 +755,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                 {/* Save Draft */}
                 <button
                   type="button"
-                  onClick={() => handleSave('Draft')}
+                  onClick={() => handleSave('pending')}
                   className="px-5 py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 text-amber-300 hover:text-white font-bold transition-all duration-300 text-xs shadow-md"
                 >
                   Save Draft
@@ -764,7 +764,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                 {/* Publish */}
                 <button
                   type="button"
-                  onClick={() => handleSave('Published')}
+                  onClick={() => handleSave('approved')}
                   className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-extrabold text-xs hover:shadow-[0_0_24px_rgba(139,92,246,0.6)] transition-all hover:-translate-y-0.5 active:scale-95 border border-white/20"
                 >
                   {courseToEdit ? 'Publish Updates' : 'Publish Course'}

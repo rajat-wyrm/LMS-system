@@ -204,7 +204,7 @@ export function normalizeCourse(c, index = 0) {
     thumbnail: merged.thumbnail ?? merged.avatar ?? null,
     gradient: merged.gradient || seed.gradient,
     icon: merged.icon || seed.icon,
-    active: merged.active ?? merged.status === 'Published',
+    active: merged.active ?? merged.status === 'approved',
   };
 }
 
