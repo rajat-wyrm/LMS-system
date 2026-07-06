@@ -16,6 +16,7 @@ import {
   MdAssessment,
 } from 'react-icons/md';
 import { useMenuFocusTrap } from '../../../hooks/useFocusTrap';
+import { clearAdminAuth } from '../../../utils/api';
 
 const PANEL_WIDTH = 320;
 
@@ -162,7 +163,7 @@ const ProfileDropdown = ({ onToast }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('role');
+    clearAdminAuth();
     close();
     navigate('/admin-login');
   };
