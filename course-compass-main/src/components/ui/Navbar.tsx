@@ -28,7 +28,7 @@ export const Navbar = () => {
     <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/70 border-b border-border">
       <div className="container flex items-center justify-between h-16">
         <NavLink to="/" className="flex items-center gap-2">
-          <img src="/logo.webp" alt="UptoSkills Logo" className="h-10 w-auto" />
+          {/* <img src="/logo.webp" alt="UptoSkills Logo" className="h-10 w-auto" /> */}
         </NavLink>
 
         <nav className="hidden md:flex items-center gap-8">

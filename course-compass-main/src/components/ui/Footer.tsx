@@ -4,7 +4,7 @@ export const Footer = () => (
   <footer className="border-t border-border mt-20 py-10 bg-card/30">
     <div className="container grid md:grid-cols-4 gap-8">
       <div>
-        <img src="/logo.webp" alt="UptoSkills Logo" className="h-8 w-auto mb-3" />
+        {/* <img src="/logo.webp" alt="UptoSkills Logo" className="h-8 w-auto mb-3" /> */}
         <p className="text-sm text-muted-foreground">Master in-demand skills with curated courses & live projects.</p>
       </div>
       <div>
