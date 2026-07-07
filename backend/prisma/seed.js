@@ -260,10 +260,11 @@ async function main() {
   // 2. Create Courses
   const dbCourses = {};
   for (const c of seedCourses) {
-    let course = await prisma.course.findFirst({ where: { title: c.title } });
+    let course = await prisma.course.findUnique({ where: { slug: c.slug } });
     if (!course) {
       course = await prisma.course.create({
         data: {
+          slug: c.slug,
           title: c.title,
           description: c.description,
           category: c.category,
