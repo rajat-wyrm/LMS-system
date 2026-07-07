@@ -22,6 +22,7 @@ export interface CourseData {
 
 export const courseApi = {
   getAllCourses: () => API.get("/courses"),
+  getTrendingCourses: () => API.get("/courses/trending"), // Added this line to fetch trending courses
   getLearningPaths: () => API.get("/courses/learning-paths"),
   getCourseById: (id: string) => API.get(`/courses/${id}`),
   createCourse: (data: CourseData) => API.post("/courses", data),

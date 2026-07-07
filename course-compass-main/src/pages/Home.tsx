@@ -10,15 +10,15 @@ const Home = () => {
   const [featured, setFeatured] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
+ // Replaced for trending courses
   useEffect(() => {
-    courseApi.getAllCourses()
-      .then(res => {
-        setFeatured(res.data.data.slice(0, 3));
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
+  courseApi.getTrendingCourses()
+    .then(res => {
+      setFeatured(res.data.data);
+    })
+    .catch(console.error)
+    .finally(() => setLoading(false));
+}, []);
 
   const onSearch = (e: React.FormEvent) => {
     e.preventDefault();
