@@ -14,14 +14,14 @@ async function createAdmin() {
       update: {
         password: hashedPassword,
         role: 'admin',
-        status: 'approved'
+        status: 'pending'
       },
       create: {
         name: 'Shubham Admin',
         email: email,
         password: hashedPassword,
         role: 'admin',
-        status: 'approved'
+        status: 'pending'
       }
     });
     console.log('Admin account created/updated successfully!');

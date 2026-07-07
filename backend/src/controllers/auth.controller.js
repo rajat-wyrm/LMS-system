@@ -23,7 +23,7 @@ exports.register = async (req, res, next) => {
 
     // Determine status — admin users are auto-approved
     const userRole = 'user'; // Force role to user for public registrations
-    const userStatus = 'approved'; // Simplified for testing/integration phase
+    const userStatus = 'pending'; // Simplified for testing/integration phase
 
     // Create user
     const user = await prisma.user.create({
@@ -35,6 +35,10 @@ exports.register = async (req, res, next) => {
         status: userStatus
       }
     });
+
+console.log("========== USER CREATED ==========");
+console.log(user);
+console.log("==================================");
 
     // Don't issue token yet — user needs admin approval (except admins)
     if (userStatus === 'pending') {

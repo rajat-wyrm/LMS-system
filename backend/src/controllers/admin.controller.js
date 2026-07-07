@@ -600,14 +600,19 @@ exports.getAdminUsers = async (req, res, next) => {
     const skip = (pageNumber - 1) * limitNumber;
 
     const where = {};
-    if (role) where.role = role;
-    if (status) where.status = status;
-    if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } }
-      ];
-    }
+
+if (role) where.role = role;
+
+if (status && status !== 'all') {
+  where.status = status;
+}
+
+if (search) {
+  where.OR = [
+    { name: { contains: search, mode: 'insensitive' } },
+    { email: { contains: search, mode: 'insensitive' } }
+  ];
+}
 
     const orderBy = {};
     if (sortBy) orderBy[sortBy] = sortOrder === 'asc' ? 'asc' : 'desc';
@@ -952,6 +957,57 @@ exports.getApprovedCertificates = async (req, res, next) => {
       orderBy: { updatedAt: 'desc' }
     });
     res.status(200).json({ success: true, data: enrollments });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Create user (Admin only)
+// @route   POST /api/admin/users
+// @access  Private/Admin
+exports.createAdminUser = async (req, res, next) => {
+  try {
+    const bcrypt = require("bcryptjs");
+
+    const {
+      name,
+      email,
+      password,
+      role = "user",
+      status = "approved"
+    } = req.body;
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        error: "User already exists"
+      });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create approved user
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role,
+        status
+      }
+    });
+
+    res.status(201).json({
+      success: true,
+      data: user
+    });
+
   } catch (error) {
     next(error);
   }

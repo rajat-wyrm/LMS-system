@@ -11,8 +11,13 @@ const {
   deleteAdminUser,
   getAdminCourses,
   updateCourseStatus,
-  deleteAdminCourse
+  deleteAdminCourse,
+  getPendingCertificates,
+  getApprovedCertificates,
+  approveCertificate,
+  createAdminUser
 } = require('../../controllers/admin.controller');
+
 const { protect, authorize } = require('../../middlewares/auth.middleware');
 
 const router = express.Router();
@@ -20,24 +25,38 @@ const router = express.Router();
 router.use(protect);
 router.use(authorize('admin')); // All admin routes are admin only
 
-// Stats
-router.route('/stats').get(getDashboardStats);
-router.route('/analytics').get(getAnalytics);
-router.route('/dashboard/top-performers').get(getTopPerformers);
-router.route('/dashboard/recent-activity').get(getRecentActivity);
-router.route('/dashboard/student-growth').get(getStudentGrowth);
+// Dashboard
+router.get('/stats', getDashboardStats);
+router.get('/analytics', getAnalytics);
+router.get('/dashboard/top-performers', getTopPerformers);
+router.get('/dashboard/recent-activity', getRecentActivity);
+router.get('/dashboard/student-growth', getStudentGrowth);
 
-// User management
-router.route('/users').get(getAdminUsers);
-router.route('/users/:id').get(getAdminUser).put(updateUserStatus).delete(deleteAdminUser);
+// User Management
+router
+  .route('/users')
+  .get(getAdminUsers)
+  .post(createAdminUser);
 
-// Course management
-router.route('/courses').get(getAdminCourses);
-router.route('/courses/:id').put(updateCourseStatus).delete(deleteAdminCourse);
+router
+  .route('/users/:id')
+  .get(getAdminUser)
+  .put(updateUserStatus)
+  .delete(deleteAdminUser);
 
-// Certificate management
-router.route('/certificates/pending').get(require('../../controllers/admin.controller').getPendingCertificates);
-router.route('/certificates/approved').get(require('../../controllers/admin.controller').getApprovedCertificates);
-router.route('/certificates/:id/approve').put(require('../../controllers/admin.controller').approveCertificate);
+// Course Management
+router
+  .route('/courses')
+  .get(getAdminCourses);
+
+router
+  .route('/courses/:id')
+  .put(updateCourseStatus)
+  .delete(deleteAdminCourse);
+
+// Certificate Management
+router.get('/certificates/pending', getPendingCertificates);
+router.get('/certificates/approved', getApprovedCertificates);
+router.put('/certificates/:id/approve', approveCertificate);
 
 module.exports = router;
