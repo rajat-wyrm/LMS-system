@@ -78,7 +78,7 @@ const CourseCard = ({
       className="group relative flex flex-col rounded-2xl border cursor-pointer shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface-raised)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
       style={{
         borderColor: 'var(--admin-border)',
-        zIndex: menuOpen ? 30 : 'auto',
+        zIndex: menuOpen ? 50 : 10,
       }}
     >
       <div className={`relative h-40 bg-gradient-to-br ${course.gradient} rounded-t-2xl overflow-hidden shrink-0`}>
