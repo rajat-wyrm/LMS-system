@@ -10,7 +10,7 @@ import {
 } from 'react-icons/md';
 
 const CourseActionMenu = forwardRef(function CourseActionMenu(
-  { course, onEdit, onClone, onAnalytics, onPreview, onDelete },
+  { course, onEdit, onClone, onAnalytics, onPreview, onDelete, onOpenChange },
   ref
 ) {
   const [open, setOpen] = useState(false);
@@ -21,6 +21,10 @@ const CourseActionMenu = forwardRef(function CourseActionMenu(
   useImperativeHandle(ref, () => ({
     openMenu: () => setOpen(true),
   }));
+
+  useEffect(() => {
+    onOpenChange?.(open);
+  }, [open, onOpenChange]);
 
   useEffect(() => {
     const handler = (e) => {

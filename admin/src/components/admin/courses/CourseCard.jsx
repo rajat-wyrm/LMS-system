@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   MdStar,
@@ -50,6 +50,7 @@ const CourseCard = ({
   const health = getCourseHealth(course);
   const lvl = levelStyles[course.level] || levelStyles.Beginner;
   const menuRef = useRef(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleCardKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -74,10 +75,13 @@ const CourseCard = ({
       role="group"
       aria-label={`${course.title} course card. Press Enter to open actions menu.`}
       onKeyDown={handleCardKeyDown}
-      className="group relative flex flex-col rounded-2xl overflow-hidden border cursor-pointer shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface-raised)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
-      style={{ borderColor: 'var(--admin-border)' }}
+      className="group relative flex flex-col rounded-2xl border cursor-pointer shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface-raised)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
+      style={{
+        borderColor: 'var(--admin-border)',
+        zIndex: menuOpen ? 30 : 'auto',
+      }}
     >
-      <div className={`relative h-40 bg-gradient-to-br ${course.gradient} overflow-hidden shrink-0`}>
+      <div className={`relative h-40 bg-gradient-to-br ${course.gradient} rounded-t-2xl overflow-hidden shrink-0`}>
         {course.thumbnail ? (
           <img
             src={course.thumbnail}
@@ -124,18 +128,19 @@ const CourseCard = ({
           />
           {health.label}
         </div>
+      </div>
 
-        <div className="absolute top-3 right-3 z-10">
-          <CourseActionMenu
-            ref={menuRef}
-            course={course}
-            onEdit={onEdit}
-            onClone={onClone}
-            onAnalytics={onAnalytics}
-            onPreview={onPreview}
-            onDelete={onDelete}
-          />
-        </div>
+      <div className="absolute top-3 right-3 z-10">
+        <CourseActionMenu
+          ref={menuRef}
+          course={course}
+          onEdit={onEdit}
+          onClone={onClone}
+          onAnalytics={onAnalytics}
+          onPreview={onPreview}
+          onDelete={onDelete}
+          onOpenChange={setMenuOpen}
+        />
       </div>
 
       <div className="flex flex-col flex-1 p-5 gap-3">
