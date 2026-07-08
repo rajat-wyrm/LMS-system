@@ -869,6 +869,15 @@ exports.updateCourseStatus = async (req, res, next) => {
       if (req.body[key] !== undefined) updateData[key] = req.body[key];
     }
     if (updateData.price !== undefined) updateData.price = parseFloat(updateData.price) || 0;
+
+    const allowedStatuses = ['pending', 'approved', 'rejected'];
+    if (updateData.status && !allowedStatuses.includes(updateData.status)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid status. Allowed values are: pending, approved, rejected.',
+      });
+    }
+
     const existingCourse = await prisma.course.findUnique({ where: { id: req.params.id } });
     if (!existingCourse) {
       return res.status(404).json({ success: false, error: 'Course not found' });
