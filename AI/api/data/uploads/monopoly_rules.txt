@@ -1,0 +1,2 @@
+Monopoly Game Rules:
+Each player starts the game with $1500. This is the starting money allocated to each player before the game begins.

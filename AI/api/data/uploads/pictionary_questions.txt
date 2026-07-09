@@ -1,0 +1,65 @@
+ROUND: Identify the Person / Tool / Concept
+
+1.  Ada Lovelace Question: Identify the historical figure often called
+    the world’s first computer programmer, known for writing algorithms
+    for Charles Babbage’s Analytical Engine.
+
+2.  Sunita Williams Question: Identify this NASA astronaut of Indian
+    origin who spent over 300 days in space and holds records for
+    spacewalks by a female astronaut.
+
+3.  Ranveer Allahbadia (BeerBiceps) Question: Identify this Indian
+    YouTuber and podcaster known for motivational content,
+    entrepreneurship advice, and running the channel BeerBiceps.
+
+4.  Obsidian Question: Identify this knowledge management and
+    note‑taking tool popular among developers and students for linking
+    ideas using a graph‑based knowledge system.
+
+5.  CodeRabbit Question: Identify this AI‑powered coding assistant that
+    helps developers review pull requests automatically and improve code
+    quality.
+
+6.  Sridhar Vembu Question: Identify the Indian entrepreneur and founder
+    of Zoho Corporation, known for building a global tech company from
+    rural India.
+
+ROUND: Identify the Influencer / Tool
+
+7.  Perplexity Question: Identify the AI search engine that combines web
+    search with AI‑generated answers and is often seen as a competitor
+    to Google Search.
+
+8.  Antigravity Question: Identify this tech influencer/creator known
+    for explaining AI tools, productivity software, and emerging
+    technologies on social media.
+
+9.  GitHub Copilot Question: Identify this AI coding assistant developed
+    by GitHub and OpenAI that can auto‑complete code and generate
+    functions while you type.
+
+10. Cursor Question: Identify this AI‑powered code editor designed to
+    help developers write and modify code using natural language
+    prompts.
+
+11. Sarvam AI Question: Identify this Indian AI startup building large
+    language models and AI infrastructure for Indian languages.
+
+ROUND: Guess the Company from Tagline
+
+12. freeCodeCamp Question: Which platform uses the tagline: “Learn to
+    Code — for Free.”
+
+13. Nvidia Question: Which technology company is widely associated with
+    the idea of “Accelerate Innovation” through GPUs and AI computing?
+
+ROUND: Guess the Tech Term from Emojis
+
+14. Generative AI Question: What technology concept is represented by
+    these emojis? 🧠 + 💬 + 🤖
+
+15. Docker Question: Which developer tool is represented by these
+    emojis? 📦 + 🐳
+
+16. GitHub Question: Which developer platform is represented by these
+    emojis? 🐙 + 💻

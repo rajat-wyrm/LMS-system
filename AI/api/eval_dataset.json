@@ -1,0 +1,82 @@
+[
+  {
+    "id": "nb_f8804db9:Python Programming.pdf:14:0",
+    "query": "What was Python ranked as the most popular programming language according to IEEE Spectrum's ranking of top programming languages in 2018?",
+    "ground_truth_passage": "Figure 1.1: Web Site - Python\nPython is a fairly old Programming Language (1991) compared to many other\nProgramming Languages like C# (2000), Swift (2014), Java (1995), PHP (1995).\nPython has during the last 10 years become more and more popular. Today,\nPython has become one of the most popular Programming Languages.\nThere are many di\ufb00erent rankings regarding which programming language which\nis most popular. In most of these ranking, Python is in top 10.\nOne of these rankings is the IEEE Spectrum\u2019s ranking of the top programming\nlanguages [3].\nFrom this ranking we see that Python is the most popular Programming Lan-\nguage in 2018. See Figure 1.2\nAs we see in Figure 1.2 they categorize the di\ufb00erent Programming Languages\ninto the following categories:\n\u2022 Web\n12",
+    "ground_truth_source": "Python Programming.pdf",
+    "ground_truth_page": 14,
+    "ground_truth_notebook": "nb_f8804db9"
+  },
+  {
+    "id": "nb_f8804db9:Python Programming.pdf:81:0",
+    "query": "What type of error occurs when the Python interpreter encounters the code `print(Hello World)` instead of `print(Hello World)`, and what error message does it produce?",
+    "ground_truth_passage": "Chapter 10\nError Handling in Python\n10.1 Introduction to Error Handling\nSo far error messages haven\u2019t been discussed. You could say that we have 2\nkinds of errors: syntax errors and exceptions.\n10.1.1 Syntax Errors\nBelow we see an example of syntax errors:\n1 > > >p r i n t ( H e l l o World )\n2 F i l e \u201d <i p y t h o n\u2212i n p u t\u22121\u221210cb182148e3 >\u201d , l i n e 1\n3 p r i n t ( H e l l o World )\n4 \u02c6\n5 S y n t a x E r r o r : i n v a l i d s y n t a x\nIn the example we have written print(Hello World) instead of print(\u201dHello\nWorld\u201d) and then the Python Interpreter gives us an error message.\n10.1.2 Exceptions\nEven if a statement or expression is syntactically correct, it may cause an error\nwhen an attempt is made to execute it. Errors detected during execution are",
+    "ground_truth_source": "Python Programming.pdf",
+    "ground_truth_page": 81,
+    "ground_truth_notebook": "nb_f8804db9"
+  },
+  {
+    "id": "nb_a909f295:Python Programming.pdf:29:1",
+    "query": "What tool can be used to run Python interactively, where you type one command at a time after the >>> sign?",
+    "ground_truth_passage": "Yo can run Python interactively in di\ufb00erent ways either using the Console which\nis part of the operating system or the Python IDLE and the Python Shell which\nis part of the basic Python installation from https://www.python.org.\n3.3 Python Shell\nIn interactive Mode you use the Python Shell as seen in Figure 3.1.\nHere you type one and one command at a time after the \u201d >>>\u201d sign in the\nPython Shell.\n1 > > >p r i n t ( \u201d H e l l o World ! \u201d )\n3.4 Running Python from the Console\nA console (or \u201dterminal\u201d, or \u2018command prompt\u2019) is a textual way to interact\nwith your OS (Operating System).\nThe python program that you have installed will by default act as something\ncalled an interpreter. An interpreter takes text commands and runs them as\nyou enter them - very handy for trying things out.",
+    "ground_truth_source": "Python Programming.pdf",
+    "ground_truth_page": 29,
+    "ground_truth_notebook": "nb_a909f295"
+  },
+  {
+    "id": "nb_a909f295:Python Programming.pdf:73:0",
+    "query": "What is the file naming convention for a Python module?",
+    "ground_truth_passage": "Chapter 8\nCreating Python Modules\nAs your program gets longer, you may want to split it into several \ufb01les for easier\nmaintenance. You may also want to use a handy function that you have written\nin several programs without copying its de\ufb01nition into each program.\nTo support this, Python has a way to put de\ufb01nitions in a \ufb01le and use them\nin a script or in an interactive instance of the interpreter (the Python Console\nwindow).\n8.1 Python Modules\nA module is a \ufb01le containing Python de\ufb01nitions and statements. The \ufb01le name\nis the module name with the su\ufb03x .py appended.\nPython allows you to split your program into modules that can be reused in\nother Python programs. It comes with a large collection of standard modules\nthat you can use as the basis of your programs as we have seen examples of in",
+    "ground_truth_source": "Python Programming.pdf",
+    "ground_truth_page": 73,
+    "ground_truth_notebook": "nb_a909f295"
+  },
+  {
+    "id": "nb_a909f295:Python Programming.pdf:102:0",
+    "query": "What are the options available when creating a new project in Visual Studio, as shown in Figure 19.5? (Answer choices could be: Ordinary Python Application, Web Application using Django or Flask, Desktop GUI applications, Games)?",
+    "ground_truth_passage": "Figure 19.2: Installing Python Extension for Visual Studio\nFigure 19.3: Python Development Workload\n2 > > >b = 5\n3 > > >x = 3\n4 > > >y = a \u2217x + b\n5 > > >y\n19.2.3 New Python Project\nLets see how we can create a Python Application.\nStart by select from the menu: File - New - Project... The New Project window\npops up. See Figure 19.5.\nWe can create an ordinary Python Application (one or more Python Scripts),\nwe can choose to create a Web Application using either Web Frameworks like\nDjango or Flask, or we can create di\ufb00erent Desktop GUI applications. We can\nalso create Games.\nExample 19.2.1. Python Hello World Application in Visual Studio\n100",
+    "ground_truth_source": "Python Programming.pdf",
+    "ground_truth_page": 102,
+    "ground_truth_notebook": "nb_a909f295"
+  },
+  {
+    "id": "nb_f8804db9:Python Programming.pdf:26:0",
+    "query": "What website can you visit to download the basic Python features including the Python programming language interpreter and IDLE for beginners, and where is it suggested to start learning Python before upgrading to a better editor or installing additional packages?",
+    "ground_truth_passage": "https://www.python.org\nHere you can download the basic Python features in one package, which includes\nthe Python programming language interpreter, and a basic code editor, or an\nintegrated development environment, called IDLE. See Figure 2.1\nFor basic Python programming this is good enough.\nFor more advanced Python Programming you typically need a better Code Ed-\nitor and additional Packages.\nFor the basic Python examples in the beginning, the basic Python software\nfrom:\nhttps://www.python.org is good enough.\nI suggest you start with the basic Python software in order to learn the basics,\nthen you can upgrade to a better Editor, install addition Python packages (either\nmanually or or install Anaconda where \u201deverything\u201d is included).\n2.6.1 Python Windows 10 Store App",
+    "ground_truth_source": "Python Programming.pdf",
+    "ground_truth_page": 26,
+    "ground_truth_notebook": "nb_f8804db9"
+  },
+  {
+    "id": "nb_f8804db9:Python Programming.pdf:43:1",
+    "query": "What is the Python code to print the cosine of a number using the 'math' module, without importing any additional functions from it?",
+    "ground_truth_passage": "Constants like pi, e, inf, nan, etc. etc.\nExample 4.4.1. Using the math module\nWe create some basic examples how to use a Library, a Package or a Module:\nIf we need only the sin() function we can do like this:\n1 from math i m p o r t s i n\n2\n3 x = 3 . 1 4\n4 y = s i n ( x )\n5\n6 p r i n t ( y )\nIf we need a few functions we can do like this\n1 from math i m p o r t s i n , c o s\n2\n3 x = 3 . 1 4\n4 y = s i n ( x )\n5 p r i n t ( y )\n6\n7 y = c o s ( x )\n8 p r i n t ( y )\nIf we need many functions we can do like this:\n1 from math i m p o r t \u2217\n2\n3 x = 3 . 1 4\n4 y = s i n ( x )\n5 p r i n t ( y )\n6\n7 y = c o s ( x )\n8 p r i n t ( y )\nWe can also use this alternative:\n1 i m p o r t math\n2\n3 x = 3 . 1 4\n4 y = math . s i n ( x )\n5\n6 p r i n t ( y )\n41",
+    "ground_truth_source": "Python Programming.pdf",
+    "ground_truth_page": 43,
+    "ground_truth_notebook": "nb_f8804db9"
+  },
+  {
+    "id": "nb_a909f295:Python Programming.pdf:61:0",
+    "query": "Write a Python script that plots the solution `x(t)` for the given differential equation from t=0 to t=25, with T=5, initial condition x(0)=1, and includes grid, title, and axis labels.?",
+    "ground_truth_passage": "where T is the time constant.\nThe solution for the di\ufb00erential equation is:\nx(t) =eatx0 (5.3)\nSet T=5 and the initial condition x(0)=1.\nCreate a Script in Python (.py \ufb01le) where you plot the solution x(t) in the time\ninterval:\n0\u2264t\u2264 25\nAdd Grid, and proper Title and Axis Labels to the plot.\n[End of Exercise]\n59",
+    "ground_truth_source": "Python Programming.pdf",
+    "ground_truth_page": 61,
+    "ground_truth_notebook": "nb_a909f295"
+  },
+  {
+    "id": "nb_f8804db9:Python Programming.pdf:65:1",
+    "query": "What is the mathematical expression for converting radians to degrees, according to the provided document chunk?",
+    "ground_truth_passage": "and degrees.\nIt is quite easy to convert from radians to degrees or from degrees to radians.\nWe have that:\n2\u03c0[radians] = 360[degrees] (6.1)\nThis gives:\nd[degrees] =r[radians]\u00d7 (180\n\u03c0 ) (6.2)\nand\nr[radians] =d[degrees]\u00d7 ( \u03c0\n180) (6.3)\nCreate two functions that convert from radians to degrees (r2d(x)) and from\ndegrees to radians (d2r(x)) respectively.\nThese functions should be saved in one Python \ufb01le .py.\nTest the functions to make sure that they work as expected.\n63",
+    "ground_truth_source": "Python Programming.pdf",
+    "ground_truth_page": 65,
+    "ground_truth_notebook": "nb_f8804db9"
+  },
+  {
+    "id": "nb_a909f295:Python Programming.pdf:121:1",
+    "query": "What is the output of the print statement in line 7, given the provided Python code that calculates the mean or average of a dataset using the statistics module?",
+    "ground_truth_passage": "see:\nhttps://docs.python.org/3/library/\nExample 23.2.2. Statistics using the statistics module in Python Standard\nLibrary\nBelow you \ufb01nd some examples how to use some of the statistics functions in the\nstatistics module in Python Standard Library:\n1 i m p o r t s t a t i s t i c s a s s t\n2\n3 d a t a = [ \u2212 1 . 0 , 2 . 5 , 3 . 2 5 , 5 . 7 5 ]\n4\n5 # Mean o r Average\n6 m = s t . mean ( d a t a )\n7 p r i n t (m)\n8\n9 # St and ard D e v i a t i o n\n10 s t d e v = s t . s t d e v ( d a t a )\n119",
+    "ground_truth_source": "Python Programming.pdf",
+    "ground_truth_page": 121,
+    "ground_truth_notebook": "nb_a909f295"
+  }
+]

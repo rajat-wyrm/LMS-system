@@ -1,0 +1,2 @@
+Ticket to Ride Game Rules:
+The player who has the longest continuous path of trains receives a bonus card worth 10 points. This determines how many points the longest continuous train gets.
