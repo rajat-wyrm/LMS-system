@@ -75,6 +75,27 @@ const CourseDetails = () => {
         const res = await courseApi.getCourseById(id!);
         setCourse(res.data.data);
       } catch (err) {
+        const localCoursesStr = localStorage.getItem('lms_courses_data');
+        if (localCoursesStr) {
+          try {
+            const localCourses = JSON.parse(localCoursesStr);
+            const found = localCourses.find((c: any) => String(c.id) === String(id));
+            if (found) {
+              const mappedCourse = {
+                ...found,
+                description: found.description || `Master ${found.title} with hands-on practice, coding exercises, and projects.`,
+                price: found.price ? parseFloat(found.price) : 0,
+                duration: found.hours ? `${found.hours} hours` : 'Self-paced',
+                _count: { enrollments: found.students || 0 }
+              };
+              setCourse(mappedCourse);
+              setError(false);
+              return;
+            }
+          } catch (e) {
+            console.error('Failed to parse local courses:', e);
+          }
+        }
         setError(true);
       } finally {
         setIsLoading(false);
