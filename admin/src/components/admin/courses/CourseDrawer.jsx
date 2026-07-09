@@ -422,7 +422,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                     2. Course Details
                   </h4>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Level */}
                     <div>
                       <label className={labelCls}>Level *</label>
@@ -456,7 +456,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Duration */}
                     <div>
                       <label className={labelCls}>Duration (Hours)</label>
@@ -572,7 +572,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                     4. Pricing
                   </h4>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Price */}
                     <div>
                       <label className={labelCls}>Course Price (₹)</label>
@@ -614,7 +614,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                     5. Statistics & Visibility
                   </h4>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Lessons */}
                     <div>
                       <label className={labelCls}>Total Lessons</label>
