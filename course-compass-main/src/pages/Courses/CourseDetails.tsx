@@ -71,10 +71,34 @@ const CourseDetails = () => {
   // -------------------------------------------------------------------------
   useEffect(() => {
     const fetchCourse = async () => {
+      // 1. Check URL parameters for direct preview data (cross-origin port bypass)
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('preview') === 'true') {
+        const mappedCourse = {
+          id: urlParams.get('id') || id,
+          title: urlParams.get('title') || '',
+          category: urlParams.get('category') || '',
+          level: urlParams.get('level') || '',
+          price: parseFloat(urlParams.get('price') || '0'),
+          duration: urlParams.get('hours') ? `${urlParams.get('hours')} hours` : 'Self-paced',
+          _count: { enrollments: parseInt(urlParams.get('students') || '0', 10) },
+          rating: parseFloat(urlParams.get('rating') || '4.5'),
+          teacher: urlParams.get('teacher') || 'Guest Instructor',
+          gradient: urlParams.get('gradient') || 'from-cyan-500 to-blue-500',
+          description: `Master ${urlParams.get('title') || 'this course'} with comprehensive hands-on practice, quizzes, and real-world projects.`,
+        };
+        setCourse(mappedCourse);
+        setError(false);
+        setIsLoading(false);
+        return;
+      }
+
+      // 2. Otherwise try standard database API
       try {
         const res = await courseApi.getCourseById(id!);
         setCourse(res.data.data);
       } catch (err) {
+        // 3. Fallback to localStorage (if on the same port or seeded)
         const localCoursesStr = localStorage.getItem('lms_courses_data');
         if (localCoursesStr) {
           try {

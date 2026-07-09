@@ -173,7 +173,22 @@ const Courses = () => {
         onEdit={handleOpenEditDrawer}
         onClone={handleClone}
         onAnalytics={() => navigate('/dashboard/admin/analytics')}
-        onPreview={(course) => window.open(`http://localhost:3000/courses/${course.id}`, '_blank')}
+        onPreview={(course) => {
+          const params = new URLSearchParams({
+            preview: 'true',
+            id: String(course.id),
+            title: course.title || '',
+            category: course.category || '',
+            level: course.level || '',
+            price: String(course.price || 0),
+            hours: String(course.hours || 0),
+            students: String(course.students || 0),
+            rating: String(course.rating || 0),
+            teacher: course.teacher || '',
+            gradient: course.gradient || '',
+          });
+          window.open(`http://localhost:3000/courses/${course.id}?${params.toString()}`, '_blank');
+        }}
         onDelete={handleDelete}
         hasFilters={hasFilters}
       />
