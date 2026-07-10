@@ -85,7 +85,6 @@ const deriveStreak = (student) =>
   student.streak ?? Math.max(1, Math.floor((student.progress ?? 0) / 12));
 
 const StudentTable = ({ students, onViewProfile, onNotify, onEdit, onDelete, hasFilters, onClearFilters }) => {
-  console.log('hasFilters value:', hasFilters);
   const [activeDropdownId, setActiveDropdownId] = useState(null);
 
   useEffect(() => {
