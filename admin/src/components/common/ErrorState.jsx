@@ -61,7 +61,7 @@ const ErrorState = ({
           </motion.button>
         )}
 
-        
+        <a
           href={supportLink}
           className="flex items-center gap-2 px-5 py-3 rounded-xl font-medium text-sm border transition-colors"
           style={{
