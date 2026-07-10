@@ -8,6 +8,7 @@ import {
 import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { getCourseImageUrl } from "@/utils/courseImage";
 
 const celebrities = ["Virat Kohli", "Salman Khan", "Narendra Modi", "Sachin Tendulkar", "Hardik Pandya"];
 const levels      = ["Beginner", "Intermediate", "Advanced"];
@@ -215,7 +216,7 @@ const ManageCourse = () => {
           {/* Thumbnail preview */}
           <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted shrink-0 border border-border/50">
             {editForm.thumbnail && !thumbError ? (
-              <img src={editForm.thumbnail} alt={course?.title} className="w-full h-full object-cover"
+              <img src={getCourseImageUrl(editForm.thumbnail)} alt={course?.title} className="w-full h-full object-cover"
                 onError={() => setThumbError(true)} />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-primary/10">
@@ -304,7 +305,7 @@ const ManageCourse = () => {
             {editForm.thumbnail && (
               <div className="md:col-span-2 rounded-xl overflow-hidden border border-border/50 h-40 bg-muted/20 relative">
                 {!thumbError ? (
-                  <img src={editForm.thumbnail} alt="preview" className="w-full h-full object-cover"
+                  <img src={getCourseImageUrl(editForm.thumbnail)} alt="preview" className="w-full h-full object-cover"
                     onError={() => setThumbError(true)} />
                 ) : (
                   <div className="flex items-center justify-center h-full text-sm text-destructive gap-2">

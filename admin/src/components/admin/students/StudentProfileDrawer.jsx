@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdClose, MdEmail, MdPhone, MdDateRange, MdStar, MdSchool, MdHistory, MdPlayCircleOutline, MdAssignmentTurnedIn, MdWorkspacePremium, MdAccessTime, MdCheckCircle, MdPerson } from 'react-icons/md';
+import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
 const StudentProfileDrawer = ({ isOpen, onClose, student }) => {
+  const panelRef = useFocusTrap(Boolean(isOpen && student), onClose);
+
   if (!student) return null;
 
   return (
@@ -20,10 +23,15 @@ const StudentProfileDrawer = ({ isOpen, onClose, student }) => {
 
           {/* Drawer */}
           <motion.div
+            ref={panelRef}
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`${student.name} profile`}
+            tabIndex={-1}
             className="fixed top-0 right-0 h-full w-full max-w-lg bg-[#0a0f18] border-l border-white/10 z-50 shadow-2xl overflow-y-auto custom-scrollbar"
           >
             {/* Header / Profile Cover — NO overflow-hidden so avatar is never clipped */}

@@ -124,6 +124,16 @@ const Students = () => {
   const [teacherFilter, setTeacherFilter] = useState('');
   const [badgeFilter, setBadgeFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const hasFilters = Boolean(searchQuery || statusFilter || courseFilter || teacherFilter || badgeFilter || dateFilter);
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('');
+    setCourseFilter('');
+    setTeacherFilter('');
+    setBadgeFilter('');
+    setDateFilter('');
+  };
 
   const displayedStudents = useMemo(
     () =>
@@ -372,19 +382,18 @@ const Students = () => {
             />
           </div>
 
-          <div className="relative col-span-2 sm:col-span-1 flex items-center rounded-xl px-3 py-2 text-xs admin-text-primary border admin-surface border-[var(--admin-border)]">
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(e) => setDateFilter(e.target.value)}
-              className="bg-transparent border-none w-full text-xs admin-text-primary focus:outline-none cursor-pointer [color-scheme:var(--color-scheme)]"
-            />
-            <MdOutlineCalendarToday
-              className="admin-text-secondary ml-2 pointer-events-none shrink-0"
-              size={16}
-            />
-          </div>
-        </div>
+          <div className="relative col-span-2 sm:col-span-1 flex items-center rounded-xl px-3 py-2 text-xs admin-text-primary min-w-[160px] border admin-surface border-[var(--admin-border)]">
+  <input
+    type="date"
+    value={dateFilter}
+    onChange={(e) => setDateFilter(e.target.value)}
+    className="bg-transparent border-none w-full text-xs admin-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 rounded-md cursor-pointer [color-scheme:var(--color-scheme)]"
+  />
+  <MdOutlineCalendarToday
+    className="admin-text-secondary ml-2 pointer-events-none shrink-0"
+    size={16}
+  />
+</div>
       </div>
 
       <StudentTable
@@ -396,6 +405,8 @@ const Students = () => {
           setIsAddModalOpen(true);
         }}
         onDelete={handleOpenDeleteModal}
+        hasFilters={hasFilters}
+        onClearFilters={handleClearFilters}
       />
 
       <StudentProfileDrawer

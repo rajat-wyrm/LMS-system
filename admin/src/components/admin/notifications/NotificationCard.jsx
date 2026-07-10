@@ -19,7 +19,7 @@ function ActionBtn({ icon: Icon, title, onClick, danger, active }) {
         e.stopPropagation();
         onClick();
       }}
-      className={`rounded-lg p-1.5 transition-colors ${
+      className={`rounded-lg p-1.5 transition-colors focus:opacity-100 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2 ${
         danger
           ? 'admin-text-muted hover:bg-red-500/15 hover:text-red-400'
           : active
@@ -54,7 +54,10 @@ const NotificationCard = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: 12 }}
       whileHover={{ y: -4, boxShadow: 'var(--admin-shadow-lg)' }}
-      className={`group relative flex gap-3 rounded-2xl border p-4 transition-all duration-300 shadow-[var(--admin-shadow-card)] ${
+      tabIndex={0}
+      role="group"
+      aria-label={`Notification: ${notif.title}`}
+      className={`group relative flex gap-3 rounded-2xl border p-4 transition-all duration-300 shadow-[var(--admin-shadow-card)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2 ${
         !notif.read
           ? 'ring-1 ring-[#8B5CF6]/25'
           : ''
@@ -134,7 +137,7 @@ const NotificationCard = ({
         </p>
       </div>
 
-      <div className="flex shrink-0 flex-col gap-0.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity sm:flex-row sm:items-start">
+      <div className="flex shrink-0 flex-col gap-0.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity sm:flex-row sm:items-start">
         <ActionBtn icon={MdVisibility} title="View" onClick={() => onView(notif)} />
         <ActionBtn
           icon={MdPushPin}

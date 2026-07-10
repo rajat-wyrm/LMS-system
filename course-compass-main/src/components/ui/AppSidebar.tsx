@@ -40,36 +40,23 @@ export const AppSidebar = ({
         <h3 className="font-display font-bold text-lg text-foreground tracking-wide">All Filters</h3>
         <button
           onClick={clearAll}
-          className="text-xs font-medium text-secondary hover:text-primary transition-colors flex items-center gap-1"
+          className="text-xs font-medium text-secondary hover:text-primary transition-colors flex items-center gap-1 rounded focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
         >
           <X className="w-3 h-3" /> Clear All
         </button>
       </div>
 
       <FilterGroup title="Sort By">
-        {sortOptions.map((s) => (
-          <label
-            key={s}
-            className="flex items-center gap-3 py-2 cursor-pointer text-muted-foreground hover:text-foreground transition-colors group"
-          >
-            <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${sortBy === s ? "border-primary" : "border-border group-hover:border-primary/50"}`}>
-              {sortBy === s && <div className="w-2 h-2 rounded-full bg-primary" />}
-            </div>
-            <input
-              type="radio"
-              name="sortBy"
-              checked={sortBy === s}
-              onChange={() => setSortBy(s)}
-              className="sr-only"
-            />
-            <span className="text-sm">{s}</span>
-          </label>
-        ))}
+        <div role="radiogroup" aria-label="Sort By" className="space-y-1">
+          {sortOptions.map((s) => (
+            <SortOption key={s} label={s} selected={sortBy === s} onSelect={() => setSortBy(s)} />
+          ))}
+        </div>
       </FilterGroup>
 
       <FilterGroup title="Level">
         {levels.map((l) => (
-          <Checkbox
+          <FilterCheckbox
             key={l}
             label={l}
             checked={selLevels.includes(l)}
@@ -80,7 +67,7 @@ export const AppSidebar = ({
 
       <FilterGroup title="Topics">
         {topics.map((t) => (
-          <Checkbox
+          <FilterCheckbox
             key={t}
             label={t}
             checked={selTopics.includes(t)}
@@ -101,7 +88,30 @@ const FilterGroup = ({ title, children }: { title: string; children: React.React
   </div>
 );
 
-const Checkbox = ({
+const SortOption = ({
+  label,
+  selected,
+  onSelect,
+}: {
+  label: string;
+  selected: boolean;
+  onSelect: () => void;
+}) => (
+  <button
+    type="button"
+    role="radio"
+    aria-checked={selected}
+    onClick={onSelect}
+    className="w-full flex items-center gap-3 py-2 cursor-pointer text-muted-foreground hover:text-foreground transition-colors group text-left rounded focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
+  >
+    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${selected ? "border-primary" : "border-border group-hover:border-primary/50"}`}>
+      {selected && <div className="w-2 h-2 rounded-full bg-primary" />}
+    </div>
+    <span className="text-sm">{label}</span>
+  </button>
+);
+
+const FilterCheckbox = ({
   label,
   checked,
   onChange,
@@ -110,7 +120,13 @@ const Checkbox = ({
   checked: boolean;
   onChange: () => void;
 }) => (
-  <label className="flex items-center gap-3 py-2 cursor-pointer text-muted-foreground hover:text-foreground transition-colors group">
+  <button
+    type="button"
+    role="checkbox"
+    aria-checked={checked}
+    onClick={onChange}
+    className="w-full flex items-center gap-3 py-2 cursor-pointer text-muted-foreground hover:text-foreground transition-colors group text-left rounded focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
+  >
     <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${checked ? "bg-primary border-primary" : "border-border group-hover:border-primary/50"}`}>
       {checked && (
         <svg viewBox="0 0 14 14" fill="none" className="w-3 h-3 text-primary-foreground">
@@ -118,7 +134,6 @@ const Checkbox = ({
         </svg>
       )}
     </div>
-    <input type="checkbox" checked={checked} onChange={onChange} className="sr-only" />
     <span className="text-sm">{label}</span>
-  </label>
+  </button>
 );

@@ -378,7 +378,7 @@ function ReplyModal({ review, onClose, onSave }) {
         </div>
         <textarea value={text} onChange={(e) => setText(e.target.value)} rows={4}
           placeholder="Write your admin reply…"
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500 focus:bg-white/10 transition-all resize-none mb-5"
+          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500 focus:bg-white/10 focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1736] transition-all resize-none mb-5"
         />
         <div className="flex gap-3">
           <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium">Cancel</button>
@@ -679,7 +679,7 @@ const Reviews = () => {
             <input
               type="text" placeholder="Search by student, course, or teacher…"
               value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#161b22] border border-white/5 rounded-2xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-purple-500/50 focus:bg-white/5 transition-all text-white placeholder:text-gray-600"
+              className="w-full bg-[#161b22] border border-white/5 rounded-2xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-purple-500/50 focus:bg-white/5 focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#161b22] transition-all text-white placeholder:text-gray-600"
             />
           </div>
 

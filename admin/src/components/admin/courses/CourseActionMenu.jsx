@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MdMoreVert,
@@ -9,17 +9,40 @@ import {
   MdDelete,
 } from 'react-icons/md';
 
-function CourseActionMenu({ course, onEdit, onClone, onAnalytics, onPreview, onDelete }) {
+const CourseActionMenu = forwardRef(function CourseActionMenu(
+  { course, onEdit, onClone, onAnalytics, onPreview, onDelete },
+  ref
+) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const containerRef = useRef(null);
+  const firstItemRef = useRef(null);
+  const triggerRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    openMenu: () => setOpen(true),
+  }));
 
   useEffect(() => {
     const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+      if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  useEffect(() => {
+    if (open) {
+      firstItemRef.current?.focus();
+    }
+  }, [open]);
+
+  const handleMenuKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      setOpen(false);
+      triggerRef.current?.focus();
+    }
+  };
 
   const run = (fn) => (e) => {
     e.stopPropagation();
@@ -28,9 +51,11 @@ function CourseActionMenu({ course, onEdit, onClone, onAnalytics, onPreview, onD
   };
 
   return (
-    <div ref={ref} className="relative" onClick={(e) => e.stopPropagation()}>
+    <div ref={containerRef} className="relative" onClick={(e) => e.stopPropagation()}>
       <button
+        ref={triggerRef}
         type="button"
+        tabIndex={-1}
         onClick={(e) => {
           e.stopPropagation();
           setOpen((o) => !o);
@@ -51,6 +76,7 @@ function CourseActionMenu({ course, onEdit, onClone, onAnalytics, onPreview, onD
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -6 }}
             transition={{ duration: 0.15 }}
+            onKeyDown={handleMenuKeyDown}
             className="absolute right-0 top-full mt-2 w-44 rounded-2xl shadow-2xl z-50 overflow-hidden border"
             style={{
               background: 'var(--admin-surface-raised)',
@@ -58,6 +84,7 @@ function CourseActionMenu({ course, onEdit, onClone, onAnalytics, onPreview, onD
             }}
           >
             <button
+              ref={firstItemRef}
               type="button"
               onClick={run(onEdit)}
               className="w-full flex items-center gap-3 px-4 py-3 text-sm admin-text-primary hover:bg-[var(--admin-surface-hover)] transition-colors"
@@ -107,6 +134,6 @@ function CourseActionMenu({ course, onEdit, onClone, onAnalytics, onPreview, onD
       </AnimatePresence>
     </div>
   );
-}
+});
 
 export default CourseActionMenu;

@@ -17,6 +17,7 @@ import {
 import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { getCourseImageUrl } from "@/utils/courseImage";
 
 const tabs = ["About", "Outcomes", "Curriculum", "Instructors"] as const;
 type Tab = typeof tabs[number];
@@ -248,7 +249,7 @@ const CourseDetails = () => {
       <div className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0">
           <img
-            src={course.thumbnail}
+            src={getCourseImageUrl(course.thumbnail)}
             alt=""
             className="w-full h-full object-cover opacity-20 blur-2xl"
           />
@@ -294,7 +295,7 @@ const CourseDetails = () => {
             <div className="glass-card overflow-hidden lg:sticky lg:top-20">
               <div className="relative aspect-video">
                 <img
-                  src={course.thumbnail}
+                  src={getCourseImageUrl(course.thumbnail)}
                   alt={course.title}
                   className="w-full h-full object-cover"
                 />

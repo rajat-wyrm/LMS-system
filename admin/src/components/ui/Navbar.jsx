@@ -25,7 +25,7 @@ const Navbar = () => {
             type="button"
             onClick={toggleTheme}
             title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-            className="w-8 h-8 rounded-lg text-[var(--admin-text-muted)] hover:text-amber-500 hover:bg-[var(--admin-surface-hover)] active:scale-95 focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/40 transition-all flex items-center justify-center"
+            className="w-8 h-8 rounded-lg text-[var(--admin-text-muted)] hover:text-amber-500 hover:bg-[var(--admin-surface-hover)] active:scale-95 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2 transition-all flex items-center justify-center"
           >
             {isLight ? <MdNightsStay size={18} /> : <MdWbSunny size={18} />}
           </button>

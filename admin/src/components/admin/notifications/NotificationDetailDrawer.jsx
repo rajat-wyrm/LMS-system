@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MdClose, MdMarkEmailRead } from 'react-icons/md';
 import { CATEGORY_META, PRIORITY_META } from './constants';
+import { useAutoFocusPanel } from '../../../hooks/useFocusTrap';
 
 const NotificationDetailDrawer = ({
   notif,
@@ -10,6 +11,7 @@ const NotificationDetailDrawer = ({
   onPin,
   onArchive,
 }) => {
+  const panelRef = useAutoFocusPanel(Boolean(notif), onClose);
   if (!notif) return null;
   const cat = CATEGORY_META[notif.category];
   const pri = PRIORITY_META[notif.priority];
@@ -17,9 +19,13 @@ const NotificationDetailDrawer = ({
 
   return (
     <motion.aside
+      ref={panelRef}
       initial={{ opacity: 0, x: 24 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 24 }}
+      role="complementary"
+      aria-label={`Notification details: ${notif.title}`}
+      tabIndex={-1}
       className="flex w-full flex-col rounded-2xl border p-5 shadow-[var(--admin-shadow-card)] lg:min-w-[320px] lg:max-w-[360px]"
       style={{
         borderColor: 'var(--admin-border)',
