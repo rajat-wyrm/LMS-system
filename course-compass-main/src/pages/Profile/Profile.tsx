@@ -144,9 +144,9 @@ const Profile = () => {
                       user.name.charAt(0)
                     )}
                   </div>
-                  <label className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shadow-sm cursor-pointer group-hover:scale-110">
+                  <label className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center text-muted-foreground hover:text-primary transition-colors shadow-sm cursor-pointer group-hover:scale-110 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-[#FF6B35] has-[:focus-visible]:outline-offset-2">
                     <Camera className="w-3.5 h-3.5" />
-                    <input type="file" className="hidden" accept="image/*" onChange={handleAvatarUpload} disabled={isUploadingAvatar} />
+                    <input type="file" className="sr-only" accept="image/*" onChange={handleAvatarUpload} disabled={isUploadingAvatar} />
                   </label>
                   {isUploadingAvatar && (
                     <div className="absolute inset-0 bg-background/50 rounded-full flex items-center justify-center">

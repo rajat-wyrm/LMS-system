@@ -1,4 +1,4 @@
-import React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   MdLibraryBooks,
@@ -9,56 +9,12 @@ import {
   MdStar,
   MdLocalFireDepartment,
 } from 'react-icons/md';
-import { topPerformersSpotlight } from './dashboardData';
+import { apiFetch } from '../../../api/config';
 
 const ICONS = {
   course: MdLibraryBooks,
   teacher: MdSchool,
   student: MdEmojiEvents,
-};
-
-const SPARK_W = 72;
-const SPARK_H = 22;
-
-const MiniSparkline = ({ points, color, trendUp }) => {
-  if (!points?.length) return null;
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  const range = max - min || 1;
-  const step = SPARK_W / (points.length - 1);
-  const coords = points.map((v, i) => {
-    const x = i * step;
-    const y = SPARK_H - ((v - min) / range) * (SPARK_H - 4) - 2;
-    return `${x},${y}`;
-  });
-  const line = coords.join(' ');
-  const area = `M0,${SPARK_H} L${coords.map((c) => c.replace(',', ' ')).join(' L')} L${SPARK_W},${SPARK_H} Z`;
-
-  return (
-    <svg
-      width={SPARK_W}
-      height={SPARK_H}
-      viewBox={`0 0 ${SPARK_W} ${SPARK_H}`}
-      className="shrink-0"
-      aria-hidden
-    >
-      <defs>
-        <linearGradient id={`spark-fill-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity={trendUp ? 0.35 : 0.2} />
-          <stop offset="100%" stopColor={color} stopOpacity={0} />
-        </linearGradient>
-      </defs>
-      <path d={area} fill={`url(#spark-fill-${color.replace('#', '')})`} />
-      <polyline
-        points={line}
-        fill="none"
-        stroke={color}
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
 };
 
 const TrendBadge = ({ trend, trendUp }) => {
@@ -75,6 +31,20 @@ const TrendBadge = ({ trend, trendUp }) => {
     </span>
   );
 };
+
+const FALLBACK_ITEMS = [
+  {
+    label: 'Top Course',
+    name: 'No data yet',
+    iconKey: 'course',
+    accent: '#3B82F6',
+    glow: 'rgba(59,130,246,0.35)',
+    trend: '0%',
+    trendUp: true,
+    enrollmentsDisplay: '0',
+    progress: 0,
+  },
+];
 
 const ProgressBar = ({ value, accent }) => (
   <div className="w-full">
@@ -144,87 +114,147 @@ const PerformerMetrics = ({ item }) => {
   );
 };
 
-const DashboardTopPerformers = () => (
-  <section
-    className="rounded-2xl border p-3 md:p-4 shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface)]"
-    style={{ borderColor: 'var(--admin-border)' }}
-  >
-    <div className="flex items-center justify-between mb-2.5">
-      <h2 className="text-base font-bold admin-text-primary">Top Performers</h2>
-      <span className="text-[10px] font-semibold uppercase tracking-wider admin-text-muted">
-        Leaderboard
-      </span>
-    </div>
+const DashboardTopPerformers = () => {
+  const [items, setItems] = useState(FALLBACK_ITEMS);
 
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-      {topPerformersSpotlight.map((item, index) => {
-        const Icon = ICONS[item.iconKey];
-        return (
-          <motion.article
-            key={item.label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            whileHover={{
-              y: -6,
-              boxShadow: `0 12px 32px ${item.glow}`,
-            }}
-            className="relative overflow-hidden rounded-xl border p-2.5 transition-all duration-300 cursor-default"
-            style={{
-              borderColor: `${item.accent}40`,
-              background: 'var(--admin-surface-raised)',
-              backgroundImage: item.gradient,
-            }}
-          >
-            <div className="flex items-start justify-between gap-1 mb-1.5">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span
-                  className="text-[9px] font-extrabold text-white px-1.5 py-0.5 rounded shrink-0"
+  const fetchPerformers = useCallback(async () => {
+    try {
+      const { data } = await apiFetch('/admin/dashboard/top-performers');
+      const nextItems = [];
+
+      if (data?.topCourse) {
+        nextItems.push({
+          label: 'Top Course',
+          name: data.topCourse.name,
+          iconKey: 'course',
+          accent: '#3B82F6',
+          glow: 'rgba(59,130,246,0.35)',
+          trend: `${data.topCourse.rating ?? 0}★`,
+          trendUp: true,
+          enrollmentsDisplay: data.topCourse.enrollments.toLocaleString(),
+          progress: Math.min(data.topCourse.enrollments, 100),
+        });
+      }
+
+      if (data?.topInstructor) {
+        nextItems.push({
+          label: 'Top Teacher',
+          name: data.topInstructor.name,
+          iconKey: 'teacher',
+          accent: '#10B981',
+          glow: 'rgba(16,185,129,0.35)',
+          trend: `${data.topInstructor.rating ?? 0}★`,
+          trendUp: true,
+          learnersDisplay: data.topInstructor.students >= 1000
+            ? `${(data.topInstructor.students / 1000).toFixed(1)}k`
+            : data.topInstructor.students.toString(),
+          rating: data.topInstructor.rating ?? 0,
+        });
+      }
+
+      if (data?.topStudent) {
+        nextItems.push({
+          label: 'Top Student',
+          name: data.topStudent.name,
+          iconKey: 'student',
+          accent: '#8B5CF6',
+          glow: 'rgba(139,92,246,0.35)',
+          trend: `${data.topStudent.progress}%`,
+          trendUp: true,
+          completion: data.topStudent.progress,
+          streak: 1,
+        });
+      }
+
+      setItems(nextItems.length > 0 ? nextItems : FALLBACK_ITEMS);
+    } catch (error) {
+      console.error('Top performers fetch failed:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPerformers();
+  }, [fetchPerformers]);
+
+  return (
+    <section
+      className="rounded-2xl border p-3 md:p-4 shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface)]"
+      style={{ borderColor: 'var(--admin-border)' }}
+    >
+      <div className="flex items-center justify-between mb-2.5">
+        <h2 className="text-base font-bold admin-text-primary">Top Performers</h2>
+        <span className="text-[10px] font-semibold uppercase tracking-wider admin-text-muted">
+          Leaderboard
+        </span>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+        {items.map((item, index) => {
+          const Icon = ICONS[item.iconKey];
+          return (
+            <motion.article
+              key={item.label}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              whileHover={{
+                y: -6,
+                boxShadow: `0 12px 32px ${item.glow}`,
+              }}
+              className="relative overflow-hidden rounded-xl border p-2.5 transition-all duration-300 cursor-default"
+              style={{
+                borderColor: `${item.accent}40`,
+                background: 'var(--admin-surface-raised)',
+              }}
+            >
+              <div className="flex items-start justify-between gap-1 mb-1.5">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span
+                    className="text-[9px] font-extrabold text-white px-1.5 py-0.5 rounded shrink-0"
+                    style={{ background: item.accent }}
+                  >
+                    #1
+                  </span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wide admin-text-secondary truncate">
+                    {item.label}
+                  </span>
+                </div>
+                <TrendBadge trend={item.trend} trendUp={item.trendUp} />
+              </div>
+
+              <div className="flex items-start gap-2 mb-1.5">
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-md"
                   style={{ background: item.accent }}
                 >
-                  #1
-                </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wide admin-text-secondary truncate">
-                  {item.label}
-                </span>
+                  <Icon size={16} className="text-white" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p
+                    className="text-sm font-bold admin-text-primary truncate leading-snug"
+                    title={item.name}
+                  >
+                    {item.name}
+                  </p>
+                  <PerformerMetrics item={item} />
+                </div>
               </div>
-              <TrendBadge trend={item.trend} trendUp={item.trendUp} />
-            </div>
 
-            <div className="flex items-start gap-2 mb-1.5">
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-md"
-                style={{ background: item.accent }}
+                className="flex items-center justify-between pt-1.5 border-t"
+                style={{ borderColor: 'var(--admin-border-subtle)' }}
               >
-                <Icon size={16} className="text-white" />
+                <span className="text-[10px] font-semibold admin-text-secondary">
+                  Live platform data
+                </span>
+                <span className="text-[9px] font-medium admin-text-muted">Updated now</span>
               </div>
-              <div className="min-w-0 flex-1">
-                <p
-                  className="text-sm font-bold admin-text-primary truncate leading-snug"
-                  title={item.name}
-                >
-                  {item.name}
-                </p>
-                <PerformerMetrics item={item} />
-              </div>
-            </div>
-
-            <div
-              className="flex items-center justify-between pt-1.5 border-t"
-              style={{ borderColor: 'var(--admin-border-subtle)' }}
-            >
-              <MiniSparkline
-                points={item.sparkline}
-                color={item.accent}
-                trendUp={item.trendUp}
-              />
-              <span className="text-[9px] font-medium admin-text-muted">30d trend</span>
-            </div>
-          </motion.article>
-        );
-      })}
-    </div>
-  </section>
-);
+            </motion.article>
+          );
+        })}
+      </div>
+    </section>
+  );
+};
 
 export default DashboardTopPerformers;

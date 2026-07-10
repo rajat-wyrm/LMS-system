@@ -336,3 +336,30 @@ main,
     color 0.2s ease,
     box-shadow 0.25s ease;
 }
+
+/* ── Keyboard focus accessibility (focus-visible only; mouse interaction unchanged) ──
+   Uses :where() so any element with its own existing focus-visible style keeps it. */
+:where(
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  [tabindex]:not([tabindex='-1']),
+  [role='button'],
+  [role='tab'],
+  [role='menuitem'],
+  [role='checkbox'],
+  [role='switch'],
+  [role='link'],
+  .glass-card,
+  .kpi-card,
+  .dashboard-card,
+  .neon-border,
+  .add-student-btn
+):focus-visible {
+  outline: 2px solid #FF6B35;
+  outline-offset: 2px;
+  transition-property: color, background-color, border-color, box-shadow, transform;
+}

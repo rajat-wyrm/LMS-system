@@ -1,6 +1,14 @@
+const bcrypt = require('bcryptjs');
 const { prisma } = require('../src/config/db');
 
 const img = (seed) => `https://images.unsplash.com/${seed}?auto=format&fit=crop&w=800&q=80`;
+
+const seedAdmin = {
+  name: "Amit Sharma",
+  email: "admin.amit@lms.com",
+  role: "admin",
+  status: "approved"
+};
 
 const seedCourses = [
   {
@@ -204,7 +212,30 @@ const seedLearningPaths = [
 
 async function main() {
   console.log('Seeding database...');
-  
+
+  // Hash password
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash('password123', salt);
+
+  // Create default admin user
+  console.log('Upserting admin user...');
+  await prisma.user.upsert({
+    where: { email: seedAdmin.email },
+    update: {
+      name: seedAdmin.name,
+      password: hashedPassword,
+      role: seedAdmin.role,
+      status: seedAdmin.status
+    },
+    create: {
+      name: seedAdmin.name,
+      email: seedAdmin.email,
+      password: hashedPassword,
+      role: seedAdmin.role,
+      status: seedAdmin.status
+    }
+  });
+
   // 1. Create Instructors
   const instructors = {};
   for (const c of seedCourses) {
@@ -216,7 +247,7 @@ async function main() {
           data: {
             name: c.instructorName,
             email,
-            password: 'password123',
+            password: hashedPassword,
             role: 'instructor',
             status: 'approved'
           }

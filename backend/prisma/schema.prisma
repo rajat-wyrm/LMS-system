@@ -105,4 +105,5 @@ model Enrollment {
   completedLessons Lesson[] @relation("CompletedLessons")
 
   @@unique([userId, courseId]) // Prevent duplicate enrollments
+   @@index([createdAt]) //for weekly stats performance
 }

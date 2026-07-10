@@ -51,7 +51,7 @@ const DateRangePicker = () => {
         aria-expanded={open}
         aria-haspopup="listbox"
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 text-[var(--admin-text-muted)] text-xs border rounded-lg px-3 py-1.5 bg-[var(--admin-input-bg)] border-[var(--admin-input-border)] hover:text-[var(--admin-text-primary)] hover:border-[#7C3AED]/40 focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/50 transition-all"
+        className="flex items-center gap-2 text-[var(--admin-text-muted)] text-xs border rounded-lg px-3 py-1.5 bg-[var(--admin-input-bg)] border-[var(--admin-input-border)] hover:text-[var(--admin-text-primary)] hover:border-[#7C3AED]/40 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2 transition-all"
       >
         <span>{label}</span>
         <MdDateRange size={14} />

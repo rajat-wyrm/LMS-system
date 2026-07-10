@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MdWarningAmber, MdDeleteForever } from 'react-icons/md';
+import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
 const DeleteStudentModal = ({ student, onClose, onConfirm }) => {
+  const panelRef = useFocusTrap(Boolean(student), onClose);
+
   if (!student) return null;
 
   return (
@@ -18,9 +21,14 @@ const DeleteStudentModal = ({ student, onClose, onConfirm }) => {
 
       {/* Modal */}
       <motion.div 
+        ref={panelRef}
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        role="alertdialog"
+        aria-modal="true"
+        aria-label="Delete Student?"
+        tabIndex={-1}
         className="relative w-full max-w-sm glass-card border border-red-500/30 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(239,68,68,0.2)] bg-[#0f141e]/90 text-center"
       >
         <div className="p-8">

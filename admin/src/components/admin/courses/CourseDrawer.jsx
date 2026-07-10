@@ -6,6 +6,7 @@ import {
   MdAttachMoney, MdLocalOffer, MdSchool, MdAssignment,
   MdCheckCircle, MdOutlineFiberManualRecord, MdSearch
 } from 'react-icons/md';
+import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
 // Category Options
 const CATEGORIES = [
@@ -30,6 +31,7 @@ const DEFAULT_TEACHERS = [
 ];
 
 const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
+  const panelRef = useFocusTrap(isOpen, onClose);
   const [form, setForm] = useState({
     title: '',
     slug: '',
@@ -270,10 +272,15 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
 
           {/* Side Drawer */}
           <motion.div
+            ref={panelRef}
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 26, stiffness: 200 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={courseToEdit ? 'Edit Course Details' : 'Add New Course'}
+            tabIndex={-1}
             className="fixed right-0 top-0 h-full w-full max-w-[520px] bg-[#070b16] border-l border-white/10 z-[110] shadow-[-24px_0_60px_rgba(0,0,0,0.7)] flex flex-col rounded-l-[32px] overflow-hidden"
           >
             {/* Ambient Background Glow Inside Drawer */}
@@ -325,7 +332,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                 {/* ── SECTION 1: COURSE THUMBNAIL ── */}
                 <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}>
                   <label className={labelCls}>Course Thumbnail</label>
-                  <label className="relative w-full h-44 rounded-2xl border-2 border-dashed border-purple-500/30 hover:border-purple-500/60 bg-purple-500/5 flex flex-col items-center justify-center text-gray-400 hover:text-purple-400 hover:bg-purple-500/10 transition-all duration-300 cursor-pointer group overflow-hidden shadow-lg shadow-purple-500/5">
+                  <label className="relative w-full h-44 rounded-2xl border-2 border-dashed border-purple-500/30 hover:border-purple-500/60 bg-purple-500/5 flex flex-col items-center justify-center text-gray-400 hover:text-purple-400 hover:bg-purple-500/10 transition-all duration-300 cursor-pointer group overflow-hidden shadow-lg shadow-purple-500/5 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-[#FF6B35] has-[:focus-visible]:outline-offset-2">
                     {avatarPreview ? (
                       <div className="w-full h-full relative">
                         <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
@@ -431,7 +438,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                         <select
                           value={form.level}
                           onChange={set('level')}
-                          className="w-full bg-[#111827] border border-white/10 rounded-xl py-3 pl-11 pr-10 text-sm text-white focus:outline-none focus:border-purple-500 transition-all cursor-pointer appearance-none"
+                          className="w-full bg-[#111827] border border-white/10 rounded-xl py-3 pl-11 pr-10 text-sm text-white focus:outline-none focus:border-purple-500 focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#070b16] transition-all cursor-pointer appearance-none"
                         >
                           {LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
                         </select>
@@ -447,7 +454,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                         <select
                           value={form.category}
                           onChange={set('category')}
-                          className="w-full bg-[#111827] border border-white/10 rounded-xl py-3 pl-11 pr-10 text-sm text-white focus:outline-none focus:border-purple-500 transition-all cursor-pointer appearance-none"
+                          className="w-full bg-[#111827] border border-white/10 rounded-xl py-3 pl-11 pr-10 text-sm text-white focus:outline-none focus:border-purple-500 focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#070b16] transition-all cursor-pointer appearance-none"
                         >
                           {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                         </select>
@@ -659,7 +666,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                         onChange={(e) => setForm(prev => ({ ...prev, certificate: e.target.checked }))}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600" />
+                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-[#FF6B35] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--admin-surface-raised)] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600" />
                     </label>
                   </div>
 
@@ -676,7 +683,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                         onChange={(e) => setForm(prev => ({ ...prev, featured: e.target.checked }))}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600" />
+                      <div className="w-11 h-6 bg-white/10 peer-focus:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-[#FF6B35] peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[var(--admin-surface-raised)] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600" />
                     </label>
                   </div>
 

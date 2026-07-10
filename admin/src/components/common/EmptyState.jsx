@@ -2,10 +2,25 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MdInbox } from 'react-icons/md';
 
+/**
+ * Reusable empty-state block — used across the admin dashboard whenever a
+ * page has no data to display (e.g. an empty courses list, empty student
+ * list, etc.), in place of a plain "No Results" text message.
+ *
+ * Implements issue #5: "Create Reusable Empty State Component for
+ * Admin Dashboard".
+ *
+ * Props:
+ *  - title:          short heading, e.g. "No Courses Found"
+ *  - description:    helper text explaining why it's empty / what to do
+ *  - icon:            icon/illustration component to render (defaults to MdInbox)
+ *  - buttonText:      CTA button label, e.g. "+ Create Course" (omit to hide the button)
+ *  - onButtonClick:   click handler for the CTA button
+ */
 const EmptyState = ({
-  icon: Icon = MdInbox,
   title = 'Nothing Here Yet',
-  description = 'There\u2019s no data to show right now.',
+  description = 'There’s no data to show right now.',
+  icon: Icon = MdInbox,
   buttonText,
   onButtonClick,
 }) => {

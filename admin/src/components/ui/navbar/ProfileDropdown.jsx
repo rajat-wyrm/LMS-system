@@ -15,6 +15,8 @@ import {
   MdLibraryBooks,
   MdAssessment,
 } from 'react-icons/md';
+import { useMenuFocusTrap } from '../../../hooks/useFocusTrap';
+import { clearAdminAuth } from '../../../utils/api';
 
 const PANEL_WIDTH = 320;
 
@@ -108,9 +110,10 @@ const ProfileDropdown = ({ onToast }) => {
   const [open, setOpen] = useState(false);
   const [panelPos, setPanelPos] = useState({ top: 0, right: 16 });
   const triggerRef = useRef(null);
-  const panelRef = useRef(null);
+  const buttonRef = useRef(null);
 
   const close = useCallback(() => setOpen(false), []);
+  const panelRef = useMenuFocusTrap(open, close, buttonRef);
 
   const updatePosition = useCallback(() => {
     const el = triggerRef.current;
@@ -141,15 +144,8 @@ const ProfileDropdown = ({ onToast }) => {
     };
     document.addEventListener('mousedown', onPointerDown);
     return () => document.removeEventListener('mousedown', onPointerDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- panelRef is a stable ref object returned by useMenuFocusTrap
   }, [close]);
-
-  useEffect(() => {
-    const onKeyDown = (e) => {
-      if (e.key === 'Escape') close();
-    };
-    if (open) window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [open, close]);
 
   const handleNav = (item) => {
     close();
@@ -167,7 +163,7 @@ const ProfileDropdown = ({ onToast }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('role');
+    clearAdminAuth();
     close();
     navigate('/admin-login');
   };
@@ -187,6 +183,7 @@ const ProfileDropdown = ({ onToast }) => {
                 id={menuId}
                 role="menu"
                 aria-label="Admin profile menu"
+                tabIndex={-1}
                 initial={panelMotion.initial}
                 animate={panelMotion.animate}
                 exit={panelMotion.exit}
@@ -245,7 +242,7 @@ const ProfileDropdown = ({ onToast }) => {
                           type="button"
                           role="menuitem"
                           onClick={() => handleQuickAction(action)}
-                          className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40 ${action.className}`}
+                          className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2 ${action.className}`}
                         >
                           <Icon size={18} aria-hidden />
                           {action.label}
@@ -267,7 +264,7 @@ const ProfileDropdown = ({ onToast }) => {
                         type="button"
                         role="menuitem"
                         onClick={() => handleNav(item)}
-                        className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-white/[0.06] hover:shadow-[0_0_16px_rgba(255,255,255,0.04)] transition-all duration-150 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED]/50"
+                        className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-white/[0.06] hover:shadow-[0_0_16px_rgba(255,255,255,0.04)] transition-all duration-150 text-left focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
                       >
                         <span
                           className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
@@ -284,7 +281,7 @@ const ProfileDropdown = ({ onToast }) => {
                     type="button"
                     role="menuitem"
                     onClick={handleHelp}
-                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-white/[0.06] hover:shadow-[0_0_16px_rgba(255,255,255,0.04)] transition-all duration-150 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED]/50"
+                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm text-slate-200 hover:bg-white/[0.06] hover:shadow-[0_0_16px_rgba(255,255,255,0.04)] transition-all duration-150 text-left focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
                   >
                     <span
                       className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
@@ -305,7 +302,7 @@ const ProfileDropdown = ({ onToast }) => {
                     type="button"
                     role="menuitem"
                     onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold text-red-100 bg-gradient-to-r from-red-500/20 to-red-600/25 border border-red-400/20 hover:from-red-500/30 hover:to-red-600/35 hover:shadow-[0_8px_24px_rgba(239,68,68,0.35)] hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400/50"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-[14px] text-sm font-semibold text-red-100 bg-gradient-to-r from-red-500/20 to-red-600/25 border border-red-400/20 hover:from-red-500/30 hover:to-red-600/35 hover:shadow-[0_8px_24px_rgba(239,68,68,0.35)] hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
                   >
                     <MdLogout size={18} aria-hidden />
                     Logout
@@ -322,12 +319,13 @@ const ProfileDropdown = ({ onToast }) => {
     <>
       <div ref={triggerRef} className="relative">
         <button
+          ref={buttonRef}
           type="button"
           aria-expanded={open}
           aria-haspopup="menu"
           aria-controls={open ? menuId : undefined}
           onClick={() => setOpen((v) => !v)}
-          className="flex items-center gap-3 cursor-pointer group rounded-lg px-1 py-1 hover:bg-[var(--admin-surface-hover)] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/50 transition-all"
+          className="flex items-center gap-3 cursor-pointer group rounded-lg px-1 py-1 hover:bg-[var(--admin-surface-hover)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2 transition-all"
         >
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#4F46E5] flex items-center justify-center shadow-[0_0_10px_rgba(124,58,237,0.3)] text-xs font-bold text-white">
             SA

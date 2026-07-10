@@ -1,23 +1,48 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdMoreVert, MdVisibility, MdEdit, MdDelete } from 'react-icons/md';
 
-function TeacherActionMenu({ teacher, onView, onEdit, onDelete }) {
+const TeacherActionMenu = forwardRef(function TeacherActionMenu(
+  { teacher, onView, onEdit, onDelete },
+  ref
+) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const containerRef = useRef(null);
+  const firstItemRef = useRef(null);
+  const triggerRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    openMenu: () => setOpen(true),
+  }));
 
   useEffect(() => {
     const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+      if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  useEffect(() => {
+    if (open) {
+      firstItemRef.current?.focus();
+    }
+  }, [open]);
+
+  const handleMenuKeyDown = (e) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      setOpen(false);
+      triggerRef.current?.focus();
+    }
+  };
+
   return (
-    <div ref={ref} className="relative" onClick={(e) => e.stopPropagation()}>
+    <div ref={containerRef} className="relative" onClick={(e) => e.stopPropagation()}>
       <button
+        ref={triggerRef}
         type="button"
+        tabIndex={-1}
         onClick={(e) => {
           e.stopPropagation();
           setOpen((o) => !o);
@@ -38,6 +63,7 @@ function TeacherActionMenu({ teacher, onView, onEdit, onDelete }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: -6 }}
             transition={{ duration: 0.15 }}
+            onKeyDown={handleMenuKeyDown}
             className="absolute right-0 top-full mt-2 w-44 rounded-2xl shadow-2xl z-50 overflow-hidden border"
             style={{
               background: 'var(--admin-surface-raised)',
@@ -45,6 +71,7 @@ function TeacherActionMenu({ teacher, onView, onEdit, onDelete }) {
             }}
           >
             <button
+              ref={firstItemRef}
               type="button"
               onClick={() => {
                 setOpen(false);
@@ -84,6 +111,6 @@ function TeacherActionMenu({ teacher, onView, onEdit, onDelete }) {
       </AnimatePresence>
     </div>
   );
-}
+});
 
 export default TeacherActionMenu;

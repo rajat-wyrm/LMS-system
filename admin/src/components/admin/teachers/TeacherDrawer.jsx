@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdClose, MdPhotoCamera, MdCheckCircle, MdCancel } from 'react-icons/md';
 import { COLORS } from '../../../utils/teacherUtils';
+import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
 function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
   const [form, setForm] = useState({
@@ -15,6 +16,7 @@ function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
     avatar: null,
   });
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const panelRef = useFocusTrap(isOpen, onClose);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -73,10 +75,15 @@ function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100]"
           />
           <motion.div
+            ref={panelRef}
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
+            tabIndex={-1}
             className="fixed right-0 top-0 h-full w-full max-w-md z-[110] shadow-[-20px_0_60px_rgba(0,0,0,0.35)] overflow-y-auto border-l"
             style={{
               background: 'var(--admin-surface)',
@@ -98,7 +105,7 @@ function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
                 <div className="flex justify-center relative">
                   <label
                     htmlFor="teacher-photo-input"
-                    className="relative w-28 h-28 rounded-full border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all admin-text-secondary hover:border-[#8B5CF6]"
+                    className="relative w-28 h-28 rounded-full border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all admin-text-secondary hover:border-[#8B5CF6] has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-[#FF6B35] has-[:focus-visible]:outline-offset-2"
                     style={{ borderColor: 'var(--admin-border)', background: 'var(--admin-surface-raised)' }}
                   >
                     <MdPhotoCamera size={30} className="mb-1" />
@@ -108,7 +115,7 @@ function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
                       type="file"
                       accept="image/*"
                       onChange={handleImageUpload}
-                      className="hidden"
+                      className="sr-only"
                     />
                   </label>
                   {avatarPreview && (

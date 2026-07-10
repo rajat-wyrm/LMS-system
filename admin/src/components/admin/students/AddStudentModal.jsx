@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MdClose, MdUploadFile, MdPerson, MdEmail, MdPhone, MdLock, MdSchool, MdCheckCircle, MdBlock, MdEvent } from 'react-icons/md';
+import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
 const AddStudentModal = ({ onClose, onAdd, studentToEdit }) => {
+  const panelRef = useFocusTrap(true, onClose);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -77,9 +79,14 @@ const AddStudentModal = ({ onClose, onAdd, studentToEdit }) => {
 
       {/* Modal Container */}
       <motion.div 
+        ref={panelRef}
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        role="dialog"
+        aria-modal="true"
+        aria-label={isEditMode ? 'Edit Student' : 'Add New Student'}
+        tabIndex={-1}
         className="relative w-full max-w-[900px] border border-white/10 rounded-[24px] overflow-hidden bg-gradient-to-b from-[#0B1020] to-[#050814] shadow-[0_20px_60px_rgba(0,0,0,0.6),_0_0_40px_rgba(124,58,237,0.15)] flex flex-col max-h-[95vh]"
       >
         {/* Header Section */}
@@ -111,7 +118,7 @@ const AddStudentModal = ({ onClose, onAdd, studentToEdit }) => {
             <div className="flex flex-col md:flex-row gap-8">
               {/* Left: Avatar Upload */}
               <div className="flex-shrink-0 flex flex-col items-center gap-3">
-                <div className="w-40 h-40 rounded-[24px] border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-[12px] flex flex-col items-center justify-center text-gray-400 hover:border-[#8B5CF6] hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:text-[#8B5CF6] transition-all duration-250 cursor-pointer group relative overflow-hidden">
+                <div className="w-40 h-40 rounded-[24px] border-2 border-dashed border-white/20 bg-white/5 backdrop-blur-[12px] flex flex-col items-center justify-center text-gray-400 hover:border-[#8B5CF6] hover:shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:text-[#8B5CF6] transition-all duration-250 cursor-pointer group relative overflow-hidden has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-[#FF6B35] has-[:focus-visible]:outline-offset-2">
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full object-cover" />
                   ) : (

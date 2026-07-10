@@ -13,13 +13,15 @@ async function createAdmin() {
       where: { email },
       update: {
         password: hashedPassword,
-        role: 'admin'
+        role: 'admin',
+        status: 'approved'
       },
       create: {
         name: 'Shubham Admin',
         email: email,
         password: hashedPassword,
-        role: 'admin'
+        role: 'admin',
+        status: 'approved'
       }
     });
     console.log('Admin account created/updated successfully!');

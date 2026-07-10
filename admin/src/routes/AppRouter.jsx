@@ -5,6 +5,7 @@ import AdminLogin from '../pages/Auth/AdminLogin';
 
 // Admin Dashboards
 import AdminDashboard from '../pages/Dashboard/Admin/Dashboard';
+import AdminUsers from '../pages/Dashboard/Admin/Users';
 import AdminStudents from '../pages/Dashboard/Admin/Students';
 import AdminCourses from '../pages/Dashboard/Admin/Courses';
 import AdminTeachers from '../pages/Dashboard/Admin/Teachers';
@@ -28,6 +29,7 @@ const AppRouter = () => {
         <Route element={<AdminLayout />}>
           <Route element={<AdminRoute />}>
             <Route path="/dashboard/admin" element={<AdminDashboard />} />
+            <Route path="/dashboard/admin/users" element={<AdminUsers />} />
             <Route path="/dashboard/admin/students" element={<AdminStudents />} />
             <Route path="/dashboard/admin/courses" element={<AdminCourses />} />
             <Route path="/dashboard/admin/teachers" element={<AdminTeachers />} />
