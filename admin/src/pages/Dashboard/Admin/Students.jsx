@@ -395,7 +395,7 @@ const Students = () => {
   />
 </div>
       </div>
-
+      </div>
       <StudentTable
         students={displayedStudents}
         onViewProfile={handleOpenDrawer}
