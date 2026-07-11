@@ -11,6 +11,14 @@ function retentionColor(pct) {
   return 'rgba(245, 158, 11, 0.55)';
 }
 
+function retentionLabel(pct) {
+  if (pct == null) return { text: 'N/A', color: 'text-gray-500' };
+  if (pct >= 85) return { text: `${pct}%`, color: 'text-emerald-400' };
+  if (pct >= 70) return { text: `${pct}%`, color: 'text-blue-400' };
+  if (pct >= 55) return { text: `${pct}%`, color: 'text-purple-400' };
+  return { text: `${pct}%`, color: 'text-amber-400' };
+}
+
 const CohortRetention = () => {
   const { weeks, cohorts } = cohortRetentionData;
 
@@ -20,7 +28,7 @@ const CohortRetention = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35, duration: 0.35 }}
       whileHover={{ y: -4 }}
-      className="rounded-2xl border p-5 shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface)] h-full transition-all duration-300 overflow-x-auto"
+      className="rounded-2xl border p-5 shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface)] h-full transition-all duration-300"
       style={{ borderColor: 'var(--admin-border)' }}
     >
       <div className="flex items-start gap-3 mb-4">
@@ -38,42 +46,78 @@ const CohortRetention = () => {
         </div>
       </div>
 
-      <table className="w-full min-w-[320px] text-xs border-collapse">
-        <thead>
-          <tr>
-            <th className="text-left py-2 pr-2 admin-text-secondary font-semibold">Cohort</th>
-            {weeks.map((w) => (
-              <th key={w} className="text-center py-2 px-1 admin-text-secondary font-semibold">
-                {w}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {cohorts.map((row) => (
-            <tr key={row.label}>
-              <td className="py-2 pr-2 font-medium admin-text-primary whitespace-nowrap">
-                {row.label}
-              </td>
-              {row.values.map((pct, i) => (
-                <td key={`${row.label}-${weeks[i]}`} className="p-1">
-                  <div
-                    className="rounded-lg h-9 flex items-center justify-center font-bold tabular-nums"
-                    style={{
-                      background: retentionColor(pct),
-                      color: pct != null ? '#fff' : 'var(--admin-text-muted)',
-                      minWidth: 40,
-                    }}
-                    title={pct != null ? `${pct}% retained` : 'N/A'}
-                  >
-                    {pct != null ? `${pct}%` : '—'}
-                  </div>
-                </td>
+      {/* ── Desktop table (md+) ── */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full min-w-[320px] text-xs border-collapse">
+          <thead>
+            <tr>
+              <th className="text-left py-2 pr-2 admin-text-secondary font-semibold">Cohort</th>
+              {weeks.map((w) => (
+                <th key={w} className="text-center py-2 px-1 admin-text-secondary font-semibold">
+                  {w}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {cohorts.map((row) => (
+              <tr key={row.label}>
+                <td className="py-2 pr-2 font-medium admin-text-primary whitespace-nowrap">
+                  {row.label}
+                </td>
+                {row.values.map((pct, i) => (
+                  <td key={`${row.label}-${weeks[i]}`} className="p-1">
+                    <div
+                      className="rounded-lg h-9 flex items-center justify-center font-bold tabular-nums"
+                      style={{
+                        background: retentionColor(pct),
+                        color: pct != null ? '#fff' : 'var(--admin-text-muted)',
+                        minWidth: 40,
+                      }}
+                      title={pct != null ? `${pct}% retained` : 'N/A'}
+                    >
+                      {pct != null ? `${pct}%` : '—'}
+                    </div>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ── Mobile card layout (below md) ── */}
+      <div className="md:hidden space-y-3">
+        {cohorts.map((row) => (
+          <div
+            key={row.label}
+            className="rounded-xl border p-3"
+            style={{ borderColor: 'var(--admin-border)', background: 'var(--admin-surface-raised)' }}
+          >
+            <div className="text-xs font-semibold admin-text-primary mb-2">{row.label}</div>
+            <div className="flex flex-wrap gap-2">
+              {row.values.map((pct, i) => {
+                const { text, color } = retentionLabel(pct);
+                return (
+                  <div key={`${row.label}-mobile-${weeks[i]}`} className="flex flex-col items-center gap-0.5">
+                    <span className="text-[9px] admin-text-secondary">{weeks[i]}</span>
+                    <div
+                      className="rounded-lg h-8 w-10 flex items-center justify-center font-bold text-[10px] tabular-nums text-white"
+                      style={{
+                        background: retentionColor(pct),
+                        color: pct != null ? '#fff' : 'var(--admin-text-muted)',
+                      }}
+                      title={pct != null ? `${pct}% retained` : 'N/A'}
+                    >
+                      {pct != null ? `${pct}%` : '—'}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
     </motion.section>
   );
 };
