@@ -84,7 +84,7 @@ function SidebarTooltip({ label, children, enabled }) {
 const AdminSidebar = ({ mobileOpen }) =>  {
   const navigate = useNavigate();
   const location = useLocation();
-  const { collapsed, toggleCollapsed } = useAdminSidebar();
+  const { collapsed, toggleCollapsed, closeMobileSidebar } = useAdminSidebar();
 
   const links = [
     { name: 'Dashboard',           path: '/dashboard/admin',              icon: LuLayoutDashboard, end: true },
@@ -194,6 +194,13 @@ const AdminSidebar = ({ mobileOpen }) =>  {
                 }
                 return {};
               }}
+              onClick={() => {
+  console.log("Clicked:", link.name);
+
+  if (window.innerWidth < 768) {
+    closeMobileSidebar();
+  }
+}}
             >
               {({ isActive }) => {
                 const active =

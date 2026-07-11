@@ -6,24 +6,29 @@ import { DateRangeProvider } from '../context/DateRangeContext';
 import { AdminSidebarProvider, useAdminSidebar } from '../context/AdminSidebarContext';
 
 function AdminLayoutContent() {
-  const { sidebarWidth } = useAdminSidebar();
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const {
+  sidebarWidth,
+  mobileOpen,
+  toggleMobileSidebar,
+  closeMobileSidebar,
+} = useAdminSidebar();
+
   return (
     <div
       className="flex min-h-screen bg-[var(--admin-shell-bg)]"
       style={{ '--sidebar-width': `${sidebarWidth}px` }}
     >
-      <AdminSidebar mobileOpen={mobileSidebarOpen} />
-      {mobileSidebarOpen && (
+      <AdminSidebar mobileOpen={mobileOpen} />
+      {mobileOpen && (
   <div
     className="fixed inset-0 z-40 bg-black/50 md:hidden"
-    onClick={() => setMobileSidebarOpen(false)}
+    onClick={closeMobileSidebar}
   />
 )}
       <div
   className="flex-1 flex flex-col min-h-screen md:ml-[var(--sidebar-width)]"
 >
-        <Navbar onMenuClick={() => setMobileSidebarOpen(true)} />
+        <Navbar onMenuClick={toggleMobileSidebar} />
         <main className="flex-1 overflow-y-auto bg-[var(--admin-shell-bg)] p-6">
           <Outlet />
         </main>
