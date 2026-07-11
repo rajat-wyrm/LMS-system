@@ -6,558 +6,10 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id                                                            String                  @id @default(cuid())
-  name                                                          String
-  email                                                         String                  @unique
-  password                                                      String
-  role                                                          Role                    @default(user)
-  createdAt                                                     DateTime                @default(now())
-  updatedAt                                                     DateTime                @updatedAt
-  avatar                                                        String?
-  bio                                                           String?
-  status                                                        UserStatus              @default(pending)
-  AssessmentAttempt                                             AssessmentAttempt[]
-  AssessmentRetakeGrant_AssessmentRetakeGrant_grantedByIdToUser AssessmentRetakeGrant[] @relation("AssessmentRetakeGrant_grantedByIdToUser")
-  AssessmentRetakeGrant_AssessmentRetakeGrant_userIdToUser      AssessmentRetakeGrant[] @relation("AssessmentRetakeGrant_userIdToUser")
-  AssignmentSubmission                                          AssignmentSubmission[]
-  AuditLog                                                      AuditLog[]
-  Bookmark                                                      Bookmark[]
-  Certificate                                                   Certificate[]
-  ChatMessage                                                   ChatMessage[]
-  CommunityPost                                                 CommunityPost[]
-  CommunityReport                                               CommunityReport[]
-  CommunityTopic                                                CommunityTopic[]
-  courses                                                       Course[]                @relation("InstructorCourses")
-  CourseReview                                                  CourseReview[]
-  enrollments                                                   Enrollment[]
-  LearningEvent                                                 LearningEvent[]
-  LiveSession                                                   LiveSession[]
-  Notification                                                  Notification[]
-  PracticeQuestion                                              PracticeQuestion[]
-  Session                                                       Session[]
-  SupportTicket_SupportTicket_assigneeIdToUser                  SupportTicket[]         @relation("SupportTicket_assigneeIdToUser")
-  SupportTicket_SupportTicket_requesterIdToUser                 SupportTicket[]         @relation("SupportTicket_requesterIdToUser")
-  TicketMessage                                                 TicketMessage[]
-  UserPreference                                                UserPreference?
-}
-
-model Course {
-  id               String          @id @default(cuid())
-  title            String
-  description      String
-  category         String
-  celebrityTeacher String?
-  instructorId     String?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  level            String          @default("Beginner")
-  thumbnail        String?
-  duration         String?
-  gradient         String?
-  icon             String?
-  outcomes         String[]
-  price            Int             @default(0)
-  rating           Float           @default(4.5)
-  xp               String?
-  scheduledAt      DateTime?
-  publishedAt      DateTime?
-  archivedAt       DateTime?
-  rejectionReason  String?
-  status           CourseStatus    @default(pending)
-  Announcement     Announcement[]
-  Assessment       Assessment[]
-  Assignment       Assignment[]
-  Bookmark         Bookmark[]
-  Certificate      Certificate[]
-  ChatMessage      ChatMessage[]
-  instructor       User?           @relation("InstructorCourses", fields: [instructorId], references: [id])
-  CourseReview     CourseReview[]
-  enrollments      Enrollment[]
-  LearningEvent    LearningEvent[]
-  lessons          Lesson[]
-  LiveSession      LiveSession[]
-  learningPaths    LearningPath[]  @relation("LearningPathCourses")
-
-  @@index([category, level])
-  @@index([status, createdAt])
-}
-
-model LearningPath {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  description String
-  duration    String
-  color       String   @default("teal")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  courses     Course[] @relation("LearningPathCourses")
-}
-
-model Lesson {
-  id              String          @id @default(cuid())
-  title           String
-  content         String
-  videoUrl        String?
-  order           Int
-  courseId        String
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  durationSeconds Int?
-  resources       Json?
-  transcript      String?
-  type            String          @default("text")
-  LearningEvent   LearningEvent[]
-  course          Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  completedBy     Enrollment[]    @relation("CompletedLessons")
-
-  @@unique([courseId, order])
-}
-
-model Enrollment {
-  id                  String           @id @default(cuid())
-  userId              String
-  courseId            String
-  progress            Int              @default(0)
-  status              EnrollmentStatus @default(active)
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
-  certificateApproved Boolean          @default(false)
-  mentor              String?
-  lastAccessedAt      DateTime?
-  lastLessonId        String?
-  lastPositionSeconds Int              @default(0)
-  course              Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  user                User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  completedLessons    Lesson[]         @relation("CompletedLessons")
-
-  @@unique([userId, courseId])
-  @@index([courseId, status])
-  @@index([userId, status])
-}
-
-model AIPersonality {
-  id           String        @id
-  name         String        @unique
-  title        String
-  description  String?
-  avatar       String?
-  accent       String        @default("#6366f1")
-  systemPrompt String
-  active       Boolean       @default(true)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime
-  ChatMessage  ChatMessage[]
-}
-
-model Announcement {
-  id          String    @id
-  title       String
-  body        String
-  courseId    String?
-  publishedAt DateTime?
-  expiresAt   DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime
-  Course      Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  @@index([courseId, publishedAt])
-}
-
-model Assessment {
-  id                    String                  @id
-  courseId              String
-  title                 String
-  description           String?
-  passingScore          Int                     @default(70)
-  attemptLimit          Int                     @default(1)
-  durationMinutes       Int?
-  randomize             Boolean                 @default(false)
-  dueAt                 DateTime?
-  publishedAt           DateTime?
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime
-  Course                Course                  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  AssessmentAttempt     AssessmentAttempt[]
-  AssessmentRetakeGrant AssessmentRetakeGrant[]
-  Question              Question[]
-
-  @@index([courseId, publishedAt])
-}
-
-model AssessmentAttempt {
-  id           String     @id
-  assessmentId String
-  userId       String
-  answers      Json
-  score        Int?
-  passed       Boolean?
-  startedAt    DateTime   @default(now())
-  submittedAt  DateTime?
-  updatedAt    DateTime
-  Assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
-  User         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([assessmentId, userId])
-}
-
-model AssessmentRetakeGrant {
-  id                                           String     @id
-  assessmentId                                 String
-  userId                                       String
-  grantedById                                  String
-  extraAttempts                                Int        @default(1)
-  reason                                       String?
-  expiresAt                                    DateTime?
-  createdAt                                    DateTime   @default(now())
-  updatedAt                                    DateTime
-  Assessment                                   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
-  User_AssessmentRetakeGrant_grantedByIdToUser User       @relation("AssessmentRetakeGrant_grantedByIdToUser", fields: [grantedById], references: [id], onDelete: Cascade)
-  User_AssessmentRetakeGrant_userIdToUser      User       @relation("AssessmentRetakeGrant_userIdToUser", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([assessmentId, userId, expiresAt])
-}
-
-model Assignment {
-  id                   String                 @id
-  courseId             String
-  title                String
-  description          String
-  dueAt                DateTime?
-  maxPoints            Int                    @default(100)
-  allowResubmit        Boolean                @default(false)
-  rubric               Json?
-  publishedAt          DateTime?
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime
-  Course               Course                 @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  AssignmentSubmission AssignmentSubmission[]
-
-  @@index([courseId, publishedAt])
-}
-
-model AssignmentSubmission {
-  id           String           @id
-  assignmentId String
-  userId       String
-  text         String?
-  fileUrl      String?
-  status       SubmissionStatus @default(draft)
-  score        Int?
-  feedback     String?
-  submittedAt  DateTime?
-  gradedAt     DateTime?
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime
-  Assignment   Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  User         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([assignmentId, userId])
-  @@index([status, submittedAt])
-}
-
-model AuditLog {
-  id         String   @id
-  actorId    String?
-  actorRole  String?
-  action     String
-  targetType String
-  targetId   String?
-  previous   Json?
-  next       Json?
-  requestId  String?
-  ipAddress  String?
-  userAgent  String?
-  createdAt  DateTime @default(now())
-  User       User?    @relation(fields: [actorId], references: [id])
-
-  @@index([actorId, createdAt])
-  @@index([createdAt])
-  @@index([targetType, targetId])
-}
-
-model BillingRecord {
-  id          String        @id
-  userId      String?
-  courseId    String?
-  amount      Float
-  currency    String        @default("INR")
-  providerRef String?       @unique
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime
-  status      BillingStatus
-
-  @@index([status, createdAt])
-}
-
-model Bookmark {
-  id        String   @id
-  userId    String
-  courseId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-  Course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, courseId])
-}
-
-model Certificate {
-  id             String            @id
-  verificationId String            @unique
-  userId         String
-  courseId       String
-  issuedAt       DateTime?
-  expiresAt      DateTime?
-  revokedAt      DateTime?
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime
-  status         CertificateStatus @default(pending)
-  Course         Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  User           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, courseId])
-  @@index([status, createdAt])
-}
-
-model ChatMessage {
-  id            String         @id
-  roomId        String
-  userId        String
-  courseId      String?
-  personalityId String?
-  role          String         @default("user")
-  content       String
-  moderated     Boolean        @default(false)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime
-  Course        Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  AIPersonality AIPersonality? @relation(fields: [personalityId], references: [id])
-  User          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([roomId, createdAt])
-  @@index([userId, createdAt])
-}
-
-model CommunityPost {
-  id              String            @id
-  topicId         String
-  authorId        String?
-  body            String
-  hidden          Boolean           @default(false)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime
-  User            User?             @relation(fields: [authorId], references: [id])
-  CommunityTopic  CommunityTopic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  CommunityReport CommunityReport[]
-
-  @@index([topicId, createdAt])
-}
-
-model CommunityReport {
-  id            String        @id
-  postId        String
-  reporterId    String
-  reason        String
-  createdAt     DateTime      @default(now())
-  reviewedAt    DateTime?
-  updatedAt     DateTime
-  status        ReportStatus  @default(open)
-  CommunityPost CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  User          User          @relation(fields: [reporterId], references: [id], onDelete: Cascade)
-
-  @@unique([postId, reporterId])
-  @@index([status, createdAt])
-}
-
-model CommunityTopic {
-  id            String          @id
-  title         String
-  description   String?
-  createdById   String?
-  locked        Boolean         @default(false)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime
-  CommunityPost CommunityPost[]
-  User          User?           @relation(fields: [createdById], references: [id])
-
-  @@index([createdAt])
-}
-
-model CourseReview {
-  id        String       @id
-  userId    String
-  courseId  String
-  rating    Int
-  comment   String?
-  createdAt DateTime     @default(now())
-  updatedAt DateTime
-  status    ReviewStatus @default(published)
-  Course    Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  User      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, courseId])
-  @@index([courseId, status])
-}
-
-model LearningEvent {
-  id        String   @id
-  userId    String
-  courseId  String?
-  lessonId  String?
-  type      String
-  metadata  Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-  Course    Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  Lesson    Lesson?  @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([courseId, type, createdAt])
-  @@index([userId, createdAt])
-}
-
-model LiveSession {
-  id              String            @id
-  title           String
-  description     String?
-  courseId        String?
-  instructorId    String
-  startsAt        DateTime
-  durationMinutes Int               @default(60)
-  meetingUrl      String?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime
-  status          LiveSessionStatus @default(scheduled)
-  Course          Course?           @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  User            User              @relation(fields: [instructorId], references: [id], onDelete: Cascade)
-
-  @@index([courseId, startsAt])
-  @@index([startsAt, status])
-}
-
-model Notification {
-  id        String           @id
-  userId    String
-  type      NotificationType @default(system)
-  title     String
-  message   String
-  actionUrl String?
-  readAt    DateTime?
-  createdAt DateTime         @default(now())
-  updatedAt DateTime
-  User      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, readAt, createdAt])
-}
-
-model PracticeQuestion {
-  id          String   @id
-  authorId    String?
-  category    String
-  difficulty  String   @default("medium")
-  type        String   @default("multiple_choice")
-  prompt      String
-  options     Json?
-  answer      Json?
-  explanation String?
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime
-  User        User?    @relation(fields: [authorId], references: [id])
-
-  @@index([category, difficulty, active])
-}
-
-model Question {
-  id           String     @id
-  assessmentId String
-  type         String
-  prompt       String
-  options      Json?
-  answer       Json?
-  points       Int        @default(1)
-  order        Int
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime
-  Assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
-
-  @@unique([assessmentId, order])
-}
-
-model Session {
-  id         String    @id
-  userId     String
-  tokenHash  String    @unique
-  userAgent  String?
-  ipAddress  String?
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  lastUsedAt DateTime  @default(now())
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime
-  User       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([expiresAt])
-  @@index([userId, revokedAt])
-}
-
-model SupportTicket {
-  id                                   String          @id
-  requesterId                          String?
-  assigneeId                           String?
-  subject                              String
-  description                          String
-  priority                             String          @default("medium")
-  status                               TicketStatus    @default(open)
-  createdAt                            DateTime        @default(now())
-  updatedAt                            DateTime
-  User_SupportTicket_assigneeIdToUser  User?           @relation("SupportTicket_assigneeIdToUser", fields: [assigneeId], references: [id])
-  User_SupportTicket_requesterIdToUser User?           @relation("SupportTicket_requesterIdToUser", fields: [requesterId], references: [id])
-  TicketMessage                        TicketMessage[]
-
-  @@index([requesterId, createdAt])
-  @@index([status, priority, createdAt])
-}
-
-model TicketMessage {
-  id            String        @id
-  ticketId      String
-  authorId      String?
-  body          String
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime
-  User          User?         @relation(fields: [authorId], references: [id])
-  SupportTicket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-
-  @@index([ticketId, createdAt])
-}
-
-model UserPreference {
-  id                  String   @id
-  userId              String   @unique
-  language            String   @default("English")
-  timezone            String   @default("UTC")
-  emailNotifications  Boolean  @default(false)
-  courseNotifications Boolean  @default(true)
-  deadlineReminders   Boolean  @default(true)
-  reducedMotion       Boolean  @default(false)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime
-  User                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
 enum Role {
   user
   instructor
   admin
-}
-
-enum EnrollmentStatus {
-  active
-  completed
-  dropped
 }
 
 enum UserStatus {
@@ -573,57 +25,95 @@ enum CourseStatus {
   rejected
 }
 
-enum BillingStatus {
-  pending
-  paid
-  failed
-}
-
-enum CertificateStatus {
-  pending
-  issued
-  revoked
-}
-
-enum LiveSessionStatus {
-  scheduled
-  live
+enum EnrollmentStatus {
+  active
   completed
-  cancelled
+  dropped
 }
 
-enum NotificationType {
-  system
-  course
-  assignment
-  assessment
-  certificate
-  security
+model User {
+  id          String       @id @default(cuid())
+  name        String
+  email       String       @unique
+  password    String
+  role        Role         @default(user)
+  status      UserStatus   @default(pending)
+  bio         String?
+  avatar      String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  courses     Course[]     @relation("InstructorCourses")
+  enrollments Enrollment[]
 }
 
-enum ReportStatus {
-  open
-  actioned
-  dismissed
+model Course {
+  id               String          @id @default(cuid())
+  title            String
+  description      String
+  category         String
+  level            String          @default("Beginner")
+  price            Float           @default(0)
+  thumbnail        String?
+  celebrityTeacher String?
+  instructorId     String
+  duration         String?
+  rating           Float           @default(4.5)
+  outcomes         String[]
+  xp               String?
+  gradient         String?
+  icon             String?
+  status           CourseStatus    @default(pending)
+  instructor       User            @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  lessons          Lesson[]
+  enrollments      Enrollment[]
+  learningPaths    LearningPath[]  @relation("LearningPathCourses")
 }
 
-enum ReviewStatus {
-  published
-  hidden
+model LearningPath {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  duration    String
+  color       String   @default("teal")
+  courses     Course[] @relation("LearningPathCourses")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
-enum SubmissionStatus {
-  draft
-  submitted
-  late
-  graded
-  returned
+model Lesson {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  videoUrl  String?
+  order     Int
+  courseId  String
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  completedBy Enrollment[] @relation("CompletedLessons")
 }
 
-enum TicketStatus {
-  open
-  assigned
-  waiting
-  resolved
-  closed
+model Enrollment {
+  id                  String           @id @default(cuid())
+  userId              String
+  courseId            String
+  progress            Int              @default(0)
+  status              EnrollmentStatus @default(active)
+  certificateApproved Boolean          @default(false)
+  mentor              String?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  completedLessons Lesson[] @relation("CompletedLessons")
+
+  @@unique([userId, courseId])
+  @@index([createdAt])
 }

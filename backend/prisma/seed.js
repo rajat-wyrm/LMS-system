@@ -210,6 +210,69 @@ const seedLearningPaths = [
   }
 ];
 
+const seedStudents = [
+  {
+    name: "Aarav Patel",
+    email: "aarav.patel@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Ananya Iyer",
+    email: "ananya.iyer@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Kabir Malhotra",
+    email: "kabir.malhotra@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Diya Sen",
+    email: "diya.sen@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Vivaan Joshi",
+    email: "vivaan.joshi@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Isha Gupta",
+    email: "isha.gupta@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Arjun Verma",
+    email: "arjun.verma@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Riya Chakraborty",
+    email: "riya.chakraborty@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Sai Teja",
+    email: "sai.teja@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Meera Nair",
+    email: "meera.nair@example.com",
+    role: "user",
+    status: "approved"
+  }
+];
+
 async function main() {
   console.log('Seeding database...');
 
@@ -235,6 +298,28 @@ async function main() {
       status: seedAdmin.status
     }
   });
+
+  // Create student users
+  console.log('Upserting student users...');
+  for (const student of seedStudents) {
+    await prisma.user.upsert({
+      where: { email: student.email },
+      update: {
+        name: student.name,
+        password: hashedPassword,
+        role: student.role,
+        status: student.status
+      },
+      create: {
+        name: student.name,
+        email: student.email,
+        password: hashedPassword,
+        role: student.role,
+        status: student.status
+      }
+    });
+  }
+
 
   // 1. Create Instructors
   const instructors = {};
