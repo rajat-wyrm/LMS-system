@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   MdStar,
@@ -19,6 +19,14 @@ const BADGES = [
 
 const TeacherCard = ({ teacher, onView, onEdit, onDelete }) => {
   const activeBadges = BADGES.filter((b) => teacher[b.key]);
+  const menuRef = useRef(null);
+
+  const handleCardKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      menuRef.current?.openMenu();
+    }
+  };
 
   return (
     <motion.article
@@ -32,7 +40,11 @@ const TeacherCard = ({ teacher, onView, onEdit, onDelete }) => {
         boxShadow: '0 24px 48px rgba(139, 92, 246, 0.2)',
       }}
       onClick={() => onView(teacher)}
-      className="rounded-2xl overflow-hidden cursor-pointer group border shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface-raised)]"
+      tabIndex={0}
+      role="group"
+      aria-label={`${teacher.name} teacher card. Press Enter to open actions menu.`}
+      onKeyDown={handleCardKeyDown}
+      className="rounded-2xl overflow-hidden cursor-pointer group border shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface-raised)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
       style={{ borderColor: 'var(--admin-border)' }}
     >
       <div className={`relative h-32 bg-gradient-to-r ${teacher.color} overflow-hidden`}>
@@ -45,6 +57,7 @@ const TeacherCard = ({ teacher, onView, onEdit, onDelete }) => {
         />
         <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
           <TeacherActionMenu
+            ref={menuRef}
             teacher={teacher}
             onView={onView}
             onEdit={onEdit}

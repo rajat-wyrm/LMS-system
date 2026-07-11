@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdClose, MdMailOutline } from 'react-icons/md';
+import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
 const InviteTeacherModal = ({ isOpen, onClose }) => {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const panelRef = useFocusTrap(isOpen, onClose);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -35,9 +37,14 @@ const InviteTeacherModal = ({ isOpen, onClose }) => {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100]"
           />
           <motion.div
+            ref={panelRef}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Invite Teacher"
+            tabIndex={-1}
             className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md z-[110] rounded-2xl border p-6 shadow-2xl"
             style={{
               background: 'var(--admin-surface-raised)',

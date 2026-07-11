@@ -1,7 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { GraduationCap, Menu, X, LayoutGrid, Shield } from "lucide-react";
+import { GraduationCap, Menu, X, LayoutGrid, Shield, MoonStar, Sun } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/store/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 
 const links = [
   { to: "/", label: "Home" },
@@ -13,6 +14,7 @@ const links = [
 export const Navbar = () => {
   const [open, setOpen] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -74,6 +76,14 @@ export const Navbar = () => {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/70 text-foreground transition-colors hover:border-primary hover:text-primary"
+            aria-label="Toggle dark mode"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <MoonStar className="h-4 w-4" />}
+          </button>
           {isAuthenticated && user ? (
             <div className="flex items-center gap-4">
               <NavLink to="/profile" className="text-sm font-medium hover:text-primary transition-colors">
@@ -137,6 +147,14 @@ export const Navbar = () => {
               </NavLink>
             )}
             <div className="border-t border-border my-2" />
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="inline-flex items-center gap-2 rounded-lg border border-border bg-background/70 px-3 py-2 text-sm text-foreground transition-colors hover:border-primary hover:text-primary"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <MoonStar className="h-4 w-4" />}
+              {theme === "dark" ? "Light mode" : "Dark mode"}
+            </button>
             {isAuthenticated && user ? (
               <>
                 <NavLink to="/profile" onClick={() => setOpen(false)} className="text-sm py-2 font-medium hover:text-primary transition-colors">

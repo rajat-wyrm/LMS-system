@@ -5,6 +5,7 @@ import {
   MdLock, MdSchool, MdCheckCircle, MdCancel, MdEvent,
   MdStar
 } from 'react-icons/md';
+import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
 const COURSES = [
   'DSA with Java', 'Python', 'C++', 'HTML', 'CSS',
@@ -32,6 +33,7 @@ const AddStudentDrawer = ({ isOpen, onClose, onAdd, studentToEdit }) => {
   const [form, setForm]             = useState(defaultForm);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const isEdit = !!studentToEdit;
+  const panelRef = useFocusTrap(isOpen, onClose);
 
   /* Pre-fill when editing */
   useEffect(() => {
@@ -99,8 +101,13 @@ const AddStudentDrawer = ({ isOpen, onClose, onAdd, studentToEdit }) => {
 
           {/* Drawer */}
           <motion.div
+            ref={panelRef}
             initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 26, stiffness: 200 }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={isEdit ? 'Edit Student' : 'Add New Student'}
+            tabIndex={-1}
             className="fixed right-0 top-0 h-full w-full max-w-[480px] bg-[#0B1120] border-l border-white/10 z-[110] shadow-[-24px_0_60px_rgba(0,0,0,0.6)] flex flex-col"
           >
             {/* ── Drawer Header ── */}
@@ -129,7 +136,7 @@ const AddStudentDrawer = ({ isOpen, onClose, onAdd, studentToEdit }) => {
 
               {/* Avatar Upload */}
               <div className="flex justify-center">
-                <label className="relative w-28 h-28 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center text-gray-500 hover:text-purple-400 hover:border-purple-500 hover:bg-purple-500/10 transition-all cursor-pointer group overflow-hidden">
+                <label className="relative w-28 h-28 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 flex flex-col items-center justify-center text-gray-500 hover:text-purple-400 hover:border-purple-500 hover:bg-purple-500/10 transition-all cursor-pointer group overflow-hidden has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-[#FF6B35] has-[:focus-visible]:outline-offset-2">
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
                   ) : (

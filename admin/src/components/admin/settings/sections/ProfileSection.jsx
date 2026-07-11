@@ -42,7 +42,7 @@ const ProfileSection = ({ profile, onUpdate }) => {
           <h2 className="text-xl font-bold admin-text-primary">{profile.name}</h2>
           <p className="text-sm admin-text-secondary mt-0.5">{profile.role}</p>
           <p className="text-xs admin-text-muted mt-2">Last updated · {profile.lastUpdated}</p>
-          <label className="mt-4 inline-flex">
+          <label className="mt-4 inline-flex rounded-xl has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-[#FF6B35] has-[:focus-visible]:outline-offset-2">
             <motion.span
               whileHover={{ boxShadow: '0 0 24px rgba(59,130,246,0.4)' }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white cursor-pointer"
@@ -51,7 +51,7 @@ const ProfileSection = ({ profile, onUpdate }) => {
               <MdPhotoCamera size={18} />
               Change Photo
             </motion.span>
-            <input type="file" accept="image/*" className="hidden" onChange={handleAvatar} />
+            <input type="file" accept="image/*" className="sr-only" onChange={handleAvatar} />
           </label>
         </div>
       </div>

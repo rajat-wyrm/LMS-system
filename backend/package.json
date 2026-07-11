@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
+    "postinstall": "prisma generate",
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "node server.js",
+    "dev:watch": "nodemon server.js",
+    "prisma:generate": "prisma generate",
+    "pdf:phase2": "node gen_pdf.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -40,7 +44,6 @@
   },
   "devDependencies": {
     "autocannon": "^8.0.0",
-    "markdown-pdf": "^11.0.0",
     "md-to-pdf": "^5.2.5",
     "nodemon": "^3.1.14",
     "prisma": "^7.8.0"

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import AdminSidebar from '../components/ui/AdminSidebar';
 import Navbar from '../components/ui/Navbar';
 import { DateRangeProvider } from '../context/DateRangeContext';
@@ -7,6 +7,13 @@ import { AdminSidebarProvider, useAdminSidebar } from '../context/AdminSidebarCo
 
 function AdminLayoutContent() {
   const { sidebarWidth } = useAdminSidebar();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (document.activeElement && document.activeElement !== document.body) {
+      document.activeElement.blur();
+    }
+  }, [location.pathname]);
 
   return (
     <div

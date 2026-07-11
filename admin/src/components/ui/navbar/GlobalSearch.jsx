@@ -118,7 +118,7 @@ const GlobalSearch = () => {
         aria-activedescendant={
           activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
         }
-        className="block w-full pl-9 pr-16 py-2 border rounded-lg text-sm transition-all bg-[var(--admin-input-bg)] border-[var(--admin-input-border)] text-[var(--admin-text-primary)] placeholder-[var(--admin-text-muted)] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/50 focus:border-[#7C3AED]/50"
+        className="block w-full pl-9 pr-16 py-2 border rounded-lg text-sm transition-all bg-[var(--admin-input-bg)] border-[var(--admin-input-border)] text-[var(--admin-text-primary)] placeholder-[var(--admin-text-muted)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
         placeholder="Search for students, courses, teachers..."
         value={query}
         onChange={(e) => {

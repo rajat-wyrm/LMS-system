@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MdClose, MdSend, MdEmail, MdSms, MdNotificationsActive } from 'react-icons/md';
+import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
 const NotificationModal = ({ student, onClose }) => {
   const [method, setMethod] = useState('in-app');
   const [type, setType] = useState('course-reminder');
   const [message, setMessage] = useState('');
+  const panelRef = useFocusTrap(Boolean(student), onClose);
 
   if (!student) return null;
 
@@ -22,9 +24,14 @@ const NotificationModal = ({ student, onClose }) => {
 
       {/* Modal */}
       <motion.div 
+        ref={panelRef}
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Send Notification"
+        tabIndex={-1}
         className="relative w-full max-w-lg glass-card border border-white/10 rounded-3xl overflow-hidden shadow-2xl bg-[#0f141e]/90"
       >
         {/* Header */}

@@ -1,6 +1,14 @@
+const bcrypt = require('bcryptjs');
 const { prisma } = require('../src/config/db');
 
 const img = (seed) => `https://images.unsplash.com/${seed}?auto=format&fit=crop&w=800&q=80`;
+
+const seedAdmin = {
+  name: "Amit Sharma",
+  email: "admin.amit@lms.com",
+  role: "admin",
+  status: "approved"
+};
 
 const seedCourses = [
   {
@@ -202,9 +210,117 @@ const seedLearningPaths = [
   }
 ];
 
+const seedStudents = [
+  {
+    name: "Aarav Patel",
+    email: "aarav.patel@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Ananya Iyer",
+    email: "ananya.iyer@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Kabir Malhotra",
+    email: "kabir.malhotra@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Diya Sen",
+    email: "diya.sen@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Vivaan Joshi",
+    email: "vivaan.joshi@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Isha Gupta",
+    email: "isha.gupta@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Arjun Verma",
+    email: "arjun.verma@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Riya Chakraborty",
+    email: "riya.chakraborty@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Sai Teja",
+    email: "sai.teja@example.com",
+    role: "user",
+    status: "approved"
+  },
+  {
+    name: "Meera Nair",
+    email: "meera.nair@example.com",
+    role: "user",
+    status: "approved"
+  }
+];
+
 async function main() {
   console.log('Seeding database...');
-  
+
+  // Hash password
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash('password123', salt);
+
+  // Create default admin user
+  console.log('Upserting admin user...');
+  await prisma.user.upsert({
+    where: { email: seedAdmin.email },
+    update: {
+      name: seedAdmin.name,
+      password: hashedPassword,
+      role: seedAdmin.role,
+      status: seedAdmin.status
+    },
+    create: {
+      name: seedAdmin.name,
+      email: seedAdmin.email,
+      password: hashedPassword,
+      role: seedAdmin.role,
+      status: seedAdmin.status
+    }
+  });
+
+  // Create student users
+  console.log('Upserting student users...');
+  for (const student of seedStudents) {
+    await prisma.user.upsert({
+      where: { email: student.email },
+      update: {
+        name: student.name,
+        password: hashedPassword,
+        role: student.role,
+        status: student.status
+      },
+      create: {
+        name: student.name,
+        email: student.email,
+        password: hashedPassword,
+        role: student.role,
+        status: student.status
+      }
+    });
+  }
+
+
   // 1. Create Instructors
   const instructors = {};
   for (const c of seedCourses) {
@@ -216,7 +332,7 @@ async function main() {
           data: {
             name: c.instructorName,
             email,
-            password: 'password123',
+            password: hashedPassword,
             role: 'instructor',
             status: 'approved'
           }
