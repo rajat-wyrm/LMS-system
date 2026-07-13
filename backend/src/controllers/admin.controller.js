@@ -258,15 +258,11 @@ exports.getDashboardStats = async (req, res, next) => {
       }
     });
 
-<<<<<<< Updated upstream
-    const revenueTrend = Object.values(revenueMap);
 
-    // Get recent 5 users for activity feed
-=======
     const revenueChart = Object.values(revenueMap);
 
     // Get recent 5 users for activity feed (Kept from your changes)
->>>>>>> Stashed changes
+
     const recentUsers = await prisma.user.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
@@ -802,8 +798,7 @@ exports.getStudentGrowth = async (req, res, next) => {
   }
 };
 
-<<<<<<< Updated upstream
-=======
+
 // ─── Analytics Overview ───────────────────────────────────────────────────────
 // @desc    Get analytics data (monthly revenue, student growth, course categories)
 // @route   GET /api/admin/analytics
@@ -973,7 +968,7 @@ exports.getAnalytics = async (req, res, next) => {
 };
 
 // ─── Admin Users ──────────────────────────────────────────────────────────────
->>>>>>> Stashed changes
+
 // @desc    Get all users (admin)
 // @route   GET /api/admin/users
 // @access  Private/Admin
@@ -988,14 +983,9 @@ exports.getAdminUsers = async (req, res, next) => {
       role,
       status,
     } = req.query;
-<<<<<<< Updated upstream
 
-    const pageNumber = parseInt(page, 10);
-    const limitNumber = parseInt(limit, 10);
-=======
     const pageNumber = parseInt(page, 10) || 1;
     const limitNumber = parseInt(limit, 10) || 50;
->>>>>>> Stashed changes
     const skip = (pageNumber - 1) * limitNumber;
 
     const where = {};
@@ -1011,13 +1001,9 @@ exports.getAdminUsers = async (req, res, next) => {
     }
 
     const orderBy = {};
-<<<<<<< Updated upstream
     if (sortBy) {
       orderBy[sortBy] = sortOrder === "asc" ? "asc" : "desc";
     }
-=======
-    if (sortBy) orderBy[sortBy] = sortOrder === "asc" ? "asc" : "desc";
->>>>>>> Stashed changes
 
     const [users, total] = await Promise.all([
       prisma.user.findMany({
@@ -1031,9 +1017,6 @@ exports.getAdminUsers = async (req, res, next) => {
           email: true,
           role: true,
           status: true,
-<<<<<<< Updated upstream
-          createdAt: true,
-=======
           bio: true,
           avatar: true,
           createdAt: true,
@@ -1045,37 +1028,38 @@ exports.getAdminUsers = async (req, res, next) => {
               mentor: true,
               certificateApproved: true,
               createdAt: true,
-              course: { select: { id: true, title: true, price: true } },
+              course: {
+                select: {
+                  id: true,
+                  title: true,
+                  price: true,
+                },
+              },
             },
           },
->>>>>>> Stashed changes
         },
       }),
       prisma.user.count({ where }),
     ]);
 
-<<<<<<< Updated upstream
-    res.status(200).json({
-      success: true,
-      count: users.length,
-      data: users,
-=======
-    // Enrich users with computed fields
     const enriched = users.map((u) => {
       const activeEnrollment =
         u.enrollments.find(
-          (e) => e.status === "active" || e.status === "completed",
+          (e) => e.status === "active" || e.status === "completed"
         ) || u.enrollments[0];
+
       const certificates = u.enrollments.filter(
-        (e) => e.certificateApproved,
+        (e) => e.certificateApproved
       ).length;
+
       const avgProgress =
         u.enrollments.length > 0
           ? Math.round(
-              u.enrollments.reduce((s, e) => s + e.progress, 0) /
-                u.enrollments.length,
+              u.enrollments.reduce((sum, e) => sum + e.progress, 0) /
+                u.enrollments.length
             )
           : 0;
+
       return {
         id: u.id,
         name: u.name,
@@ -1098,7 +1082,6 @@ exports.getAdminUsers = async (req, res, next) => {
       success: true,
       count: enriched.length,
       data: enriched,
->>>>>>> Stashed changes
       meta: {
         total,
         page: pageNumber,
@@ -1111,9 +1094,6 @@ exports.getAdminUsers = async (req, res, next) => {
   }
 };
 
-<<<<<<< Updated upstream
-// @desc    Update user status/role (admin)
-=======
 // @desc    Get single user with full details (admin)
 // @route   GET /api/admin/users/:id
 // @access  Private/Admin
@@ -1133,30 +1113,42 @@ exports.getAdminUser = async (req, res, next) => {
         enrollments: {
           include: {
             course: {
-              select: { id: true, title: true, price: true, category: true },
+              select: {
+                id: true,
+                title: true,
+                price: true,
+                category: true,
+              },
             },
-            completedLessons: { select: { id: true } },
+            completedLessons: {
+              select: { id: true },
+            },
           },
         },
       },
     });
-    if (!user)
-      return res.status(404).json({ success: false, error: "User not found" });
-    res.status(200).json({ success: true, data: user });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
   } catch (error) {
     next(error);
   }
 };
 
 // @desc    Update user status/role/name/email (admin)
->>>>>>> Stashed changes
 // @route   PUT /api/admin/users/:id
 // @access  Private/Admin
 exports.updateUserStatus = async (req, res, next) => {
   try {
-<<<<<<< Updated upstream
-    const { status, role } = req.body;
-=======
     const { status, role, name, email } = req.body;
 
     if (!status && !role && !name && !email) {
@@ -1204,17 +1196,16 @@ exports.updateUserStatus = async (req, res, next) => {
       });
     }
 
->>>>>>> Stashed changes
     const updateData = {};
+
     if (status) updateData.status = status;
     if (role) updateData.role = role;
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
 
     const user = await prisma.user.update({
       where: { id: req.params.id },
       data: updateData,
-<<<<<<< Updated upstream
-      select: { id: true, name: true, email: true, role: true, status: true },
-=======
       select: {
         id: true,
         name: true,
@@ -1227,10 +1218,8 @@ exports.updateUserStatus = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "User updated successfully.",
-      data: updatedUser,
->>>>>>> Stashed changes
+      data: user,
     });
-    res.status(200).json({ success: true, data: user });
   } catch (error) {
     next(error);
   }
@@ -1241,15 +1230,14 @@ exports.updateUserStatus = async (req, res, next) => {
 // @access  Private/Admin
 exports.deleteAdminUser = async (req, res, next) => {
   try {
-<<<<<<< Updated upstream
-    await prisma.user.delete({ where: { id: req.params.id } });
-    res.status(200).json({ success: true, data: {} });
-=======
+    // Prevent admins from deleting themselves
     if (req.params.id === req.user?.id) {
-      return res
-        .status(403)
-        .json({ success: false, error: "Cannot delete your own account" });
+      return res.status(403).json({
+        success: false,
+        error: "Cannot delete your own account",
+      });
     }
+
     const existingUser = await prisma.user.findUnique({
       where: { id: req.params.id },
     });
@@ -1270,12 +1258,10 @@ exports.deleteAdminUser = async (req, res, next) => {
       message: "User deleted successfully.",
       data: {},
     });
->>>>>>> Stashed changes
   } catch (error) {
     next(error);
   }
 };
-
 // @desc    Get all courses (admin, including non-approved)
 // @route   GET /api/admin/courses
 // @access  Private/Admin
@@ -1291,14 +1277,9 @@ exports.getAdminCourses = async (req, res, next) => {
       category,
       level,
     } = req.query;
-<<<<<<< Updated upstream
 
-    const pageNumber = parseInt(page, 10);
-    const limitNumber = parseInt(limit, 10);
-=======
     const pageNumber = parseInt(page, 10) || 1;
     const limitNumber = parseInt(limit, 10) || 50;
->>>>>>> Stashed changes
     const skip = (pageNumber - 1) * limitNumber;
 
     const where = {};
@@ -1316,13 +1297,9 @@ exports.getAdminCourses = async (req, res, next) => {
     }
 
     const orderBy = {};
-<<<<<<< Updated upstream
     if (sortBy) {
       orderBy[sortBy] = sortOrder === "asc" ? "asc" : "desc";
     }
-=======
-    if (sortBy) orderBy[sortBy] = sortOrder === "asc" ? "asc" : "desc";
->>>>>>> Stashed changes
 
     const [courses, total] = await Promise.all([
       prisma.course.findMany({
@@ -1331,41 +1308,39 @@ exports.getAdminCourses = async (req, res, next) => {
         skip,
         take: limitNumber,
         include: {
-          instructor: { select: { id: true, name: true, email: true } },
-<<<<<<< Updated upstream
-          _count: { select: { enrollments: true } },
-=======
-          _count: { select: { enrollments: true, lessons: true } },
->>>>>>> Stashed changes
+          instructor: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          _count: {
+            select: {
+              enrollments: true,
+              lessons: true,
+            },
+          },
         },
       }),
       prisma.course.count({ where }),
     ]);
 
-<<<<<<< Updated upstream
-    res.status(200).json({
-      success: true,
-      count: courses.length,
-      data: courses,
-=======
-    // Compute revenue per course
-    const enriched = await Promise.all(
-      courses.map(async (c) => {
-        const revenue = (c._count.enrollments || 0) * (c.price || 0);
-        return {
-          ...c,
-          revenue,
-          students: c._count.enrollments,
-          lessons: c._count.lessons,
-        };
-      }),
-    );
+    const enriched = courses.map((course) => {
+      const revenue = (course._count.enrollments || 0) * (course.price || 0);
+
+      return {
+        ...course,
+        revenue,
+        students: course._count.enrollments,
+        lessons: course._count.lessons,
+      };
+    });
 
     res.status(200).json({
       success: true,
       count: enriched.length,
       data: enriched,
->>>>>>> Stashed changes
       meta: {
         total,
         page: pageNumber,
@@ -1383,12 +1358,6 @@ exports.getAdminCourses = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateCourseStatus = async (req, res, next) => {
   try {
-<<<<<<< Updated upstream
-    const { status } = req.body;
-    const course = await prisma.course.update({
-      where: { id: req.params.id },
-      data: { status },
-=======
     const allowed = [
       "status",
       "title",
@@ -1402,27 +1371,47 @@ exports.updateCourseStatus = async (req, res, next) => {
       "icon",
       "xp",
     ];
+
     const updateData = {};
+
     for (const key of allowed) {
-      if (req.body[key] !== undefined) updateData[key] = req.body[key];
+      if (req.body[key] !== undefined) {
+        updateData[key] = req.body[key];
+      }
     }
-    if (updateData.price !== undefined)
+
+    if (updateData.price !== undefined) {
       updateData.price = parseFloat(updateData.price) || 0;
+    }
+
     const existingCourse = await prisma.course.findUnique({
       where: { id: req.params.id },
     });
+
     if (!existingCourse) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Course not found" });
+      return res.status(404).json({
+        success: false,
+        error: "Course not found",
+      });
     }
+
     const course = await prisma.course.update({
       where: { id: req.params.id },
       data: updateData,
->>>>>>> Stashed changes
-      include: { instructor: { select: { id: true, name: true } } },
+      include: {
+        instructor: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
     });
-    res.status(200).json({ success: true, data: course });
+
+    res.status(200).json({
+      success: true,
+      data: course,
+    });
   } catch (error) {
     next(error);
   }
@@ -1433,19 +1422,25 @@ exports.updateCourseStatus = async (req, res, next) => {
 // @access  Private/Admin
 exports.deleteAdminCourse = async (req, res, next) => {
   try {
-<<<<<<< Updated upstream
-=======
     const existingCourse = await prisma.course.findUnique({
       where: { id: req.params.id },
     });
+
     if (!existingCourse) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Course not found" });
+      return res.status(404).json({
+        success: false,
+        error: "Course not found",
+      });
     }
->>>>>>> Stashed changes
-    await prisma.course.delete({ where: { id: req.params.id } });
-    res.status(200).json({ success: true, data: {} });
+
+    await prisma.course.delete({
+      where: { id: req.params.id },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: {},
+    });
   } catch (error) {
     next(error);
   }
@@ -1478,27 +1473,33 @@ exports.getPendingCertificates = async (req, res, next) => {
 // @access  Private/Admin
 exports.approveCertificate = async (req, res, next) => {
   try {
-<<<<<<< Updated upstream
-    const enrollment = await prisma.enrollment.update({
-=======
     const enrollment = await prisma.enrollment.findUnique({
       where: { id: req.params.id },
     });
-    if (!enrollment)
-      return res
-        .status(404)
-        .json({ success: false, error: "Enrollment not found" });
-    if (enrollment.progress < 100)
+
+    if (!enrollment) {
+      return res.status(404).json({
+        success: false,
+        error: "Enrollment not found",
+      });
+    }
+
+    if (enrollment.progress < 100) {
       return res.status(400).json({
         success: false,
         error: "Course not yet completed (progress < 100%)",
       });
-    const updated = await prisma.enrollment.update({
->>>>>>> Stashed changes
+    }
+
+    const updatedEnrollment = await prisma.enrollment.update({
       where: { id: req.params.id },
       data: { certificateApproved: true },
     });
-    res.status(200).json({ success: true, data: enrollment });
+
+    res.status(200).json({
+      success: true,
+      data: updatedEnrollment,
+    });
   } catch (error) {
     next(error);
   }
