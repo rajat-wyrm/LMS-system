@@ -1,8 +1,5 @@
-<<<<<<< Updated upstream
-const { prisma } = require("../config/db"); // Trigger restart for history endpoint
 
-=======
-const { prisma } = require("../config/db");
+const { prisma } = require("../config/db"); // Trigger restart for history endpoint
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const getTrend = (curr, prev) => {
@@ -22,7 +19,6 @@ const formatRevenue = (n) => {
 };
 
 // ─── Dashboard Stats ──────────────────────────────────────────────────────────
->>>>>>> Stashed changes
 // @desc    Get dashboard statistics for admin
 // @route   GET /api/admin/stats
 // @access  Private/Admin
@@ -39,7 +35,6 @@ exports.getDashboardStats = async (req, res, next) => {
 
     const now = new Date();
 
-<<<<<<< Updated upstream
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(now.getDate() - 7);
 
@@ -76,24 +71,8 @@ exports.getDashboardStats = async (req, res, next) => {
       where: { status: "pending" },
     });
 
-    // Calculate revenue
-    const allEnrollments = await prisma.enrollment.findMany({
-      include: { course: { select: { price: true } } },
-    });
-    const totalRevenue = allEnrollments.reduce(
-      (sum, enr) => sum + (enr.course?.price || 0),
-      0,
-    );
+   
 
-    // Revenue trend for last 12 months
-    const revenueMap = {};
-
-    for (let i = 11; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-
-      const key = `${date.getFullYear()}-${date.getMonth()}`;
-=======
     if (startDate && endDate) {
       currentStart = new Date(startDate);
       currentEnd = new Date(endDate);
@@ -134,7 +113,7 @@ exports.getDashboardStats = async (req, res, next) => {
       activeEnrollments,
       pendingUsers,
       pendingCourses,
-
+      recentUsers,
       periodEnrollments,
       allEnrollments,
     ] = await Promise.all([
@@ -195,31 +174,7 @@ exports.getDashboardStats = async (req, res, next) => {
       where: { ...prevDateFilter },
       include: { course: { select: { price: true } } },
     });
-    // //revenue trend
-    //     const revenueMap = {};
-    //     for (let i = 11; i >= 0; i--) {
-    //       const date = new Date();
-    //       date.setMonth(date.getMonth() - i);
-    //       const key = `${date.getFullYear()}-${date.getMonth()}`;
-
-    //       revenueMap[key] = {
-    //         month: date.toLocaleString("default", { month: "short" }),
-    //         revenue: 0,
-    //       };
-    //     }
-
-    //     allEnrollments.forEach((enrollment) => {
-    //       if (!enrollment.createdAt) return;
-    //       const date = new Date(enrollment.createdAt);
-    //       const key = `${date.getFullYear()}-${date.getMonth()}`;
-
-    //       if (revenueMap[key]) {
-    //         revenueMap[key].revenue += enrollment.course?.price || 0;
-    //       }
-    //     });
-
-    //     const revenueTrend = Object.values(revenueMap);
-
+    
     // Monthly revenue (last 12 months)
     const revenueMap = {};
 
@@ -237,7 +192,6 @@ exports.getDashboardStats = async (req, res, next) => {
       );
 
       const key = `${monthDate.getFullYear()}-${monthDate.getMonth()}`;
->>>>>>> Stashed changes
 
       revenueMap[key] = {
         month: monthDate.toLocaleString("default", { month: "short" }),
@@ -275,8 +229,7 @@ exports.getDashboardStats = async (req, res, next) => {
         createdAt: true,
       },
     });
-<<<<<<< Updated upstream
-=======
+
     const prevRevenue = prevEnrollments.reduce(
       (s, e) => s + (e.course?.price || 0),
       0,
@@ -286,13 +239,9 @@ exports.getDashboardStats = async (req, res, next) => {
     const teachersTrend = getTrend(teachersCount, prevTeachersCount);
     const coursesTrend = getTrend(coursesCount, prevCoursesCount);
     const revenueTrendStats = getTrend(periodRevenue, prevRevenue);
->>>>>>> Stashed changes
-
     res.status(200).json({
       success: true,
       data: {
-<<<<<<< Updated upstream
-=======
         studentsCount,
         studentsTrend: studentsTrend.trend,
         studentsTrendUp: studentsTrend.trendUp,
@@ -305,7 +254,6 @@ exports.getDashboardStats = async (req, res, next) => {
         revenueCount: periodRevenue,
         revenueTrend: revenueTrendStats.trend,
         revenueTrendUp: revenueTrendStats.trendUp,
->>>>>>> Stashed changes
         totalUsers,
         totalStudents,
         totalInstructors,
@@ -321,14 +269,12 @@ exports.getDashboardStats = async (req, res, next) => {
         pendingUsers,
         pendingCourses,
         recentUsers,
-<<<<<<< Updated upstream
-=======
-      },
+      }
     });
   } catch (error) {
     next(error);
   }
-};
+  }
 
 // ─── Instructors (Teachers) ───────────────────────────────────────────────────
 // @desc    Get all instructors with stats
@@ -790,7 +736,6 @@ exports.getStudentGrowth = async (req, res, next) => {
         newStudentsThisMonth,
         growthRate,
         growthUp,
->>>>>>> Stashed changes
       },
     });
   } catch (error) {
