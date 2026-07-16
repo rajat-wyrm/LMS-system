@@ -54,10 +54,14 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
   });
 
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [errors, setErrors] = useState({});
   const [teachers, setTeachers] = useState(DEFAULT_TEACHERS);
   const [searchTeacherQuery, setSearchTeacherQuery] = useState('');
   const [isTeacherDropdownOpen, setIsTeacherDropdownOpen] = useState(false);
   const teacherDropdownRef = useRef(null);
+  const titleRef = useRef(null);
+  const shortDescRef = useRef(null);
+  
 
   // Load actual teachers from local storage if available
   useEffect(() => {
@@ -155,19 +159,27 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
 
   // Auto-generate Slug from Title
   const handleTitleChange = (e) => {
-    const titleVal = e.target.value;
-    const generatedSlug = titleVal
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, '') // remove invalid chars
-      .replace(/\s+/g, '-'); // collapse spaces to hyphens
+  const titleVal = e.target.value;
 
-    setForm(prev => ({
+  if (errors.title) {
+    setErrors(prev => ({
       ...prev,
-      title: titleVal,
-      slug: generatedSlug
+      title: ""
     }));
-  };
+  }
+
+  const generatedSlug = titleVal
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-');
+
+  setForm(prev => ({
+    ...prev,
+    title: titleVal,
+    slug: generatedSlug
+  }));
+};
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -181,10 +193,30 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
   };
 
   const handleSave = (statusOverride) => {
-    if (!form.title || !form.shortDesc) {
-      alert("Please fill in all required fields marked with *");
-      return;
-    }
+
+  const newErrors = {};
+
+  if (!form.title.trim()) {
+    newErrors.title = "Course Name is required";
+  }
+
+  if (!form.shortDesc.trim()) {
+    newErrors.shortDesc = "Short Description is required";
+  }
+
+  if (Object.keys(newErrors).length > 0) {
+  setErrors(newErrors);
+
+  if (newErrors.title) {
+    titleRef.current?.focus();
+  } else if (newErrors.shortDesc) {
+    shortDescRef.current?.focus();
+  }
+
+  return;
+}
+
+  setErrors({});
 
     const submissionStatus = statusOverride || form.status;
 
@@ -246,8 +278,19 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
     onClose();
   };
 
-  const set = (key) => (e) => setForm(prev => ({ ...prev, [key]: e.target.value }));
+const set = (key) => (e) => {
+  if (errors[key]) {
+    setErrors(prev => ({
+      ...prev,
+      [key]: ""
+    }));
+  }
 
+  setForm(prev => ({
+    ...prev,
+    [key]: e.target.value
+  }));
+};
   // Filtered teachers list based on search
   const filteredTeachers = teachers.filter(t => 
     t.name.toLowerCase().includes(searchTeacherQuery.toLowerCase())
@@ -312,6 +355,16 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
 
             {/* ── SCROLLABLE FORM BODY ── */}
             <div className="flex-1 overflow-y-auto px-8 py-7 space-y-7 custom-scrollbar relative z-10">
+
+            {Object.keys(errors).length > 0 && (
+              <div
+                role="alert"
+                className="mb-4 rounded-xl border border-red-500 bg-red-500/10 p-4 text-red-400"
+              >
+               <strong>Validation Error</strong>
+               <p>Please fill in all required fields before submitting.</p>
+              </div>
+            )}
               
               {/* Animation Group Wrapper */}
               <motion.div
@@ -367,13 +420,19 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                     <div className="relative">
                       <MdTitle className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
                       <input
-                        type="text"
-                        required
-                        value={form.title}
-                        onChange={handleTitleChange}
-                        placeholder="e.g. Master Next.js and Server Actions"
-                        className={`${inputCls} pl-11`}
+                         ref={titleRef}
+                         type="text"
+                         required
+                         value={form.title}
+                         onChange={handleTitleChange}
+                         placeholder="e.g. Master Next.js and Server Actions"
+                         className={`${inputCls} pl-11 ${errors.title ? "border-red-500" : ""}`}
                       />
+                      {errors.title && (
+                       <p className="text-red-500 text-xs mt-1">
+                          {errors.title}
+                            </p>
+                                )}
                     </div>
                   </div>
 
@@ -398,13 +457,18 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                     <div className="relative">
                       <MdDescription className="absolute left-3.5 top-5 text-gray-500" size={18} />
                       <textarea
+                        ref={shortDescRef}
                         required
                         value={form.shortDesc}
                         onChange={set('shortDesc')}
-                        placeholder="Brief overview summarizing the syllabus and core learning target (max 150 chars)."
-                        maxLength={150}
-                        className={`${textareaCls} pl-11 pt-4 h-20`}
-                      />
+                        placeholder="Brief overview summarizing the syllabus..."
+                        className={`${textareaCls} pl-11 pt-4 h-20 ${errors.shortDesc ? "border-red-500" : ""}`}
+                    />
+                      {errors.shortDesc && (
+                         <p className="text-red-500 text-xs mt-1">
+                          {errors.shortDesc}
+                       </p>
+                      )}
                     </div>
                   </div>
 
