@@ -4,8 +4,8 @@ import { useTheme } from '../../context/ThemeProvider';
 import GlobalSearch from './navbar/GlobalSearch';
 import DateRangePicker from './navbar/DateRangePicker';
 import ProfileDropdown from './navbar/ProfileDropdown';
-
-const Navbar = () => {
+import { LuMenu } from 'react-icons/lu';
+const Navbar = ({ onMenuClick }) => {
   const { resolvedTheme, toggleTheme } = useTheme();
   const isLight = resolvedTheme === 'light';
   const [toast, setToast] = useState(null);
@@ -18,14 +18,26 @@ const Navbar = () => {
   return (
     <>
       <header className="admin-navbar h-16 border-b flex items-center justify-between px-6 sticky top-0 z-40 bg-[var(--admin-nav-bg)] border-[var(--admin-nav-border)] backdrop-blur-lg">
-        <GlobalSearch />
+
+        <div className="flex items-center gap-3">
+  <button
+    type="button"
+    onClick={onMenuClick}
+    className="md:hidden w-11 h-11 flex items-center justify-center rounded-lg hover:bg-[var(--admin-surface-hover)]"
+    aria-label="Open menu"
+  >
+    <LuMenu size={22} />
+  </button>
+  
+  <GlobalSearch />
+</div>
 
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={toggleTheme}
             title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-            className="w-8 h-8 rounded-lg text-[var(--admin-text-muted)] hover:text-amber-500 hover:bg-[var(--admin-surface-hover)] active:scale-95 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2 transition-all flex items-center justify-center"
+            className="w-8 h-8 rounded-lg text-[var(--admin-text-muted)] hover:text-amber-500 hover:bg-[var(--admin-surface-hover)] active:scale-95 focus:outline-none focus:ring-1 focus:ring-[#7C3AED]/40 transition-all flex items-center justify-center"
           >
             {isLight ? <MdNightsStay size={18} /> : <MdWbSunny size={18} />}
           </button>
