@@ -148,34 +148,60 @@ exports.getMe = async (req, res, next) => {
 exports.forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
+
     if (!email) {
-      return res.status(400).json({ success: false, error: 'Please provide an email' });
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide an email',
+      });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
     if (!user) {
       // Return 200 even if user not found to prevent email enumeration
-      return res.status(200).json({ success: true, message: 'If that email is registered, a reset link has been sent.' });
+      return res.status(200).json({
+        success: true,
+        message: 'If that email is registered, a reset link has been sent.',
+      });
     }
 
     // Generate token valid for 15 minutes, signed with user's current password
     const secret = process.env.JWT_SECRET + user.password;
-    const token = jwt.sign({ email: user.email, id: user.id }, secret, { expiresIn: '15m' });
 
-    const resetLink = `${process.env.CLIENT_URL || 'http://localhost:8081'}/reset-password/${user.id}/${token}`;
-    
+    const token = jwt.sign(
+      { email: user.email, id: user.id },
+      secret,
+      { expiresIn: '15m' }
+    );
+
+    const resetLink = `${
+      process.env.CLIENT_URL || 'http://localhost:8081'
+    }/reset-password/${user.id}/${token}`;
+
     // Dispatch async email job
     await addEmailJob({
       to: user.email,
       subject: 'Password Reset Request - LMS',
-      body: `You requested a password reset. Click the link below to reset it:\n\n${resetLink}\n\nThis link is valid for 15 minutes.`
+      body: `You requested a password reset. Click the link below to reset it:\n\n${resetLink}\n\nThis link is valid for 15 minutes.`,
     });
 
-    res.status(200).json({ 
-      success: true, 
+    const response = {
+      success: true,
       message: 'If that email is registered, a reset link has been sent.',
-      resetLink // Keeping for testing, though in production you'd remove this
-    });
+    };
+
+    // Only expose resetLink in local development when explicitly enabled
+    if (
+      process.env.NODE_ENV === 'development' &&
+      process.env.DEBUG_RESET_LINK === 'true'
+    ) {
+      response.resetLink = resetLink;
+    }
+
+    return res.status(200).json(response);
   } catch (error) {
     next(error);
   }

@@ -4,12 +4,12 @@
   "main": "server.js",
   "scripts": {
     "postinstall": "prisma generate",
+    "test": "jest --runInBand",
     "start": "node server.js",
     "dev": "node server.js",
     "dev:watch": "nodemon server.js",
     "prisma:generate": "prisma generate",
-    "pdf:phase2": "node gen_pdf.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pdf:phase2": "node gen_pdf.js"
   },
   "keywords": [],
   "author": "",
@@ -44,8 +44,10 @@
   },
   "devDependencies": {
     "autocannon": "^8.0.0",
+    "jest": "^30.4.2",
     "md-to-pdf": "^5.2.5",
     "nodemon": "^3.1.14",
-    "prisma": "^7.8.0"
+    "prisma": "^7.8.0",
+    "supertest": "^7.2.2"
   }
 }
