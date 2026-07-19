@@ -113,7 +113,7 @@ exports.getDashboardStats = async (req, res, next) => {
       totalUsers, totalStudents, totalInstructors, totalAdmins,
       totalCourses, totalEnrollments, activeEnrollments,
       pendingUsers, pendingCourses,
-      recentUsers,
+     
       periodEnrollments, allEnrollments
     ] = await Promise.all([
       prisma.user.count({ where: { role: 'user', ...dateFilter } }),
@@ -178,12 +178,26 @@ exports.getDashboardStats = async (req, res, next) => {
     });
 
     // const revenueTrend = Object.values(revenueMap);
+
+    // Get recent 5 users for activity feed.
+    const recentUsers = await prisma.user.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
+    });
     const prevRevenue = prevEnrollments.reduce((s, e) => s + (e.course?.price || 0), 0);
 
     const studentsTrend = getTrend(studentsCount, prevStudentsCount);
     const teachersTrend = getTrend(teachersCount, prevTeachersCount);
     const coursesTrend = getTrend(coursesCount, prevCoursesCount);
-    const revenueTrendSummary = getTrend(periodRevenue, prevRevenue);
+    const revenueTrend = getTrend(periodRevenue, prevRevenue);
 
     res.status(200).json({
       success: true,
@@ -208,7 +222,7 @@ exports.getDashboardStats = async (req, res, next) => {
         totalEnrollments,
         activeEnrollments,
         totalRevenue,
-        revenueTrendSummary,
+        revenueTrend,
         pendingUsers,
         pendingCourses,
         recentUsers
@@ -915,6 +929,15 @@ exports.updateCourseStatus = async (req, res, next) => {
       if (req.body[key] !== undefined) updateData[key] = req.body[key];
     }
     if (updateData.price !== undefined) updateData.price = parseFloat(updateData.price) || 0;
+
+    const allowedStatuses = ['pending', 'approved', 'rejected'];
+    if (updateData.status && !allowedStatuses.includes(updateData.status)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid status. Allowed values are: pending, approved, rejected.',
+      });
+    }
+
     const existingCourse = await prisma.course.findUnique({ where: { id: req.params.id } });
     if (!existingCourse) {
       return res.status(404).json({ success: false, error: 'Course not found' });

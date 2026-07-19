@@ -10,6 +10,7 @@ const setupSwagger = require('./docs/swagger');
 const { RedisStore } = require('rate-limit-redis');
 const redisClient = require('./services/redis.service');
 const { prisma } = require('./config/db');
+const requestLogger = require('./middlewares/requestLogger');
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger);
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
@@ -77,6 +79,7 @@ const userRoutesV1 = require('./routes/v1/users.routes');
 const adminRoutesV1 = require('./routes/v1/admin.routes');
 const profileRoutesV1 = require('./routes/v1/profile.routes');
 const uploadRoutesV1 = require('./routes/v1/upload.routes');
+const analyticsRoutes = require('./analytics/analytics.routes');
 
 // Mount v1 Routes
 app.use('/api/v1/auth', authRoutesV1);
@@ -86,6 +89,7 @@ app.use('/api/v1/users', userRoutesV1);
 app.use('/api/v1/admin', adminRoutesV1);
 app.use('/api/v1/profile', profileRoutesV1);
 app.use('/api/v1/upload', uploadRoutesV1);
+app.use('/api/v1/analytics', analyticsRoutes);
 
 // Maintain backward compatibility by aliasing /api to v1 routes
 app.use('/api/auth', authRoutesV1);
@@ -95,6 +99,7 @@ app.use('/api/users', userRoutesV1);
 app.use('/api/admin', adminRoutesV1);
 app.use('/api/profile', profileRoutesV1);
 app.use('/api/upload', uploadRoutesV1);
+app.use('/api/analytics', analyticsRoutes);
 
 // Default Route
 app.get('/', (req, res) => {
@@ -116,6 +121,12 @@ app.get('/health', async (req, res) => {
     logger.error({ err: error }, 'Health check failed');
     res.status(503).json({ status: 'error', details: error.message });
   }
+});
+
+// Centralized 404 handler
+app.use((req, res, next) => {
+  const AppError = require('./utils/AppError');
+  next(new AppError(`Not Found - ${req.originalUrl}`, 404, 'RESOURCE_NOT_FOUND'));
 });
 
 // Global Error Handler

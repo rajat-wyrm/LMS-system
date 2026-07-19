@@ -1,5 +1,12 @@
+import { ThemeProvider } from "@/context/ThemeContext";
 import { AppRouter } from "@/routes/AppRouter";
 
-export default function App() {
-  return <AppRouter />;
-}
+const App = () => {
+  return (
+    <ThemeProvider>
+      <AppRouter />
+    </ThemeProvider>
+  );
+};
+
+export default App;

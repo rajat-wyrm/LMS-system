@@ -4,11 +4,11 @@
   "main": "server.js",
   "scripts": {
     "prisma:generate": "prisma generate",
-    "postinstall": "npm run prisma:generate",
-    "prestart": "npm run prisma:generate",
-    "predev": "npm run prisma:generate",
+    "postinstall": "prisma generate",
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "node server.js",
+    "dev:watch": "nodemon server.js",
+    "pdf:phase2": "node gen_pdf.js",
     "test": "node --test test/validation.test.js"
   },
   "keywords": [],

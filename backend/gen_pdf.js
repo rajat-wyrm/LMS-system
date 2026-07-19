@@ -1,19 +1,19 @@
 const { mdToPdf } = require("md-to-pdf");
 
-async function generatePdf() {
+async function main() {
   const result = await mdToPdf(
     { path: "Phase_2_Report.md" },
     { dest: "Phase_2_Report.pdf" }
   );
 
-  if (!result?.filename) {
-    throw new Error("PDF generation failed.");
+  if (!result) {
+    throw new Error("Failed to generate Phase_2_Report.pdf");
   }
 
   console.log("PDF generated successfully.");
 }
 
-generatePdf().catch((error) => {
-  console.error(error.message);
+main().catch((error) => {
+  console.error(error);
   process.exit(1);
 });

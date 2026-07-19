@@ -38,7 +38,7 @@ const options = {
     ],
   },
   // Look for swagger JSDoc comments in these files
-  apis: ['./src/routes/v1/*.js', './src/controllers/*.js'],
+  apis: ['./src/routes/v1/*.js', './src/controllers/*.js', './src/analytics/*.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
