@@ -18,6 +18,64 @@ const formatRevenue = (n) => {
 };
 
 // ─── Dashboard Stats ──────────────────────────────────────────────────────────
+const getStudentGrowthSnapshot = async (months = 6) => {
+  const rangeStart = new Date();
+  rangeStart.setMonth(rangeStart.getMonth() - (months - 1));
+  rangeStart.setDate(1);
+  rangeStart.setHours(0, 0, 0, 0);
+
+  const recentStudents = await prisma.user.findMany({
+    where: {
+      role: 'user',
+      createdAt: { gte: rangeStart },
+    },
+    select: { createdAt: true },
+  });
+
+  const studentGrowthMap = {};
+  const cursor = new Date(rangeStart);
+
+  for (let i = 0; i < months; i++) {
+    const key = `${cursor.getFullYear()}-${cursor.getMonth()}`;
+    studentGrowthMap[key] = {
+      month: cursor.toLocaleString('default', { month: 'short' }),
+      students: 0,
+    };
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  recentStudents.forEach((student) => {
+    if (!student.createdAt) return;
+    const date = new Date(student.createdAt);
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+    if (studentGrowthMap[key]) {
+      studentGrowthMap[key].students += 1;
+    }
+  });
+
+  const chartData = Object.values(studentGrowthMap);
+  const newStudentsThisMonth = chartData[chartData.length - 1]?.students || 0;
+  const previousMonthStudents = chartData[chartData.length - 2]?.students || 0;
+
+  let growthRate = '0.0%';
+  let growthUp = true;
+
+  if (previousMonthStudents > 0) {
+    const growth = ((newStudentsThisMonth - previousMonthStudents) / previousMonthStudents) * 100;
+    growthRate = `${Math.abs(growth).toFixed(1)}%`;
+    growthUp = growth >= 0;
+  } else if (newStudentsThisMonth > 0) {
+    growthRate = '100.0%';
+  }
+
+  return {
+    chartData,
+    newStudentsThisMonth,
+    growthRate,
+    growthUp,
+  };
+};
+
 // @desc    Get dashboard statistics for admin
 // @route   GET /api/admin/stats
 // @access  Private/Admin
@@ -78,12 +136,10 @@ exports.getDashboardStats = async (req, res, next) => {
         orderBy: { createdAt: 'desc' },
         select: { id: true, name: true, email: true, role: true, status: true, createdAt: true }
       }),
-      // Revenue for current period
       prisma.enrollment.findMany({
         where: { ...dateFilter },
         include: { course: { select: { price: true } } }
       }),
-      // Total revenue (all time)
       prisma.enrollment.findMany({
         include: { course: { select: { price: true } } }
       })
@@ -123,8 +179,7 @@ exports.getDashboardStats = async (req, res, next) => {
 
     // const revenueTrend = Object.values(revenueMap);
 
-
-    // Get recent 5 users for activity feed (Kept from your changes)
+    // Get recent 5 users for activity feed.
     const recentUsers = await prisma.user.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
@@ -157,8 +212,8 @@ exports.getDashboardStats = async (req, res, next) => {
         coursesTrend: coursesTrend.trend,
         coursesTrendUp: coursesTrend.trendUp,
         revenueCount: periodRevenue,
-        revenueTrend: revenueTrend.trend,
-        revenueTrendUp: revenueTrend.trendUp,
+        revenueTrend: revenueTrendSummary.trend,
+        revenueTrendUp: revenueTrendSummary.trendUp,
         totalUsers,
         totalStudents,
         totalInstructors,
@@ -478,92 +533,12 @@ exports.getRecentActivity = async (req, res, next) => {
 // @access  Private/Admin
 exports.getStudentGrowth = async (req, res, next) => {
   try {
-    
-    //student growth analytics
-    const twelveMonthsAgo = new Date();
-    twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 11);
-    twelveMonthsAgo.setDate(1);
-    twelveMonthsAgo.setHours(0, 0, 0, 0);
+    const growthSnapshot = await getStudentGrowthSnapshot(6);
 
-
-
-    // Fetch registered students created in the target period (excluding admins/instructors)
-    const recentStudents = await prisma.user.findMany({
-      where: {
-        role: "user", // Matches your totalStudents filter definition
-        createdAt: { gte: twelveMonthsAgo },
-      },
-      select: { createdAt: true },
-    });
-
-   
-
-
-
-
-    // Generate chronological 12-month baseline map with initial 0 count
-    const studentGrowthMap = {};
-    const cursor = new Date(twelveMonthsAgo);
-    for (let i = 0; i < 12; i++) {
-      const key = `${cursor.getFullYear()}-${cursor.getMonth()}`;
-      studentGrowthMap[key] = {
-        month: cursor.toLocaleString("default", { month: "short", 
-
-        }),
-        students: 0,
-      };
-      cursor.setMonth(cursor.getMonth() + 1);
-    }
-
-
-
-
-    // Populate data numbers into map 
-    recentStudents.forEach((student) => {
-      if (!student.createdAt) return;
-      const date = new Date(student.createdAt);
-      const key = `${date.getFullYear()}-${date.getMonth()}`;
-      if (studentGrowthMap[key]) {
-        studentGrowthMap[key].students ++;
-      }
-    });
-
-
-
-    const chartData = Object.values(studentGrowthMap);
-
-     const newStudentsThisMonth =
-      chartData[chartData.length - 1]?.students || 0;
-
-    const previousMonthStudents =
-      chartData[chartData.length - 2]?.students || 0;
-
-    let growthRate = "0.0%";
-    let growthUp = true;
-
-    if (previousMonthStudents > 0) {
-      const growth =
-        ((newStudentsThisMonth - previousMonthStudents) /
-          previousMonthStudents) *
-        100;
-
-      growthRate = `${Math.abs(growth).toFixed(1)}%`;
-      growthUp = growth >= 0;
-    } else if (newStudentsThisMonth > 0) {
-      growthRate = "100.0%";
-      growthUp = true;
-    }
-
-     res.status(200).json({
+    res.status(200).json({
       success: true,
-      data: {
-        chartData,
-        newStudentsThisMonth,
-        growthRate,
-        growthUp,
-      },
+      data: growthSnapshot,
     });
-    
   } catch (error) {
     next(error);
   }

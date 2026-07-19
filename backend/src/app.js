@@ -109,11 +109,14 @@ app.get('/', (req, res) => {
 // Robust Health Check
 app.get('/health', async (req, res) => {
   try {
-    // Check DB
     await prisma.$queryRaw`SELECT 1`;
-    // Check Redis
-    // await redisClient.ping();
-    res.status(200).json({ status: 'ok', db: 'ok', redis: 'ok' });
+    const redisStatus = await redisClient.ping();
+
+    res.status(200).json({
+      status: 'ok',
+      db: 'ok',
+      redis: redisStatus === 'PONG' ? 'ok' : redisStatus,
+    });
   } catch (error) {
     logger.error({ err: error }, 'Health check failed');
     res.status(503).json({ status: 'error', details: error.message });

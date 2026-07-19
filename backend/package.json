@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
+    "prisma:generate": "prisma generate",
     "postinstall": "prisma generate",
     "start": "node server.js",
     "dev": "node server.js",
     "dev:watch": "nodemon server.js",
-    "prisma:generate": "prisma generate",
     "pdf:phase2": "node gen_pdf.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test test/validation.test.js"
   },
   "keywords": [],
   "author": "",
