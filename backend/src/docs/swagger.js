@@ -1,6 +1,9 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
+const port = process.env.PORT || 5001;
+const apiBaseUrl = process.env.API_BASE_URL || `http://localhost:${port}`;
+
 const options = {
   definition: {
     openapi: '3.0.0',
@@ -11,11 +14,11 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000/api/v1',
+        url: `${apiBaseUrl}/api/v1`,
         description: 'Development server (v1)',
       },
       {
-        url: 'http://localhost:5000/api',
+        url: `${apiBaseUrl}/api`,
         description: 'Development server (Legacy)',
       }
     ],
