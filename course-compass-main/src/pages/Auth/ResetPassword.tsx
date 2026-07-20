@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Lock, Eye, EyeOff, CheckCircle2, Sparkles } from "lucide-react";
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 
 const ResetPassword = () => {
   const { id, token } = useParams<{ id: string; token: string }>();

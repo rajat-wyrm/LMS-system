@@ -7,7 +7,7 @@ const { connectDB, prisma } = require('./src/config/db');
 const logger = require('./src/utils/logger');
 const redisClient = require('./src/services/redis.service');
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 let server;
 
 connectDB().then(() => {

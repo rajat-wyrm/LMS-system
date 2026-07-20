@@ -141,6 +141,11 @@ const Courses = () => {
   };
 
   const hasFilters = Boolean(searchQuery || categoryFilter || levelFilter);
+  const handleClearFilters = () => {
+  setSearchQuery('');
+  setCategoryFilter('');
+  setLevelFilter('');
+};
 
   return (
     <div className="admin-page space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 -m-4 md:-m-6 border border-[var(--admin-border)] shadow-[var(--admin-shadow-card)] bg-[var(--admin-page-panel)]">
@@ -191,6 +196,7 @@ const Courses = () => {
         }}
         onDelete={handleDelete}
         hasFilters={hasFilters}
+        onClearFilters={handleClearFilters}
       />
 
       <CourseDrawer

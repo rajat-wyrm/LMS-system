@@ -18,6 +18,64 @@ const formatRevenue = (n) => {
 };
 
 // ─── Dashboard Stats ──────────────────────────────────────────────────────────
+const getStudentGrowthSnapshot = async (months = 6) => {
+  const rangeStart = new Date();
+  rangeStart.setMonth(rangeStart.getMonth() - (months - 1));
+  rangeStart.setDate(1);
+  rangeStart.setHours(0, 0, 0, 0);
+
+  const recentStudents = await prisma.user.findMany({
+    where: {
+      role: 'user',
+      createdAt: { gte: rangeStart },
+    },
+    select: { createdAt: true },
+  });
+
+  const studentGrowthMap = {};
+  const cursor = new Date(rangeStart);
+
+  for (let i = 0; i < months; i++) {
+    const key = `${cursor.getFullYear()}-${cursor.getMonth()}`;
+    studentGrowthMap[key] = {
+      month: cursor.toLocaleString('default', { month: 'short' }),
+      students: 0,
+    };
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  recentStudents.forEach((student) => {
+    if (!student.createdAt) return;
+    const date = new Date(student.createdAt);
+    const key = `${date.getFullYear()}-${date.getMonth()}`;
+    if (studentGrowthMap[key]) {
+      studentGrowthMap[key].students += 1;
+    }
+  });
+
+  const chartData = Object.values(studentGrowthMap);
+  const newStudentsThisMonth = chartData[chartData.length - 1]?.students || 0;
+  const previousMonthStudents = chartData[chartData.length - 2]?.students || 0;
+
+  let growthRate = '0.0%';
+  let growthUp = true;
+
+  if (previousMonthStudents > 0) {
+    const growth = ((newStudentsThisMonth - previousMonthStudents) / previousMonthStudents) * 100;
+    growthRate = `${Math.abs(growth).toFixed(1)}%`;
+    growthUp = growth >= 0;
+  } else if (newStudentsThisMonth > 0) {
+    growthRate = '100.0%';
+  }
+
+  return {
+    chartData,
+    newStudentsThisMonth,
+    growthRate,
+    growthUp,
+  };
+};
+
 // @desc    Get dashboard statistics for admin
 // @route   GET /api/admin/stats
 // @access  Private/Admin
@@ -55,7 +113,7 @@ exports.getDashboardStats = async (req, res, next) => {
       totalUsers, totalStudents, totalInstructors, totalAdmins,
       totalCourses, totalEnrollments, activeEnrollments,
       pendingUsers, pendingCourses,
-      recentUsers,
+     
       periodEnrollments, allEnrollments
     ] = await Promise.all([
       prisma.user.count({ where: { role: 'user', ...dateFilter } }),
@@ -78,24 +136,61 @@ exports.getDashboardStats = async (req, res, next) => {
         orderBy: { createdAt: 'desc' },
         select: { id: true, name: true, email: true, role: true, status: true, createdAt: true }
       }),
-      // Revenue for current period
       prisma.enrollment.findMany({
         where: { ...dateFilter },
         include: { course: { select: { price: true } } }
       }),
-      // Total revenue (all time)
       prisma.enrollment.findMany({
         include: { course: { select: { price: true } } }
       })
     ]);
 
+// Calculate revenue metrics (Kept from their incoming updates)
     const periodRevenue = periodEnrollments.reduce((s, e) => s + (e.course?.price || 0), 0);
     const totalRevenue = allEnrollments.reduce((s, e) => s + (e.course?.price || 0), 0);
 
-    // For previous period revenue, query separately
+    // For previous period revenue, query separately (Kept from their incoming updates)
     const prevEnrollments = await prisma.enrollment.findMany({
       where: { ...prevDateFilter },
       include: { course: { select: { price: true } } }
+    });
+//revenue trend
+    const revenueMap = {};
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+
+      revenueMap[key] = {
+        month: date.toLocaleString("default", { month: "short" }),
+        revenue: 0,
+      };
+    }
+
+    allEnrollments.forEach((enrollment) => {
+      if (!enrollment.createdAt) return;
+      const date = new Date(enrollment.createdAt);
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+
+      if (revenueMap[key]) {
+        revenueMap[key].revenue += enrollment.course?.price || 0;
+      }
+    });
+
+    // const revenueTrend = Object.values(revenueMap);
+
+    // Get recent 5 users for activity feed.
+    const recentUsers = await prisma.user.findMany({
+      take: 5,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        createdAt: true,
+      },
     });
     const prevRevenue = prevEnrollments.reduce((s, e) => s + (e.course?.price || 0), 0);
 
@@ -117,8 +212,8 @@ exports.getDashboardStats = async (req, res, next) => {
         coursesTrend: coursesTrend.trend,
         coursesTrendUp: coursesTrend.trendUp,
         revenueCount: periodRevenue,
-        revenueTrend: revenueTrend.trend,
-        revenueTrendUp: revenueTrend.trendUp,
+        revenueTrend: revenueTrendSummary.trend,
+        revenueTrendUp: revenueTrendSummary.trendUp,
         totalUsers,
         totalStudents,
         totalInstructors,
@@ -127,6 +222,7 @@ exports.getDashboardStats = async (req, res, next) => {
         totalEnrollments,
         activeEnrollments,
         totalRevenue,
+        revenueTrend,
         pendingUsers,
         pendingCourses,
         recentUsers
@@ -437,47 +533,11 @@ exports.getRecentActivity = async (req, res, next) => {
 // @access  Private/Admin
 exports.getStudentGrowth = async (req, res, next) => {
   try {
-    const now = new Date();
-    const months = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push(d);
-    }
-
-    const monthlyData = await Promise.all(
-      months.map(async (monthStart) => {
-        const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1);
-        const count = await prisma.user.count({
-          where: { role: 'user', createdAt: { gte: monthStart, lt: monthEnd } }
-        });
-        const monthName = monthStart.toLocaleString('en-US', { month: 'short' });
-        return { month: monthName, students: count };
-      })
-    );
-
-    // Cumulative total
-    let cumulative = await prisma.user.count({
-      where: { role: 'user', createdAt: { lt: months[0] } }
-    });
-    const cumulativeData = monthlyData.map(d => {
-      cumulative += d.students;
-      return { month: d.month, students: cumulative, newStudents: d.students };
-    });
-
-    // Compute growth rate
-    const latest = cumulativeData[cumulativeData.length - 1]?.students || 0;
-    const prev = cumulativeData[cumulativeData.length - 2]?.students || 0;
-    const growth = prev > 0 ? (((latest - prev) / prev) * 100).toFixed(1) : '0.0';
-    const newThisMonth = monthlyData[monthlyData.length - 1]?.students || 0;
+    const growthSnapshot = await getStudentGrowthSnapshot(6);
 
     res.status(200).json({
       success: true,
-      data: {
-        chartData: cumulativeData,
-        newStudentsThisMonth: newThisMonth,
-        growthRate: `${growth}%`,
-        growthUp: parseFloat(growth) >= 0
-      }
+      data: growthSnapshot,
     });
   } catch (error) {
     next(error);
@@ -869,6 +929,15 @@ exports.updateCourseStatus = async (req, res, next) => {
       if (req.body[key] !== undefined) updateData[key] = req.body[key];
     }
     if (updateData.price !== undefined) updateData.price = parseFloat(updateData.price) || 0;
+
+    const allowedStatuses = ['pending', 'approved', 'rejected'];
+    if (updateData.status && !allowedStatuses.includes(updateData.status)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid status. Allowed values are: pending, approved, rejected.',
+      });
+    }
+
     const existingCourse = await prisma.course.findUnique({ where: { id: req.params.id } });
     if (!existingCourse) {
       return res.status(404).json({ success: false, error: 'Course not found' });

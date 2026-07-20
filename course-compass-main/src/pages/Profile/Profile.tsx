@@ -4,6 +4,8 @@ import { profileApi } from "@/api/profile.api";
 import { User, Lock, Save, Mail, Edit3, Camera, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
+const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://localhost:5001/api").replace(/\/api$/, "");
+
 const Profile = () => {
   const { user, updateUser } = useAuth();
   
@@ -139,7 +141,7 @@ const Profile = () => {
                 <div className="relative group">
                   <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl uppercase border-2 border-primary/20 overflow-hidden">
                     {user.avatar ? (
-                      <img src={`http://localhost:5000${user.avatar}`} alt={user.name} className="w-full h-full object-cover" />
+                      <img src={`${API_ORIGIN}${user.avatar}`} alt={user.name} className="w-full h-full object-cover" />
                     ) : (
                       user.name.charAt(0)
                     )}

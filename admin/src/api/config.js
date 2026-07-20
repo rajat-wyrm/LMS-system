@@ -1,5 +1,8 @@
 // Centralized API base URL and fetch helper for admin frontend
-export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  import.meta.env.VITE_API_BASE_URL ||
+  'http://localhost:5001/api';
 
 export function getAuthHeaders() {
   const token = localStorage.getItem('admin_token');
