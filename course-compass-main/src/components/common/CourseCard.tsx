@@ -1,7 +1,17 @@
-import { Link } from "react-router-dom";
-import { Star, Users, School, TrendingUp, Clock, BookOpen } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Star, Users, School, TrendingUp, Clock, BookOpen, MoreVertical, Edit, Copy } from "lucide-react";
 import { useState } from "react";
-import { getCourseImageUrl } from "@/utils/courseImage";
+import { useAuth } from "@/store/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { courseApi } from "@/api/course.api";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const FALLBACK = "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&q=80";
 
 const levelStyles: Record<string, { bg: string; border: string; color: string }> = {
   Beginner: { bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.35)', color: '#10B981' },
@@ -21,13 +31,44 @@ const Stat = ({ icon: Icon, label, value, accent }: any) => (
 );
 
 export const CourseCard = ({ course, index = 0 }: { course: Course; index?: number }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [imgError, setImgError] = useState(false);
   const lvl = levelStyles[course.level] || levelStyles.Beginner;
-  const thumbnail = !imgError ? getCourseImageUrl(course.thumbnail) : getCourseImageUrl(undefined);
+  const thumbnail = !imgError && course.thumbnail ? course.thumbnail : FALLBACK;
 
   const fullStars = Math.floor(course.rating || 0);
   const showProgress = course.progress !== undefined;
   const progressVal = course.progress || 94; // fallback fake completion rate for UI
+
+  const isAdmin = user?.role === "admin";
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/portal/courses/${course.id}`);
+  };
+
+  const handleClone = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const cloned = {
+        title: `${course.title} (Copy)`,
+        description: course.description || "Cloned course",
+        category: course.category,
+        level: course.level,
+        price: course.price || 0,
+        thumbnail: course.thumbnail || "",
+      };
+      await courseApi.createCourse(cloned);
+      toast({ title: "Course Cloned ✅", description: `Successfully cloned "${course.title}".` });
+      window.location.reload();
+    } catch (err: any) {
+      toast({ title: "Clone failed", description: err?.response?.data?.error || "Error.", variant: "destructive" });
+    }
+  };
 
   return (
     <Link
@@ -64,9 +105,35 @@ export const CourseCard = ({ course, index = 0 }: { course: Course; index?: numb
             >
               {course.level}
             </span>
-            <span className="text-[10px] font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-              {course.price && course.price > 0 ? `$${course.price.toFixed(2)}` : "Free"}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20">
+                {course.price && course.price > 0 ? `$${course.price.toFixed(2)}` : "Free"}
+              </span>
+
+              {isAdmin && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors relative z-10"
+                    >
+                      <MoreVertical size={14} />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleEdit}>
+                      <Edit className="w-3.5 h-3.5 mr-2" /> Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleClone}>
+                      <Copy className="w-3.5 h-3.5 mr-2" /> Clone
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
           </div>
 
           <h3 className="text-base font-bold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors duration-300">

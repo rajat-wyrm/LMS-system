@@ -6,73 +6,49 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-}
-
-enum Role {
-  user
-  instructor
-  admin
-}
-
-enum EnrollmentStatus {
-  active
-  completed
-  dropped
+  provider = "sqlite"
 }
 
 model User {
-  id          String       @id @default(cuid())
-  name        String
-  email       String       @unique
-  password    String
-  role        Role         @default(user)
-  status      String       @default("pending") // pending, approved, rejected, suspended
-  bio         String?
-  avatar      String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("user")
+  status    String   @default("pending") // pending, approved, rejected, suspended
+  bio       String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   courses     Course[]     @relation("InstructorCourses")
   enrollments Enrollment[]
+
+  @@index([email])
+  @@index([name])
 }
 
 model Course {
-  id               String       @id @default(cuid())
+  id               String   @id @default(cuid())
   title            String
   description      String
   category         String
-  level            String       @default("Beginner")
-  price            Float        @default(0)
+  level            String   @default("Beginner")
+  price            Float    @default(0)
   thumbnail        String?
   celebrityTeacher String?
   instructorId     String
-  duration         String?
-  rating           Float        @default(4.5)
-  outcomes         String[]
-  xp               String?
-  gradient         String?
-  icon             String?
-  status           String       @default("pending") // pending, approved, rejected
-  instructor       User         @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  status           String   @default("pending") // pending, approved, rejected
+  instructor       User     @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   lessons     Lesson[]
   enrollments Enrollment[]
-  learningPaths LearningPath[] @relation("LearningPathCourses")
-}
 
-model LearningPath {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  description String
-  duration    String
-  color       String   @default("teal")
-  courses     Course[] @relation("LearningPathCourses")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  @@index([title])
+  @@index([category])
+  @@index([level])
 }
 
 model Lesson {
@@ -90,11 +66,11 @@ model Lesson {
 }
 
 model Enrollment {
-  id               String           @id @default(cuid())
-  userId           String
-  courseId         String
+  id                  String           @id @default(cuid())
+  userId              String
+  courseId            String
   progress            Int              @default(0)
-  status              EnrollmentStatus @default(active)
+  status              String           @default("active")
   certificateApproved Boolean          @default(false)
   mentor              String?
   createdAt           DateTime         @default(now())
@@ -105,5 +81,4 @@ model Enrollment {
   completedLessons Lesson[] @relation("CompletedLessons")
 
   @@unique([userId, courseId]) // Prevent duplicate enrollments
-   @@index([createdAt]) //for weekly stats performance
 }
