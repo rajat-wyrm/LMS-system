@@ -146,7 +146,7 @@ function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
                     className={inputClass}
                   />
                 </Field>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Field label="Email" required>
                     <input
                       type="email"

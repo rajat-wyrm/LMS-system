@@ -288,8 +288,9 @@ const Students = () => {
 
       <StudentInsightsStrip students={students} />
 
-      <div className="relative z-10 flex flex-wrap gap-3 items-center rounded-2xl p-4 border shadow-lg admin-surface border-[var(--admin-border)]">
-        <div className="relative min-w-[200px] flex-1">
+      <div className="relative z-10 rounded-2xl p-4 border shadow-lg admin-surface border-[var(--admin-border)]">
+        {/* Search — full width on all sizes */}
+        <div className="relative mb-3">
           <MdSearch
             className="absolute left-3.5 top-1/2 -translate-y-1/2 admin-text-secondary"
             size={18}
@@ -303,96 +304,98 @@ const Students = () => {
           />
         </div>
 
-        <div className="relative min-w-[110px]">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className={filterSelectClass}
-          >
-            <option value="">Status</option>
-            <option value="Active">Active</option>
-            <option value="Completed">Completed</option>
-            <option value="Pending">Pending</option>
-          </select>
-          <MdKeyboardArrowDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
-            size={16}
-          />
-        </div>
+        {/* Filters — 2-col grid on mobile, flex-wrap on sm+ */}
+        <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center">
+          <div className="relative">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className={filterSelectClass}
+            >
+              <option value="">Status</option>
+              <option value="Active">Active</option>
+              <option value="Completed">Completed</option>
+              <option value="Pending">Pending</option>
+            </select>
+            <MdKeyboardArrowDown
+              className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
+              size={16}
+            />
+          </div>
 
-        <div className="relative min-w-[120px]">
-          <select
-            value={courseFilter}
-            onChange={(e) => setCourseFilter(e.target.value)}
-            className={filterSelectClass}
-          >
-            <option value="">Course</option>
-            <option value="DSA with Java">DSA with Java</option>
-            <option value="MERN">MERN</option>
-            <option value="Python">Python</option>
-            <option value="C++">C++</option>
-            <option value="HTML">HTML</option>
-            <option value="CSS">CSS</option>
-            <option value="JavaScript">JavaScript</option>
-            <option value="ReactJS">ReactJS</option>
-          </select>
-          <MdKeyboardArrowDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
-            size={16}
-          />
-        </div>
+          <div className="relative">
+            <select
+              value={courseFilter}
+              onChange={(e) => setCourseFilter(e.target.value)}
+              className={filterSelectClass}
+            >
+              <option value="">Course</option>
+              <option value="DSA with Java">DSA with Java</option>
+              <option value="MERN">MERN</option>
+              <option value="Python">Python</option>
+              <option value="C++">C++</option>
+              <option value="HTML">HTML</option>
+              <option value="CSS">CSS</option>
+              <option value="JavaScript">JavaScript</option>
+              <option value="ReactJS">ReactJS</option>
+            </select>
+            <MdKeyboardArrowDown
+              className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
+              size={16}
+            />
+          </div>
 
-        <div className="relative min-w-[120px]">
-          <select
-            value={teacherFilter}
-            onChange={(e) => setTeacherFilter(e.target.value)}
-            className={filterSelectClass}
-          >
-            <option value="">Teacher</option>
-            <option value="MS Dhoni">MS Dhoni</option>
-            <option value="Alia Bhatt">Alia Bhatt</option>
-            <option value="Salman Khan">Salman Khan</option>
-            <option value="Katrina Kaif">Katrina Kaif</option>
-            <option value="Anushka Sharma">Anushka Sharma</option>
-            <option value="Virat Kohli">Virat Kohli</option>
-            <option value="Sachin Tendulkar">Sachin Tendulkar</option>
-          </select>
-          <MdKeyboardArrowDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
-            size={16}
-          />
-        </div>
+          <div className="relative">
+            <select
+              value={teacherFilter}
+              onChange={(e) => setTeacherFilter(e.target.value)}
+              className={filterSelectClass}
+            >
+              <option value="">Teacher</option>
+              <option value="MS Dhoni">MS Dhoni</option>
+              <option value="Alia Bhatt">Alia Bhatt</option>
+              <option value="Salman Khan">Salman Khan</option>
+              <option value="Katrina Kaif">Katrina Kaif</option>
+              <option value="Anushka Sharma">Anushka Sharma</option>
+              <option value="Virat Kohli">Virat Kohli</option>
+              <option value="Sachin Tendulkar">Sachin Tendulkar</option>
+            </select>
+            <MdKeyboardArrowDown
+              className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
+              size={16}
+            />
+          </div>
 
-        <div className="relative min-w-[110px]">
-          <select
-            value={badgeFilter}
-            onChange={(e) => setBadgeFilter(e.target.value)}
-            className={filterSelectClass}
-          >
-            <option value="">Badge</option>
-            <option value="Top Learner">Top Learner</option>
-            <option value="Quiz Master">Quiz Master</option>
-          </select>
-          <MdKeyboardArrowDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
-            size={16}
-          />
-        </div>
+          <div className="relative">
+            <select
+              value={badgeFilter}
+              onChange={(e) => setBadgeFilter(e.target.value)}
+              className={filterSelectClass}
+            >
+              <option value="">Badge</option>
+              <option value="Top Learner">Top Learner</option>
+              <option value="Quiz Master">Quiz Master</option>
+            </select>
+            <MdKeyboardArrowDown
+              className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
+              size={16}
+            />
+          </div>
 
-        <div className="relative flex items-center rounded-xl px-3 py-2 text-xs admin-text-primary min-w-[160px] border admin-surface border-[var(--admin-border)]">
-          <input
-            type="date"
-            value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
-            className="bg-transparent border-none w-full text-xs admin-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 rounded-md cursor-pointer [color-scheme:var(--color-scheme)]"
-          />
-          <MdOutlineCalendarToday
-            className="admin-text-secondary ml-2 pointer-events-none shrink-0"
-            size={16}
-          />
-        </div>
+          <div className="relative col-span-2 sm:col-span-1 flex items-center rounded-xl px-3 py-2 text-xs admin-text-primary min-w-[160px] border admin-surface border-[var(--admin-border)]">
+  <input
+    type="date"
+    value={dateFilter}
+    onChange={(e) => setDateFilter(e.target.value)}
+    className="bg-transparent border-none w-full text-xs admin-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 rounded-md cursor-pointer [color-scheme:var(--color-scheme)]"
+  />
+  <MdOutlineCalendarToday
+    className="admin-text-secondary ml-2 pointer-events-none shrink-0"
+    size={16}
+  />
+</div>
       </div>
-
+      </div>
       <StudentTable
         students={displayedStudents}
         onViewProfile={handleOpenDrawer}

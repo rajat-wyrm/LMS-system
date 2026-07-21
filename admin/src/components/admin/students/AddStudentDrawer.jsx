@@ -168,7 +168,7 @@ const AddStudentDrawer = ({ isOpen, onClose, onAdd, studentToEdit }) => {
               </div>
 
               {/* Phone + Password side by side */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelCls}>Phone</label>
                   <div className="relative">
@@ -191,7 +191,7 @@ const AddStudentDrawer = ({ isOpen, onClose, onAdd, studentToEdit }) => {
               </div>
 
               {/* Course + Teacher side by side */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={`${labelCls} flex items-center gap-1`}><MdSchool size={13} /> Course</label>
                   <select value={form.course} onChange={set('course')} className={selectCls}>
