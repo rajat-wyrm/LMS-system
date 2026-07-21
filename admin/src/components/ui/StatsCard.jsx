@@ -11,14 +11,14 @@ import { motion } from 'framer-motion';
 const StatsCard = ({ title, value, icon }) => {
   return (
     <motion.div
-      className="glass-card gradient-border p-4 rounded-3xl flex items-center space-x-3"
-      whileHover={{ scale: 1.02 }}
+      className="glass-card p-5 rounded-2xl flex items-center space-x-4 border border-border bg-card/70"
+      whileHover={{ y: -2 }}
       transition={{ duration: 0.2 }}
     >
-      {icon && <div className="text-[#FFB800] text-xl">{icon}</div>}
+      {icon && <div className="p-3 rounded-xl bg-primary/10 text-primary border border-primary/20 text-xl">{icon}</div>}
       <div className="flex flex-col">
-        <span className="text-sm admin-text-muted">{title}</span>
-        <span className="text-lg font-semibold admin-text-primary">{value}</span>
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</span>
+        <span className="text-xl font-bold font-display text-foreground">{value}</span>
       </div>
     </motion.div>
   );

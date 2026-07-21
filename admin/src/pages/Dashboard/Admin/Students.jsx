@@ -93,9 +93,9 @@ const initialStudents = [
 ];
 
 const filterSelectClass =
-  'w-full rounded-xl py-2.5 pl-4 pr-10 text-xs admin-text-primary focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all cursor-pointer appearance-none border bg-[var(--admin-surface)] border-[var(--admin-border)]';
+  'w-full rounded-xl py-2.5 pl-4 pr-10 text-xs font-body text-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all cursor-pointer appearance-none border border-border bg-input';
 const filterInputClass =
-  'w-full rounded-xl py-2.5 pl-10 pr-4 text-xs admin-text-primary placeholder-[var(--admin-text-muted)] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all border bg-[var(--admin-surface)] border-[var(--admin-border)]';
+  'w-full rounded-xl py-2.5 pl-10 pr-4 text-xs font-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all border border-border bg-input';
 
 const Students = () => {
   const location = useLocation();
@@ -275,7 +275,7 @@ const Students = () => {
   };
 
   return (
-    <div className="admin-page space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 -m-4 md:-m-6 border border-[var(--admin-border)] shadow-[var(--admin-shadow-card)] bg-[var(--admin-page-panel)]">
+    <div className="space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 border border-border shadow-sm bg-card/60 backdrop-blur-xl font-body">
       <StudentsHero
         totalCount={students.length.toLocaleString()}
         monthlyGrowth={monthlyGrowth}
@@ -288,10 +288,10 @@ const Students = () => {
 
       <StudentInsightsStrip students={students} />
 
-      <div className="relative z-10 flex flex-wrap gap-3 items-center rounded-2xl p-4 border shadow-lg admin-surface border-[var(--admin-border)]">
+      <div className="relative z-10 flex flex-wrap gap-3 items-center rounded-2xl p-4 border border-border shadow-sm bg-card/70 backdrop-blur-xl">
         <div className="relative min-w-[200px] flex-1">
           <MdSearch
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 admin-text-secondary"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
             size={18}
           />
           <input
@@ -315,7 +315,7 @@ const Students = () => {
             <option value="Pending">Pending</option>
           </select>
           <MdKeyboardArrowDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
             size={16}
           />
         </div>
@@ -337,7 +337,7 @@ const Students = () => {
             <option value="ReactJS">ReactJS</option>
           </select>
           <MdKeyboardArrowDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
             size={16}
           />
         </div>
@@ -358,7 +358,7 @@ const Students = () => {
             <option value="Sachin Tendulkar">Sachin Tendulkar</option>
           </select>
           <MdKeyboardArrowDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
             size={16}
           />
         </div>
@@ -374,20 +374,20 @@ const Students = () => {
             <option value="Quiz Master">Quiz Master</option>
           </select>
           <MdKeyboardArrowDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
             size={16}
           />
         </div>
 
-        <div className="relative flex items-center rounded-xl px-3 py-2 text-xs admin-text-primary min-w-[160px] border admin-surface border-[var(--admin-border)]">
+        <div className="relative flex items-center rounded-xl px-3 py-2 text-xs text-foreground min-w-[160px] border border-border bg-input">
           <input
             type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="bg-transparent border-none w-full text-xs admin-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 rounded-md cursor-pointer [color-scheme:var(--color-scheme)]"
+            className="bg-transparent border-none w-full text-xs text-foreground focus:outline-none cursor-pointer"
           />
           <MdOutlineCalendarToday
-            className="admin-text-secondary ml-2 pointer-events-none shrink-0"
+            className="text-muted-foreground ml-2 pointer-events-none shrink-0"
             size={16}
           />
         </div>
