@@ -4,7 +4,7 @@ import { MdArrowBack, MdEmail, MdVisibilityOff, MdVisibility, MdClose } from 're
 import { FcGoogle } from 'react-icons/fc';
 import { FaJava, FaGitAlt, FaGithub, FaDocker, FaPython, FaReact, FaJs, FaNodeJs, FaHtml5, FaCss3Alt } from 'react-icons/fa';
 import { SiCplusplus, SiTypescript } from 'react-icons/si';
-import logo from '../../assets/logo.webp';
+const logo = '/logo.webp';
 import { auth, googleProvider } from '../../firebase-config';
 import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 

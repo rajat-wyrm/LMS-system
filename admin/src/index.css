@@ -1,338 +1,210 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── Admin theme tokens (dark default) ── */
-:root {
-  --admin-shell-bg: #1c2b3a;
-  --admin-page-bg: #16263a;
-  --admin-page-panel: #16263a;
-  --admin-surface: #20324a;
-  --admin-surface-raised: #29405e;
-  --admin-surface-hover: #345070;
-  --admin-nav-bg: #0d1b2a;
-  --admin-nav-border: rgba(255, 255, 255, 0.06);
-  --admin-text-primary: #f8fafc;
-  --admin-text-secondary: #cbd5e1;
-  --admin-text-muted: #94a3b8;
-  --admin-border: rgba(52, 80, 112, 0.8);
-  --admin-border-subtle: rgba(52, 80, 112, 0.5);
-  --admin-input-bg: #161b22;
-  --admin-input-border: rgba(255, 255, 255, 0.1);
-  --admin-hero-bg: #20324a;
-  --admin-hero-overlay: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.35) 0%,
-    rgba(139, 92, 246, 0.28) 45%,
-    rgba(6, 182, 212, 0.12) 100%
-  );
-  --admin-hero-stat-bg: rgba(41, 64, 94, 0.85);
-  --admin-stat-pill-bg: rgba(41, 64, 94, 0.8);
-  --admin-kpi-base: #29405e;
-  --admin-progress-track: #16263a;
-  --admin-shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.25);
-  --admin-shadow-card: 0 12px 32px rgba(0, 0, 0, 0.25);
-  --color-scheme: dark;
+@layer base {
+  :root {
+    /* ── Surfaces (Dark default from UI-UX-DESIGN.md) ── */
+    --background: 229 63% 5%;        /* #070A14 */
+    --foreground: 0 0% 91%;          /* #E8E8E8 */
+    --card: 225 67% 9%;              /* #0E1424 */
+    --card-foreground: 0 0% 91%;
+    --popover: 225 67% 9%;
+    --popover-foreground: 0 0% 91%;
 
-  --bg-primary: #0b1736;
-  --card-bg: #111827;
-  --text-primary: #e5e7eb;
-  --text-muted: #9ca3af;
-  --border-base: rgba(255, 255, 255, 0.06);
-  --border-hover: rgba(100, 255, 255, 0.2);
+    /* ── Brand ── */
+    --primary: 189 94% 43%;          /* #06B6D4 — cyan */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 258 90% 66%;        /* #8B5CF6 — violet */
+    --secondary-foreground: 0 0% 100%;
+    --accent: 217 91% 60%;           /* #3B82F6 — blue */
+    --accent-foreground: 0 0% 100%;
+
+    /* ── Neutrals ── */
+    --muted: 222 30% 14%;            /* #1A2238 */
+    --muted-foreground: 215 16% 65%; /* #9BA8BC */
+    --border: 222 30% 18%;
+    --input: 222 30% 18%;
+    --ring: 189 94% 43%;
+
+    /* ── Semantic & Radius ── */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --radius: 0.5rem;
+
+    /* ── Extended ── */
+    --navy: 222 47% 11%;
+    --navy-deep: 229 63% 5%;
+    --orange: 16 100% 60%;
+    --teal: 175 100% 35%;
+
+    /* ── Gradients & Shadows ── */
+    --gradient-mesh: radial-gradient(at 20% 20%, hsl(189 94% 43% / 0.25) 0px, transparent 50%),
+                     radial-gradient(at 80% 0%, hsl(258 90% 66% / 0.25) 0px, transparent 50%),
+                     radial-gradient(at 0% 100%, hsl(217 91% 60% / 0.15) 0px, transparent 50%),
+                     radial-gradient(at 80% 80%, hsl(258 90% 66% / 0.2) 0px, transparent 50%);
+    --gradient-primary: linear-gradient(135deg, hsl(189 94% 43%), hsl(217 91% 60%));
+    --gradient-card: linear-gradient(145deg, hsl(225 67% 12%), hsl(225 67% 7%));
+
+    --shadow-glow-primary: 0 0 30px hsl(var(--primary) / 0.4);
+    --shadow-glow-secondary: 0 0 25px hsl(var(--secondary) / 0.35);
+    --shadow-card: 0 10px 30px -10px hsl(229 63% 0% / 0.6);
+
+    /* ── Admin shell variables ── */
+    --admin-shell-bg: hsl(var(--background));
+    --admin-page-bg: transparent;
+    --admin-page-panel: hsl(var(--card));
+    --admin-surface: hsl(var(--card));
+    --admin-surface-raised: hsl(var(--muted));
+    --admin-surface-hover: hsl(222 30% 20%);
+    --admin-nav-bg: hsl(225 67% 7% / 0.85);
+    --admin-nav-border: hsl(var(--border));
+    --admin-text-primary: hsl(var(--foreground));
+    --admin-text-secondary: hsl(var(--muted-foreground));
+    --admin-text-muted: hsl(215 16% 55%);
+    --admin-border: hsl(var(--border));
+    --admin-border-subtle: hsl(222 30% 14%);
+    --admin-input-bg: hsl(var(--input));
+    --admin-input-border: hsl(var(--border));
+    --admin-card-bg: hsl(var(--card));
+    --color-scheme: dark;
+  }
+
+  html.light {
+    --background: 210 40% 98%;       /* #f8fafc */
+    --foreground: 222 47% 11%;       /* #0f172a */
+    --card: 0 0% 100%;               /* #ffffff */
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 189 94% 43%;          /* #06B6D4 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 258 90% 66%;        /* #8B5CF6 */
+    --secondary-foreground: 0 0% 100%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 214 32% 91%;            /* #e2e8f0 */
+    --muted-foreground: 215 16% 45%; /* #64748b */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 189 94% 43%;
+
+    --admin-shell-bg: #f1f5f9;
+    --admin-page-bg: transparent;
+    --admin-page-panel: #ffffff;
+    --admin-surface: #ffffff;
+    --admin-surface-raised: #ffffff;
+    --admin-surface-hover: #f1f5f9;
+    --admin-nav-bg: rgba(255, 255, 255, 0.9);
+    --admin-nav-border: #e2e8f0;
+    --admin-text-primary: #0f172a;
+    --admin-text-secondary: #475569;
+    --admin-text-muted: #64748b;
+    --admin-border: #e2e8f0;
+    --admin-border-subtle: #f1f5f9;
+    --admin-input-bg: #f8fafc;
+    --admin-input-border: #e2e8f0;
+    --admin-card-bg: #ffffff;
+    --color-scheme: light;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased min-h-screen overflow-x-hidden;
+    background-image: radial-gradient(circle at 50% -20%, hsl(var(--primary) / 0.15), transparent 60%);
+    background-attachment: fixed;
+    color-scheme: var(--color-scheme);
+  }
+  h1, h2, h3, h4, h5, h6 { @apply font-display; }
+  code, pre { @apply font-mono; }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-background border-l border-border;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full border-[2px] border-solid border-background transition-colors;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/80;
+  }
 }
 
-html.light {
-  --admin-shell-bg: #f1f5f9;
-  --admin-page-bg: transparent;
-  --admin-page-panel: #ffffff;
-  --admin-surface: #ffffff;
-  --admin-surface-raised: #ffffff;
-  --admin-surface-hover: #f1f5f9;
-  --admin-nav-bg: #ffffff;
-  --admin-nav-border: #e2e8f0;
-  --admin-text-primary: #0f172a;
-  --admin-text-secondary: #475569;
-  --admin-text-muted: #64748b;
-  --admin-border: #e2e8f0;
-  --admin-border-subtle: #f1f5f9;
-  --admin-input-bg: #f8fafc;
-  --admin-input-border: #e2e8f0;
-  --admin-hero-bg: #ffffff;
-  --admin-hero-overlay: linear-gradient(
-    135deg,
-    rgba(59, 130, 246, 0.12) 0%,
-    rgba(139, 92, 246, 0.1) 45%,
-    rgba(6, 182, 212, 0.06) 100%
-  );
-  --admin-hero-stat-bg: rgba(241, 245, 249, 0.95);
-  --admin-stat-pill-bg: #f1f5f9;
-  --admin-kpi-base: #ffffff;
-  --admin-progress-track: #e2e8f0;
-  --admin-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.08);
-  --admin-shadow-card: 0 8px 24px rgba(15, 23, 42, 0.06);
-  --color-scheme: light;
-
-  --bg-primary: #f8fafc;
-  --card-bg: #ffffff;
-  --text-primary: #0f172a;
-  --text-muted: #64748b;
-  --border-base: #e2e8f0;
-  --border-hover: rgba(59, 130, 246, 0.35);
-}
-
-body {
-  @apply font-sans antialiased overflow-x-hidden;
-  font-family: 'Inter', sans-serif;
-  background-color: var(--admin-shell-bg);
-  color: var(--admin-text-primary);
-  min-height: 100vh;
-  color-scheme: var(--color-scheme);
-}
-
-.dashboard-title {
-  @apply text-[28px] font-semibold;
-  color: var(--admin-text-primary);
-}
-
-.add-student-btn {
-  @apply flex items-center gap-1 px-3 py-1.5 rounded-md bg-gradient-to-r from-accent-cyan to-accent-purple text-white transition-transform duration-200;
-}
-.add-student-btn:hover {
-  @apply scale-105;
-}
-
-.kpi-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-base);
-  @apply rounded-xl p-4 transition-colors duration-200;
-}
-.kpi-card:hover {
-  border-color: var(--border-hover);
-}
-
-.glass-card {
-  background: var(--card-bg);
-  border: 1px solid var(--border-base);
-  @apply backdrop-blur-md shadow-[0_4px_30px_rgba(0,0,0,0.08)];
-}
-
-.neon-border {
-  @apply border border-transparent transition-all duration-200;
-}
-.neon-border:hover {
-  border-color: var(--border-hover);
+@layer components {
+  .glass-card {
+    @apply bg-card/70 backdrop-blur-xl border border-border rounded-2xl transition-all duration-300;
+  }
+  .glass-card:hover {
+    @apply border-primary/30 shadow-[0_0_30px_hsl(var(--primary)/0.1)];
+  }
+  .course-card {
+    @apply bg-card border border-border rounded-2xl overflow-hidden transition-all duration-500 hover:-translate-y-1;
+  }
+  .course-card:hover {
+    @apply border-primary/50;
+    box-shadow: var(--shadow-glow-primary);
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-medium px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-[0_0_25px_hsl(var(--primary)/0.6)] hover:-translate-y-0.5 active:translate-y-0;
+  }
+  .btn-outline-teal {
+    @apply inline-flex items-center justify-center gap-2 border-2 border-secondary text-secondary font-medium px-6 py-3 rounded-xl transition-all duration-300 hover:bg-secondary hover:text-secondary-foreground hover:shadow-[0_0_25px_hsl(var(--secondary)/0.4)] hover:-translate-y-0.5 active:translate-y-0;
+  }
+  .stat-pill {
+    @apply flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 border border-border text-sm;
+  }
+  .kpi-card {
+    @apply bg-card border border-border rounded-xl p-4 transition-all duration-200 hover:border-primary/40 shadow-sm;
+  }
+  .gradient-mesh-bg {
+    background: var(--gradient-mesh);
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+  }
+  .aurora-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .aurora-bg::after {
+    content: "";
+    position: absolute;
+    top: -50%; left: -50%; right: -50%; bottom: -50%;
+    background: 
+      radial-gradient(circle at 50% 50%, hsl(var(--primary) / 0.15) 0%, transparent 40%),
+      radial-gradient(circle at 80% 20%, hsl(var(--secondary) / 0.15) 0%, transparent 40%);
+    filter: blur(80px);
+    animation: aurora 15s linear infinite;
+  }
 }
 
 @layer utilities {
-  .glass-card-hover {
-    @apply hover:shadow-[0_8px_32px_rgba(6,182,212,0.12)] transition-all duration-300;
+  .dashboard-title {
+    @apply text-2xl font-bold font-display text-foreground tracking-tight;
   }
-
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent-cyan via-accent-purple to-accent-orange;
+  .admin-sidebar {
+    @apply bg-card/80 backdrop-blur-xl border-border;
   }
-
-  .glow-blue {
-    @apply shadow-[0_0_15px_rgba(59,130,246,0.35)];
-  }
-
-  .glow-purple {
-    @apply shadow-[0_0_15px_rgba(139,92,246,0.35)];
-  }
-
-  .dashboard-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-base);
-    @apply rounded-xl p-6 shadow-lg;
-  }
-
-  .admin-page {
-    background: var(--admin-page-bg);
-    color: var(--admin-text-primary);
-  }
-
-  .admin-surface {
-    background: var(--admin-surface);
-    border-color: var(--admin-border);
-  }
-
-  .admin-surface-raised {
-    background: var(--admin-surface-raised);
-    border-color: var(--admin-border);
-  }
-
-  .admin-text-primary {
-    color: var(--admin-text-primary);
-  }
-
-  .admin-text-secondary {
-    color: var(--admin-text-secondary);
-  }
-
-  .admin-text-muted {
-    color: var(--admin-text-muted);
+  .admin-navbar {
+    @apply bg-background/80 backdrop-blur-xl border-border;
   }
 }
 
-/* Sidebar shell (structure unchanged; theme via variables) */
-.admin-sidebar {
-  background: var(--admin-nav-bg);
-  border-color: var(--admin-nav-border);
-}
-
-html.light .admin-sidebar h1 {
-  color: #0f172a;
-}
-
-html.light .admin-sidebar .text-gray-500 {
-  color: #64748b;
-}
-
-/* Dashboard / shared admin cards in light mode */
-html.light .bg-\[\#161b22\]:not(.no-theme *),
-html.light .bg-\[\#0d1117\]:not(.no-theme *),
-html.light .bg-\[\#111827\]:not(.no-theme *),
-html.light .bg-\[\#0b1324\]:not(.no-theme *),
-html.light .bg-\[\#070b16\]:not(.no-theme *),
-html.light .bg-\[\#050816\]:not(.no-theme *),
-html.light .bg-\[\#081028\]:not(.no-theme *),
-html.light .bg-\[\#1f2937\]:not(.no-theme *),
-html.light .bg-background:not(.no-theme *),
-html.light .bg-background-secondary:not(.no-theme *),
-html.light .bg-background-tertiary:not(.no-theme *),
-html.light .bg-\[\#0B1120\]:not(.no-theme *),
-html.light .bg-\[\#0f141e\]:not(.no-theme *),
-html.light .bg-\[\#0a0f18\]:not(.no-theme *),
-html.light .bg-\[\#121826\]:not(.no-theme *),
-html.light .bg-\[\#1a1f2e\]:not(.no-theme *),
-html.light .bg-\[\#101726\]:not(.no-theme *),
-html.light .bg-\[\#0f172a\]:not(.no-theme *),
-html.light .bg-\[\#1e293b\]:not(.no-theme *) {
-  background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06) !important;
-}
-
-html.light .bg-white\/5:not(.no-theme *) {
-  background-color: rgba(15, 23, 42, 0.04) !important;
-}
-html.light .bg-white\/8:not(.no-theme *) {
-  background-color: rgba(15, 23, 42, 0.06) !important;
-}
-html.light .bg-white\/10:not(.no-theme *) {
-  background-color: rgba(15, 23, 42, 0.08) !important;
-}
-html.light .bg-white\/20:not(.no-theme *) {
-  background-color: rgba(15, 23, 42, 0.12) !important;
-}
-
-html.light .text-white:not(.no-theme *):not([style*="background"]):not(.bg-gradient-to-r *):not(.bg-gradient-to-br *):not(.bg-accent-cyan *):not(.bg-accent-blue *):not(.bg-accent-purple *):not(.bg-accent-orange *):not(.bg-purple-600 *):not(.bg-blue-600 *):not(.bg-indigo-600 *):not(.bg-red-600 *):not(.bg-emerald-600 *):not(.bg-amber-600 *):not(.bg-pink-600 *):not(.bg-gradient-to-tr *),
-html.light .text-\[\#E5E7EB\]:not(.no-theme *),
-html.light .text-\[\#e5e7eb\]:not(.no-theme *),
-html.light .text-\[\#F8FAFC\]:not(.no-theme *),
-html.light .text-\[\#f8fafc\]:not(.no-theme *) {
-  color: #0f172a;
-}
-
-html.light .text-gray-500,
-html.light .text-gray-400,
-html.light .text-gray-300,
-html.light .text-\[\#9CA3AF\]:not(.no-theme *),
-html.light .text-\[\#9ca3af\]:not(.no-theme *),
-html.light .text-\[\#cbd5e1\]:not(.no-theme *),
-html.light .text-\[\#CBD5E1\]:not(.no-theme *) {
-  color: #64748b;
-}
-
-html.light .border-white\/5:not(.no-theme *),
-html.light .border-white\/10:not(.no-theme *) {
-  border-color: #e2e8f0 !important;
-}
-
-html.light .glass-card:not(.no-theme *),
-html.light .kpi-card:not(.no-theme *),
-html.light .dashboard-card:not(.no-theme *) {
-  background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06) !important;
-}
-
-html.light input,
-html.light select,
-html.light textarea {
-  color-scheme: light;
-}
-
-html.light [class*="color-scheme:dark"] {
-  color-scheme: light;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--admin-shell-bg);
-}
-::-webkit-scrollbar-thumb {
-  background: #334155;
-  border-radius: 4px;
-}
-html.light ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #475569;
-}
-
-html.light ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Admin profile dropdown (navbar) — solid panel, escapes nav stacking */
-.admin-profile-dropdown {
-  background: linear-gradient(180deg, rgba(36, 56, 86, 0.98), rgba(26, 42, 68, 0.98));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 24px;
-  box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-html.light .admin-profile-dropdown {
-  background: #ffffff !important;
-  border-color: #e2e8f0 !important;
-  box-shadow: 0 12px 48px rgba(15, 23, 42, 0.1) !important;
-}
-
-html.light .text-slate-100,
-html.light .text-slate-200,
-html.light .text-slate-300,
-html.light .text-slate-400 {
-  color: #475569 !important;
-}
-
-html.light .text-slate-500,
-html.light .text-slate-600 {
-  color: #64748b !important;
-}
-
-/* Smooth theme transition */
-html,
-body,
-header,
-aside,
-main,
-.admin-navbar,
-.admin-sidebar {
-  transition:
-    background-color 0.25s ease,
-    border-color 0.25s ease,
-    color 0.2s ease,
-    box-shadow 0.25s ease;
+@keyframes aurora {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

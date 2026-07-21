@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * FilterDropdown – generic dropdown used for filtering students.
+ * FilterDropdown – generic dropdown used for filtering.
  * Props:
  *   label: string – visible label before the select
  *   options: { value: string; label: string }[] – dropdown items
@@ -10,16 +10,16 @@ import React from 'react';
  */
 const FilterDropdown = ({ label, options, value, onChange }) => {
   return (
-    <div className="flex flex-col">
-      <label className="text-sm text-[#9CA3AF] mb-1">{label}</label>
+    <div className="flex flex-col gap-1">
+      {label && <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</label>}
       <select
-        className="bg-[#111827] border border-[rgba(255,255,255,0.06)] rounded-md text-[#E5E7EB] px-3 py-1.5 focus:outline-none focus:border-[#22D3EE] transition-colors"
+        className="bg-input border border-border rounded-xl text-foreground px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-colors font-body"
         value={value}
         onChange={e => onChange(e.target.value)}
       >
         <option value="">All</option>
         {options.map(opt => (
-          <option key={opt.value} value={opt.value}>
+          <option key={opt.value} value={opt.value} className="bg-popover text-popover-foreground">
             {opt.label}
           </option>
         ))}

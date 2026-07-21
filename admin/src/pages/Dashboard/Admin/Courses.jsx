@@ -141,7 +141,7 @@ const Courses = () => {
   const hasFilters = Boolean(searchQuery || categoryFilter || levelFilter);
 
   return (
-    <div className="admin-page space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 -m-4 md:-m-6 border border-[var(--admin-border)] shadow-[var(--admin-shadow-card)] bg-[var(--admin-page-panel)]">
+    <div className="space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 border border-border shadow-sm bg-card/60 backdrop-blur-xl font-body">
       <CoursesHero
         totalCount={courses.length.toLocaleString()}
         totalRevenue={totalRevenue}
@@ -189,17 +189,13 @@ const Courses = () => {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 24 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-5 py-3 rounded-xl border shadow-2xl text-sm font-medium admin-text-primary"
-            style={{
-              background: 'var(--admin-surface-raised)',
-              borderColor: 'var(--admin-border)',
-            }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-3 px-5 py-3 rounded-xl border border-border shadow-2xl text-sm font-medium bg-card text-card-foreground backdrop-blur-xl"
           >
             <span>{notice}</span>
             <button
               type="button"
               onClick={() => setNotice(null)}
-              className="admin-text-secondary hover:admin-text-primary"
+              className="text-muted-foreground hover:text-foreground"
               aria-label="Dismiss"
             >
               <MdClose size={18} />

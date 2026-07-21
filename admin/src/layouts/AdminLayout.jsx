@@ -10,7 +10,7 @@ function AdminLayoutContent() {
 
   return (
     <div
-      className="flex min-h-screen bg-[var(--admin-shell-bg)]"
+      className="flex min-h-screen bg-background text-foreground font-body antialiased"
       style={{ '--sidebar-width': `${sidebarWidth}px` }}
     >
       <AdminSidebar />
@@ -20,7 +20,7 @@ function AdminLayoutContent() {
         style={{ marginLeft: 'var(--sidebar-width)' }}
       >
         <Navbar />
-        <main className="flex-1 overflow-y-auto bg-[var(--admin-shell-bg)] p-6">
+        <main className="flex-1 overflow-y-auto bg-background/50 p-6 sm:p-8">
           <Outlet />
         </main>
       </div>
