@@ -1,6 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { GraduationCap, Menu, X, LayoutGrid, Shield, MoonStar, Sun } from "lucide-react";
-import { useState } from "react";
+import { GraduationCap, Menu, X, LayoutGrid, Shield, MoonStar, Sun, ShoppingBag } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/store/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -13,9 +13,28 @@ const links = [
 
 export const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const { user, isAuthenticated, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const updateCount = () => {
+      try {
+        const ids = JSON.parse(localStorage.getItem("lms_wishlist") || "[]");
+        setWishlistCount(ids.length);
+      } catch {
+        setWishlistCount(0);
+      }
+    };
+    updateCount();
+    window.addEventListener("storage", updateCount);
+    window.addEventListener("focus", updateCount);
+    return () => {
+      window.removeEventListener("storage", updateCount);
+      window.removeEventListener("focus", updateCount);
+    };
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -84,6 +103,18 @@ export const Navbar = () => {
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <MoonStar className="h-4 w-4" />}
           </button>
+          <NavLink
+            to="/wishlist"
+            className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background/70 text-foreground transition-colors hover:border-primary hover:text-primary"
+            aria-label="Wishlist"
+          >
+            <ShoppingBag className="h-4 w-4" />
+            {wishlistCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                {wishlistCount}
+              </span>
+            )}
+          </NavLink>
           {isAuthenticated && user ? (
             <div className="flex items-center gap-4">
               <NavLink to="/profile" className="text-sm font-medium hover:text-primary transition-colors">
