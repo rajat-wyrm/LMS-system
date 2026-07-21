@@ -19,6 +19,8 @@ import {
   LuChevronLeft,
 } from 'react-icons/lu';
 
+const logo = '/logo.webp';
+
 // ── Per-item accent colour config ─────────────────────────────────────────────
 const ACCENT = {
   Dashboard:          { color: '#3B82F6', rgb: '59,130,246'  },

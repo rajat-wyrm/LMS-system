@@ -76,14 +76,59 @@ const getStudentGrowthSnapshot = async (months = 6) => {
   };
 };
 
+const buildMonthlyRevenueSeries = (enrollments, monthsToInclude = 12) => {
+  const currentMonthStart = new Date();
+  currentMonthStart.setDate(1);
+  currentMonthStart.setHours(0, 0, 0, 0);
+
+  const revenueMap = new Map();
+
+  for (let i = monthsToInclude - 1; i >= 0; i--) {
+    const monthDate = new Date(
+      currentMonthStart.getFullYear(),
+      currentMonthStart.getMonth() - i,
+      1,
+    );
+    const key = `${monthDate.getFullYear()}-${monthDate.getMonth()}`;
+
+    revenueMap.set(key, {
+      name: monthDate.toLocaleString('en-US', { month: 'short' }),
+      month: monthDate.toLocaleString('en-US', { month: 'short' }),
+      year: monthDate.getFullYear(),
+      value: 0,
+      revenue: 0,
+    });
+  }
+
+  enrollments.forEach((enrollment) => {
+    if (!enrollment?.createdAt) return;
+
+    const enrollmentDate = new Date(enrollment.createdAt);
+    const key = `${enrollmentDate.getFullYear()}-${enrollmentDate.getMonth()}`;
+    const monthEntry = revenueMap.get(key);
+
+    if (!monthEntry) return;
+
+    const amount = enrollment.course?.price || 0;
+    monthEntry.value += amount;
+    monthEntry.revenue += amount;
+  });
+
+  return Array.from(revenueMap.values());
+};
+
 // @desc    Get dashboard statistics for admin
 // @route   GET /api/admin/stats
 // @access  Private/Admin
 exports.getDashboardStats = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
+    const now = new Date();
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(now.getDate() - 7);
 
-    let currentStart, currentEnd;
+    let currentStart;
+    let currentEnd;
     let isFiltered = false;
 
     if (startDate && endDate) {
@@ -94,110 +139,123 @@ exports.getDashboardStats = async (req, res, next) => {
       }
       isFiltered = true;
     } else {
-      currentEnd = new Date();
-      currentStart = new Date(currentEnd.getTime() - 30 * 24 * 60 * 60 * 1000);
+      currentEnd = new Date(now);
+      currentStart = new Date(now);
+      currentStart.setDate(currentStart.getDate() - 30);
     }
 
     const duration = currentEnd.getTime() - currentStart.getTime();
     const prevStart = new Date(currentStart.getTime() - duration);
     const prevEnd = new Date(currentStart.getTime());
+    const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
-    const dateFilter = isFiltered ? { createdAt: { gte: currentStart, lte: currentEnd } } : {};
-    const prevDateFilter = { createdAt: { gte: prevStart, lte: prevEnd } };
+    const dateFilter = { createdAt: { gte: currentStart, lte: currentEnd } };
+    const prevDateFilter = { createdAt: { gte: prevStart, lt: prevEnd } };
 
-    // Use Promise.all to run all queries in parallel
     const [
-      studentsCount, prevStudentsCount,
-      teachersCount, prevTeachersCount,
-      coursesCount, prevCoursesCount,
-      totalUsers, totalStudents, totalInstructors, totalAdmins,
-      totalCourses, totalEnrollments, activeEnrollments,
-      pendingUsers, pendingCourses,
-     
-      periodEnrollments, allEnrollments
+      totalUsers,
+      totalStudents,
+      totalInstructors,
+      totalAdmins,
+      totalCourses,
+      totalEnrollments,
+      weeklyEnrollments,
+      completedEnrollments,
+      activeEnrollments,
+      pendingUsers,
+      pendingCourses,
+      studentsCount,
+      prevStudentsCount,
+      teachersCount,
+      prevTeachersCount,
+      coursesCount,
+      prevCoursesCount,
+      recentUsers,
+      periodEnrollments,
+      prevEnrollments,
+      allEnrollments,
+      lastTwelveMonthsEnrollments,
     ] = await Promise.all([
-      prisma.user.count({ where: { role: 'user', ...dateFilter } }),
-      prisma.user.count({ where: { role: 'user', ...prevDateFilter } }),
-      prisma.user.count({ where: { role: 'instructor', status: 'approved', ...dateFilter } }),
-      prisma.user.count({ where: { role: 'instructor', status: 'approved', ...prevDateFilter } }),
-      prisma.course.count({ where: { ...dateFilter } }),
-      prisma.course.count({ where: { ...prevDateFilter } }),
       prisma.user.count(),
       prisma.user.count({ where: { role: 'user' } }),
       prisma.user.count({ where: { role: 'instructor' } }),
       prisma.user.count({ where: { role: 'admin' } }),
       prisma.course.count(),
       prisma.enrollment.count(),
+      prisma.enrollment.count({
+        where: { createdAt: { gte: sevenDaysAgo } },
+      }),
+      prisma.enrollment.count({ where: { status: 'completed' } }),
       prisma.enrollment.count({ where: { status: 'active' } }),
       prisma.user.count({ where: { status: 'pending' } }),
       prisma.course.count({ where: { status: 'pending' } }),
+      prisma.user.count({ where: { role: 'user', ...dateFilter } }),
+      prisma.user.count({ where: { role: 'user', ...prevDateFilter } }),
+      prisma.user.count({
+        where: { role: 'instructor', status: 'approved', ...dateFilter },
+      }),
+      prisma.user.count({
+        where: { role: 'instructor', status: 'approved', ...prevDateFilter },
+      }),
+      prisma.course.count({ where: dateFilter }),
+      prisma.course.count({ where: prevDateFilter }),
       prisma.user.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
-        select: { id: true, name: true, email: true, role: true, status: true, createdAt: true }
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+          createdAt: true,
+        },
       }),
       prisma.enrollment.findMany({
-        where: { ...dateFilter },
-        include: { course: { select: { price: true } } }
+        where: dateFilter,
+        include: { course: { select: { price: true } } },
       }),
       prisma.enrollment.findMany({
-        include: { course: { select: { price: true } } }
-      })
+        where: prevDateFilter,
+        include: { course: { select: { price: true } } },
+      }),
+      prisma.enrollment.findMany({
+        include: { course: { select: { price: true } } },
+      }),
+      prisma.enrollment.findMany({
+        where: { createdAt: { gte: twelveMonthsAgo } },
+        include: { course: { select: { price: true } } },
+      }),
     ]);
 
-// Calculate revenue metrics (Kept from their incoming updates)
-    const periodRevenue = periodEnrollments.reduce((s, e) => s + (e.course?.price || 0), 0);
-    const totalRevenue = allEnrollments.reduce((s, e) => s + (e.course?.price || 0), 0);
+    const completionRate =
+      totalEnrollments > 0
+        ? Number(((completedEnrollments / totalEnrollments) * 100).toFixed(2))
+        : 0;
 
-    // For previous period revenue, query separately (Kept from their incoming updates)
-    const prevEnrollments = await prisma.enrollment.findMany({
-      where: { ...prevDateFilter },
-      include: { course: { select: { price: true } } }
-    });
-//revenue trend
-    const revenueMap = {};
-    for (let i = 11; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      const key = `${date.getFullYear()}-${date.getMonth()}`;
+    const periodRevenue = periodEnrollments.reduce(
+      (sum, enrollment) => sum + (enrollment.course?.price || 0),
+      0,
+    );
+    const prevRevenue = prevEnrollments.reduce(
+      (sum, enrollment) => sum + (enrollment.course?.price || 0),
+      0,
+    );
+    const totalRevenue = allEnrollments.reduce(
+      (sum, enrollment) => sum + (enrollment.course?.price || 0),
+      0,
+    );
 
-      revenueMap[key] = {
-        month: date.toLocaleString("default", { month: "short" }),
-        revenue: 0,
-      };
-    }
-
-    allEnrollments.forEach((enrollment) => {
-      if (!enrollment.createdAt) return;
-      const date = new Date(enrollment.createdAt);
-      const key = `${date.getFullYear()}-${date.getMonth()}`;
-
-      if (revenueMap[key]) {
-        revenueMap[key].revenue += enrollment.course?.price || 0;
-      }
-    });
-
-    // const revenueTrend = Object.values(revenueMap);
-
-    // Get recent 5 users for activity feed.
-    const recentUsers = await prisma.user.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        status: true,
-        createdAt: true,
-      },
-    });
-    const prevRevenue = prevEnrollments.reduce((s, e) => s + (e.course?.price || 0), 0);
+    const monthlyRevenueTrend = buildMonthlyRevenueSeries(
+      lastTwelveMonthsEnrollments,
+      12,
+    );
 
     const studentsTrend = getTrend(studentsCount, prevStudentsCount);
     const teachersTrend = getTrend(teachersCount, prevTeachersCount);
     const coursesTrend = getTrend(coursesCount, prevCoursesCount);
-    const revenueTrend = getTrend(periodRevenue, prevRevenue);
+    const revenueTrendSummary = getTrend(periodRevenue, prevRevenue);
+    const studentGrowth = await getStudentGrowthSnapshot(6);
 
     res.status(200).json({
       success: true,
@@ -220,13 +278,19 @@ exports.getDashboardStats = async (req, res, next) => {
         totalAdmins,
         totalCourses,
         totalEnrollments,
+        weeklyEnrollments,
+        completedEnrollments,
+        completionRate,
         activeEnrollments,
         totalRevenue,
-        revenueTrend,
+        revenueChart: monthlyRevenueTrend,
+        monthlyRevenueTrend,
+        studentGrowth,
+        isFiltered,
         pendingUsers,
         pendingCourses,
-        recentUsers
-      }
+        recentUsers,
+      },
     });
   } catch (error) {
     next(error);
