@@ -100,6 +100,15 @@ exports.createCourse = async (req, res, next) => {
       return res.status(403).json({ success: false, error: 'Only admins can create and generate courses' });
     }
     const { title, description, category, level, thumbnail, celebrityTeacher, price, duration, rating, outcomes, xp, gradient, icon, status, generateAI } = req.body;
+
+    const allowedStatuses = ['pending', 'approved', 'rejected'];
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid status. Allowed values are: pending, approved, rejected.',
+      });
+    }
+
     const course = await prisma.course.create({
       data: {
         title,

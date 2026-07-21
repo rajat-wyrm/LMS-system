@@ -124,6 +124,16 @@ const Students = () => {
   const [teacherFilter, setTeacherFilter] = useState('');
   const [badgeFilter, setBadgeFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const hasFilters = Boolean(searchQuery || statusFilter || courseFilter || teacherFilter || badgeFilter || dateFilter);
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('');
+    setCourseFilter('');
+    setTeacherFilter('');
+    setBadgeFilter('');
+    setDateFilter('');
+  };
 
   const displayedStudents = useMemo(
     () =>
@@ -392,6 +402,8 @@ const Students = () => {
           setIsAddModalOpen(true);
         }}
         onDelete={handleOpenDeleteModal}
+        hasFilters={hasFilters}
+        onClearFilters={handleClearFilters}
       />
 
       <StudentProfileDrawer
