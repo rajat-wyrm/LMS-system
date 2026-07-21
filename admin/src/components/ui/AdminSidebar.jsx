@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import logo from '../../assets/logo.webp';
 import { useAdminSidebar } from '../../context/AdminSidebarContext';
 import {
   LuLayoutDashboard,
@@ -17,6 +16,8 @@ import {
   LuChevronRight,
   LuChevronLeft,
 } from 'react-icons/lu';
+
+const logo = '/logo.webp';
 
 // ── Per-item accent colour config ─────────────────────────────────────────────
 const ACCENT = {

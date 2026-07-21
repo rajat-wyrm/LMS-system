@@ -22,89 +22,120 @@ const formatRevenue = (n) => {
 // @desc    Get dashboard statistics for admin
 // @route   GET /api/admin/stats
 // @access  Private/Admin
+const buildMonthlyRevenueSeries = (enrollments, monthsToInclude = 12) => {
+  const currentMonthStart = new Date();
+  currentMonthStart.setDate(1);
+  currentMonthStart.setHours(0, 0, 0, 0);
+
+  const revenueMap = new Map();
+
+  for (let i = monthsToInclude - 1; i >= 0; i--) {
+    const monthDate = new Date(
+      currentMonthStart.getFullYear(),
+      currentMonthStart.getMonth() - i,
+      1,
+    );
+    const key = `${monthDate.getFullYear()}-${monthDate.getMonth()}`;
+
+    revenueMap.set(key, {
+      name: monthDate.toLocaleString("en-US", { month: "short" }),
+      month: monthDate.toLocaleString("en-US", { month: "short" }),
+      year: monthDate.getFullYear(),
+      value: 0,
+      revenue: 0,
+    });
+  }
+
+  enrollments.forEach((enrollment) => {
+    if (!enrollment?.createdAt) return;
+
+    const enrollmentDate = new Date(enrollment.createdAt);
+    const key = `${enrollmentDate.getFullYear()}-${enrollmentDate.getMonth()}`;
+    const monthEntry = revenueMap.get(key);
+
+    if (!monthEntry) return;
+
+    const amount = enrollment.course?.price || 0;
+    monthEntry.value += amount;
+    monthEntry.revenue += amount;
+  });
+
+  return Array.from(revenueMap.values());
+};
+
 exports.getDashboardStats = async (req, res, next) => {
   try {
-    const totalUsers = await prisma.user.count();
-    const totalStudents = await prisma.user.count({ where: { role: "user" } });
-    const totalInstructors = await prisma.user.count({
-      where: { role: "instructor" },
-    });
-    const totalAdmins = await prisma.user.count({ where: { role: "admin" } });
-    const totalCourses = await prisma.course.count();
-    const totalEnrollments = await prisma.enrollment.count();
-
+    const { startDate, endDate } = req.query;
     const now = new Date();
-
-    const sevenDaysAgo = new Date();
+    const sevenDaysAgo = new Date(now);
     sevenDaysAgo.setDate(now.getDate() - 7);
 
-    // Weekly enrollments (ROLLING 7 DAYS)
-    const weeklyEnrollments = await prisma.enrollment.count({
-      where: {
-        createdAt: {
-          gte: sevenDaysAgo,
-        },
-      },
-    });
-    //completed enrollments
-    const completedEnrollments = await prisma.enrollment.count({
-      where: {
-        status: "completed",
-      },
-    });
-
-    let completionRate = 0;
-
-    if (totalEnrollments > 0) {
-      completionRate = (completedEnrollments / totalEnrollments) * 100;
-    }
-
-    completionRate = Number(completionRate.toFixed(2));
-    const activeEnrollments = await prisma.enrollment.count({
-      where: { status: "active" },
-    });
-
-    const pendingUsers = await prisma.user.count({
-      where: { status: "pending" },
-    });
-    const pendingCourses = await prisma.course.count({
-      where: { status: "pending" },
-    });
-
-   
+    let currentStart;
+    let currentEnd;
+    let isFiltered = false;
 
     if (startDate && endDate) {
       currentStart = new Date(startDate);
       currentEnd = new Date(endDate);
+
       if (isNaN(currentStart.getTime()) || isNaN(currentEnd.getTime())) {
         return res
           .status(400)
           .json({ success: false, error: "Invalid date format provided." });
       }
+
       isFiltered = true;
     } else {
-      currentEnd = new Date();
-      currentStart = new Date(currentEnd.getTime() - 30 * 24 * 60 * 60 * 1000);
+      currentEnd = new Date(now);
+      currentStart = new Date(now);
+      currentStart.setDate(currentStart.getDate() - 30);
     }
 
     const duration = currentEnd.getTime() - currentStart.getTime();
     const prevStart = new Date(currentStart.getTime() - duration);
     const prevEnd = new Date(currentStart.getTime());
+    const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
-    const dateFilter = isFiltered
-      ? { createdAt: { gte: currentStart, lte: currentEnd } }
-      : {};
-    const prevDateFilter = { createdAt: { gte: prevStart, lte: prevEnd } };
+    const dateFilter = { createdAt: { gte: currentStart, lte: currentEnd } };
+    const prevDateFilter = { createdAt: { gte: prevStart, lt: prevEnd } };
 
-    // Use Promise.all to run all queries in parallel
     const [
+      totalUsers,
+      totalStudents,
+      totalInstructors,
+      totalAdmins,
+      totalCourses,
+      totalEnrollments,
+      weeklyEnrollments,
+      completedEnrollments,
+      activeEnrollments,
+      pendingUsers,
+      pendingCourses,
       studentsCount,
       prevStudentsCount,
       teachersCount,
       prevTeachersCount,
       coursesCount,
       prevCoursesCount,
+      recentUsers,
+      periodEnrollments,
+      prevEnrollments,
+      allEnrollments,
+      lastTwelveMonthsEnrollments,
     ] = await Promise.all([
+      prisma.user.count(),
+      prisma.user.count({ where: { role: "user" } }),
+      prisma.user.count({ where: { role: "instructor" } }),
+      prisma.user.count({ where: { role: "admin" } }),
+      prisma.course.count(),
+      prisma.enrollment.count(),
+      prisma.enrollment.count({
+        where: { createdAt: { gte: sevenDaysAgo } },
+      }),
+      prisma.enrollment.count({ where: { status: "completed" } }),
+      prisma.enrollment.count({ where: { status: "active" } }),
+      prisma.user.count({ where: { status: "pending" } }),
+      prisma.course.count({ where: { status: "pending" } }),
       prisma.user.count({ where: { role: "user", ...dateFilter } }),
       prisma.user.count({ where: { role: "user", ...prevDateFilter } }),
       prisma.user.count({
@@ -113,17 +144,8 @@ exports.getDashboardStats = async (req, res, next) => {
       prisma.user.count({
         where: { role: "instructor", status: "approved", ...prevDateFilter },
       }),
-      prisma.course.count({ where: { ...dateFilter } }),
-      prisma.course.count({ where: { ...prevDateFilter } }),
-      prisma.user.count(),
-      prisma.user.count({ where: { role: "user" } }),
-      prisma.user.count({ where: { role: "instructor" } }),
-      prisma.user.count({ where: { role: "admin" } }),
-      prisma.course.count(),
-      prisma.enrollment.count(),
-      prisma.enrollment.count({ where: { status: "active" } }),
-      prisma.user.count({ where: { status: "pending" } }),
-      prisma.course.count({ where: { status: "pending" } }),
+      prisma.course.count({ where: dateFilter }),
+      prisma.course.count({ where: prevDateFilter }),
       prisma.user.findMany({
         take: 5,
         orderBy: { createdAt: "desc" },
@@ -136,97 +158,51 @@ exports.getDashboardStats = async (req, res, next) => {
           createdAt: true,
         },
       }),
-      // Revenue for current period
       prisma.enrollment.findMany({
-        where: { ...dateFilter },
+        where: dateFilter,
         include: { course: { select: { price: true } } },
       }),
-      // Total revenue (all time)
       prisma.enrollment.findMany({
+        where: prevDateFilter,
+        include: { course: { select: { price: true } } },
+      }),
+      prisma.enrollment.findMany({
+        include: { course: { select: { price: true } } },
+      }),
+      prisma.enrollment.findMany({
+        where: { createdAt: { gte: twelveMonthsAgo } },
         include: { course: { select: { price: true } } },
       }),
     ]);
 
-    // Calculate revenue metrics (Kept from their incoming updates)
+    const completionRate =
+      totalEnrollments > 0
+        ? Number(((completedEnrollments / totalEnrollments) * 100).toFixed(2))
+        : 0;
+
     const periodRevenue = periodEnrollments.reduce(
-      (s, e) => s + (e.course?.price || 0),
+      (sum, enrollment) => sum + (enrollment.course?.price || 0),
+      0,
+    );
+    const prevRevenue = prevEnrollments.reduce(
+      (sum, enrollment) => sum + (enrollment.course?.price || 0),
       0,
     );
     const totalRevenue = allEnrollments.reduce(
-      (s, e) => s + (e.course?.price || 0),
+      (sum, enrollment) => sum + (enrollment.course?.price || 0),
       0,
     );
 
-    // For previous period revenue, query separately (Kept from their incoming updates)
-    const prevEnrollments = await prisma.enrollment.findMany({
-      where: { ...prevDateFilter },
-      include: { course: { select: { price: true } } },
-    });
-    
-    // Monthly revenue (last 12 months)
-    const revenueMap = {};
-
-    // Anchor to the first day of the current month
-    const currentMonth = new Date();
-    currentMonth.setDate(1);
-    currentMonth.setHours(0, 0, 0, 0);
-
-    // Create all 12 months first (chronological order)
-    for (let i = 11; i >= 0; i--) {
-      const monthDate = new Date(
-        currentMonth.getFullYear(),
-        currentMonth.getMonth() - i,
-        1,
-      );
-
-      const key = `${monthDate.getFullYear()}-${monthDate.getMonth()}`;
-
-      revenueMap[key] = {
-        month: monthDate.toLocaleString("default", { month: "short" }),
-        year: monthDate.getFullYear(),
-        revenue: 0,
-      };
-    }
-
-    // Aggregate revenue
-    allEnrollments.forEach((enrollment) => {
-      if (!enrollment.createdAt) return;
-
-      const date = new Date(enrollment.createdAt);
-      const key = `${date.getFullYear()}-${date.getMonth()}`;
-
-      if (revenueMap[key]) {
-        revenueMap[key].revenue += enrollment.course?.price || 0;
-      }
-    });
-
-
-    const revenueChart = Object.values(revenueMap);
-
-    // Get recent 5 users for activity feed (Kept from your changes)
-
-    const recentUsers = await prisma.user.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        status: true,
-        createdAt: true,
-      },
-    });
-
-    const prevRevenue = prevEnrollments.reduce(
-      (s, e) => s + (e.course?.price || 0),
-      0,
+    const monthlyRevenueTrend = buildMonthlyRevenueSeries(
+      lastTwelveMonthsEnrollments,
+      12,
     );
 
     const studentsTrend = getTrend(studentsCount, prevStudentsCount);
     const teachersTrend = getTrend(teachersCount, prevTeachersCount);
     const coursesTrend = getTrend(coursesCount, prevCoursesCount);
     const revenueTrendStats = getTrend(periodRevenue, prevRevenue);
+
     res.status(200).json({
       success: true,
       data: {
@@ -253,16 +229,18 @@ exports.getDashboardStats = async (req, res, next) => {
         completionRate,
         activeEnrollments,
         totalRevenue,
-        revenueChart,
+        revenueChart: monthlyRevenueTrend,
+        monthlyRevenueTrend,
+        isFiltered,
         pendingUsers,
         pendingCourses,
         recentUsers,
-      }
+      },
     });
   } catch (error) {
     next(error);
   }
-  }
+};
 
 // ─── Instructors (Teachers) ───────────────────────────────────────────────────
 // @desc    Get all instructors with stats

@@ -139,7 +139,7 @@ const Profile = () => {
                 <div className="relative group">
                   <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl uppercase border-2 border-primary/20 overflow-hidden">
                     {user.avatar ? (
-                      <img src={`http://localhost:5000${user.avatar}`} alt={user.name} className="w-full h-full object-cover" />
+                      <img src={`${import.meta.env.VITE_API_BASE || "http://localhost:5001"}${user.avatar}`} alt={user.name} className="w-full h-full object-cover" />
                     ) : (
                       user.name.charAt(0)
                     )}
