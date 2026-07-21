@@ -16,6 +16,10 @@ import {
   LuLogOut,
   LuChevronRight,
   LuChevronLeft,
+  LuTarget,
+  LuCalendarClock,
+  LuAward,
+  LuBriefcase,
 } from 'react-icons/lu';
 
 // ── Per-item accent colour config ─────────────────────────────────────────────
@@ -28,6 +32,10 @@ const ACCENT = {
   'Reviews & Ratings':{ color: '#EC4899', rgb: '236,72,153'  },
   Notifications:      { color: '#14B8A6', rgb: '20,184,166'  },
   Settings:           { color: '#6366F1', rgb: '99,102,241'  },
+  'Daily Challenges': { color: '#06B6D4', rgb: '6,182,212'   },
+  'Study Planner':    { color: '#8B5CF6', rgb: '139,92,246'  },
+  'Achievement Badges': { color: '#F59E0B', rgb: '245,158,11' },
+  'Career Options':   { color: '#10B981', rgb: '16,185,129'  },
 };
 
 function SidebarTooltip({ label, children, enabled }) {
@@ -94,6 +102,10 @@ const AdminSidebar = () => {
     { name: 'Analytics',           path: '/dashboard/admin/analytics',    icon: LuChartBar },
     { name: 'Reviews & Ratings',   path: '/dashboard/admin/reviews',      icon: LuMessageSquare },
     { name: 'Notifications',       path: '/dashboard/admin/notifications', icon: LuBell },
+    { name: 'Daily Challenges',    path: '/dashboard/admin/daily-challenges', icon: LuTarget },
+    { name: 'Study Planner',       path: '/dashboard/admin/study-planner', icon: LuCalendarClock },
+    { name: 'Achievement Badges',  path: '/dashboard/admin/achievement-badges', icon: LuAward },
+    { name: 'Career Options',      path: '/dashboard/admin/career-options', icon: LuBriefcase },
     { name: 'Settings',            path: '/dashboard/admin/settings',     icon: LuSettings2 },
   ];
 
