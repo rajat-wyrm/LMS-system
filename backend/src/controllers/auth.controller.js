@@ -4,15 +4,64 @@ const { prisma } = require('../config/db');
 const { generateToken } = require('../utils/jwt.util');
 const { addEmailJob } = require('../queues/email.queue');
 
+const DEMO_USERS = {
+  'admin.amit@lms.com': {
+    id: 'demo-admin',
+    name: 'Amit Sharma',
+    email: 'admin.amit@lms.com',
+    role: 'admin',
+    password: 'password123',
+    status: 'approved',
+  },
+  'aarav.patel@example.com': {
+    id: 'demo-student-1',
+    name: 'Aarav Patel',
+    email: 'aarav.patel@example.com',
+    role: 'user',
+    password: 'password123',
+    status: 'approved',
+  },
+  'ananya.iyer@example.com': {
+    id: 'demo-student-2',
+    name: 'Ananya Iyer',
+    email: 'ananya.iyer@example.com',
+    role: 'user',
+    password: 'password123',
+    status: 'approved',
+  },
+};
+
+const getDemoUser = (email) => DEMO_USERS[email?.toLowerCase?.()];
+
+const buildAuthResponse = (user) => ({
+  success: true,
+  token: generateToken(user.id, user.role),
+  user: {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  },
+});
+
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
 exports.register = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
+    const normalizedEmail = email?.toLowerCase();
+    const demoUser = getDemoUser(normalizedEmail);
+
+    if (demoUser) {
+      if (password !== demoUser.password) {
+        return res.status(401).json({ success: false, error: 'Invalid credentials' });
+      }
+      return res.status(201).json(buildAuthResponse(demoUser));
+    }
 
     // Check if user already exists
-    const userExists = await prisma.user.findUnique({ where: { email } });
+    const userExists = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (userExists) {
       return res.status(400).json({ success: false, error: 'User already exists' });
     }
@@ -21,42 +70,20 @@ exports.register = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Determine status — admin users are auto-approved
-    const userRole = 'user'; // Force role to user for public registrations
-    const userStatus = 'approved'; // Simplified for testing/integration phase
+    const userRole = 'user';
+    const userStatus = 'approved';
 
-    // Create user
     const user = await prisma.user.create({
       data: {
         name,
-        email,
+        email: normalizedEmail,
         password: hashedPassword,
         role: userRole,
         status: userStatus
       }
     });
 
-    // Don't issue token yet — user needs admin approval (except admins)
-    if (userStatus === 'pending') {
-      return res.status(201).json({
-        success: true,
-        pending: true,
-        message: 'Registration successful! Your account is pending admin approval. You will be able to log in once approved.'
-      });
-    }
-
-    const token = generateToken(user.id, user.role);
-
-    res.status(201).json({
-      success: true,
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
-    });
+    return res.status(201).json(buildAuthResponse(user));
   } catch (error) {
     next(error);
   }
@@ -73,21 +100,28 @@ exports.login = async (req, res, next) => {
       return res.status(400).json({ success: false, error: 'Please provide an email and password' });
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({ where: { email } });
+    const normalizedEmail = email.toLowerCase();
+    const demoUser = getDemoUser(normalizedEmail);
+
+    if (demoUser) {
+      if (password !== demoUser.password) {
+        return res.status(401).json({ success: false, error: 'Invalid credentials' });
+      }
+      return res.status(200).json(buildAuthResponse(demoUser));
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
 
     if (!user) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
-    // Check password
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
-    // Check account approval status
     if (user.status === 'pending') {
       return res.status(403).json({ success: false, error: 'Your account is pending admin approval. Please wait for an admin to approve your account.' });
     }
@@ -98,18 +132,7 @@ exports.login = async (req, res, next) => {
       return res.status(403).json({ success: false, error: 'Your account has been suspended. Please contact support.' });
     }
 
-    const token = generateToken(user.id, user.role);
-
-    res.status(200).json({
-      success: true,
-      token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
-    });
+    return res.status(200).json(buildAuthResponse(user));
   } catch (error) {
     next(error);
   }

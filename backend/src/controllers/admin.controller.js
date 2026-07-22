@@ -197,7 +197,7 @@ exports.getDashboardStats = async (req, res, next) => {
     const studentsTrend = getTrend(studentsCount, prevStudentsCount);
     const teachersTrend = getTrend(teachersCount, prevTeachersCount);
     const coursesTrend = getTrend(coursesCount, prevCoursesCount);
-    const revenueTrend = getTrend(periodRevenue, prevRevenue);
+    const revenueTrendSummary = getTrend(periodRevenue, prevRevenue);
 
     res.status(200).json({
       success: true,
@@ -222,7 +222,6 @@ exports.getDashboardStats = async (req, res, next) => {
         totalEnrollments,
         activeEnrollments,
         totalRevenue,
-        revenueTrend,
         pendingUsers,
         pendingCourses,
         recentUsers

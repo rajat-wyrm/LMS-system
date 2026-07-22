@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdClose } from 'react-icons/md';
 import CourseDrawer from '../../../components/admin/courses/CourseDrawer';
@@ -7,16 +7,17 @@ import CourseKpiRow from '../../../components/admin/courses/CourseKpiRow';
 import TopPerformingCourses from '../../../components/admin/courses/TopPerformingCourses';
 import CoursesFilters from '../../../components/admin/courses/CoursesFilters';
 import CourseGrid from '../../../components/admin/courses/CourseGrid';
+import { apiFetch } from '../../../api/config';
 import {
-  loadCourses,
   normalizeCourse,
   getCategories,
   computeRevenue,
 } from '../../../utils/courseUtils';
 import { exportToCSV } from '../../../utils/export';
+import { notifyCourseSync } from '../../../utils/courseSyncEvents';
 
 const Courses = () => {
-  const [courses, setCourses] = useState(loadCourses);
+  const [courses, setCourses] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [levelFilter, setLevelFilter] = useState('');
@@ -25,9 +26,20 @@ const Courses = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
 
+  const fetchCourses = useCallback(async () => {
+    try {
+      const payload = await apiFetch('/admin/courses');
+      const list = Array.isArray(payload?.data) ? payload.data : [];
+      setCourses(list.map((course) => normalizeCourse(course)));
+    } catch (error) {
+      console.error('Failed to fetch courses:', error);
+      setCourses([]);
+    }
+  }, []);
+
   useEffect(() => {
-    localStorage.setItem('lms_courses_data', JSON.stringify(courses));
-  }, [courses]);
+    fetchCourses();
+  }, [fetchCourses]);
 
   useEffect(() => {
     if (!notice) return undefined;
@@ -58,10 +70,17 @@ const Courses = () => {
 
   const showNotice = (message) => setNotice(message);
 
-  const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this course?')) {
-      setCourses((prev) => prev.filter((c) => c.id !== id));
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this course?')) return;
+
+    try {
+      await apiFetch(`/courses/${id}`, { method: 'DELETE' });
+      await fetchCourses();
+      notifyCourseSync();
       showNotice('Course deleted.');
+    } catch (error) {
+      console.error('Failed to delete course:', error);
+      showNotice('Unable to delete course.');
     }
   };
 
@@ -80,36 +99,67 @@ const Courses = () => {
     setIsDrawerOpen(false);
   };
 
-  const handleSaveCourse = (savedCourse) => {
-    setCourses((prev) => {
-      const normalized = normalizeCourse(
-        savedCourse,
-        prev.findIndex((c) => c.id === savedCourse.id)
-      );
-      const exists = prev.some((c) => c.id === savedCourse.id);
-      if (exists) {
-        return prev.map((c) => (c.id === savedCourse.id ? normalized : c));
+  const handleSaveCourse = async (savedCourse) => {
+    try {
+      const isEditing = Boolean(selectedCourse);
+      const payload = {
+        title: savedCourse.title,
+        description: savedCourse.shortDesc || savedCourse.fullDesc || savedCourse.description || '',
+        category: savedCourse.category,
+        level: savedCourse.level,
+        price: Number(savedCourse.price) || 0,
+        thumbnail: savedCourse.thumbnail || savedCourse.avatar || '',
+        celebrityTeacher: savedCourse.teacher || savedCourse.celebrityTeacher || '',
+        duration: savedCourse.duration || savedCourse.hours || 'Self-paced',
+        rating: Number(savedCourse.rating) || 4.5,
+        outcomes: savedCourse.outcomes || [],
+        xp: savedCourse.xp || '1000 XP',
+        gradient: savedCourse.gradient || 'from-blue-600 via-blue-500 to-cyan-400',
+        icon: savedCourse.icon || '📚',
+        status: savedCourse.status === 'Published' ? 'approved' : (savedCourse.status || 'approved'),
+      };
+
+      if (isEditing) {
+        await apiFetch(`/courses/${savedCourse.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+      } else {
+        await apiFetch('/courses', { method: 'POST', body: JSON.stringify(payload) });
       }
-      return [normalized, ...prev];
-    });
-    showNotice(selectedCourse ? 'Course updated.' : 'Course created.');
+
+      await fetchCourses();
+      notifyCourseSync();
+      showNotice(isEditing ? 'Course updated.' : 'Course created.');
+    } catch (error) {
+      console.error('Failed to save course:', error);
+      showNotice('Unable to save course.');
+    }
   };
 
-  const handleClone = (course) => {
-    const clone = normalizeCourse(
-      {
-        ...course,
-        id: Date.now(),
+  const handleClone = async (course) => {
+    try {
+      const clonePayload = {
         title: `${course.title} (Copy)`,
-        students: 0,
-        completion: 0,
-        active: false,
-        revenue: 0,
-      },
-      courses.length
-    );
-    setCourses((prev) => [clone, ...prev]);
-    showNotice('Course cloned as draft.');
+        description: course.description || course.shortDesc || 'Cloned course',
+        category: course.category,
+        level: course.level,
+        price: Number(course.price) || 0,
+        thumbnail: course.thumbnail || '',
+        celebrityTeacher: course.teacher || course.celebrityTeacher || '',
+        duration: course.duration || 'Self-paced',
+        rating: Number(course.rating) || 4.5,
+        outcomes: course.outcomes || [],
+        xp: course.xp || '1000 XP',
+        gradient: course.gradient || 'from-blue-600 via-blue-500 to-cyan-400',
+        icon: course.icon || '📚',
+        status: 'approved',
+      };
+      await apiFetch('/courses', { method: 'POST', body: JSON.stringify(clonePayload) });
+      await fetchCourses();
+      notifyCourseSync();
+      showNotice('Course cloned as draft.');
+    } catch (error) {
+      console.error('Failed to clone course:', error);
+      showNotice('Unable to clone course.');
+    }
   };
 
   const handleExport = () => {

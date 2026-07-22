@@ -102,7 +102,11 @@ const InstructorPortal = () => {
     setIsLoading(true);
     try {
       const res = await courseApi.getAllCourses();
-      const all: CourseItem[] = res.data.data;
+      const all: CourseItem[] = (res.data.data || []).map((course: any) => ({
+        ...course,
+        lessons: course.lessons || [],
+        _count: course._count || { enrollments: 0 },
+      }));
       // Instructors see only their own; admins see all
       const filtered =
         user.role === "admin"
@@ -146,7 +150,7 @@ const InstructorPortal = () => {
     try {
       await courseApi.deleteCourse(deleteTarget.id);
       toast({ title: "Course deleted", description: `"${deleteTarget.title}" was removed.` });
-      setCourses((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+      await fetchCourses();
       setDeleteTarget(null);
     } catch (err: any) {
       toast({ title: "Delete failed", description: err?.response?.data?.error || "Something went wrong.", variant: "destructive" });

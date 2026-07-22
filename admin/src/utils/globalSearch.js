@@ -4,23 +4,6 @@ import { loadCourses } from './courseUtils';
 const STUDENTS_KEY = 'lms_students_data';
 const TEACHERS_KEY = 'lms_teachers_data';
 
-const MOCK_ENROLLMENTS = [
-  { id: 'e1', studentName: 'Rahul Sharma', course: 'Full Stack Web Development', date: '2026-05-28' },
-  { id: 'e2', studentName: 'Priya Patel', course: 'DSA with Java', date: '2026-05-27' },
-  { id: 'e3', studentName: 'Aman Verma', course: 'MERN Stack', date: '2026-05-26' },
-];
-
-const MOCK_CERTIFICATES = [
-  { id: 'c1', studentName: 'Priya Patel', course: 'DSA with Java', date: '2026-05-28' },
-  { id: 'c2', studentName: 'Deepika Mishra', course: 'Python Basics', date: '2026-05-25' },
-];
-
-const MOCK_PAYMENTS = [
-  { id: 'p1', name: 'Aman Verma', amount: '₹12,999', date: '2026-05-28', status: 'Paid' },
-  { id: 'p2', name: 'Anjali Verma', amount: '₹8,499', date: '2026-05-27', status: 'Paid' },
-  { id: 'p3', name: 'Rahul Sharma', amount: '₹15,999', date: '2026-05-26', status: 'Pending' },
-];
-
 const FALLBACK_STUDENTS = [
   { id: 1, name: 'Deepika Mishra', email: 'dipmish9898@gmail.com' },
   { id: 2, name: 'Rahul Sharma', email: 'rahul@gmail.com' },
@@ -57,9 +40,9 @@ export function loadSearchSources() {
     students,
     teachers,
     courses,
-    enrollments: MOCK_ENROLLMENTS,
-    certificates: MOCK_CERTIFICATES,
-    payments: MOCK_PAYMENTS,
+    enrollments: [],
+    certificates: [],
+    payments: [],
   };
 }
 
