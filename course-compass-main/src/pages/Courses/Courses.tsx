@@ -29,6 +29,20 @@ const Courses = () => {
         setDbCourses(res.data.data);
       } catch (err) {
         console.error("Failed to fetch courses:", err);
+        const localCoursesStr = localStorage.getItem('lms_courses_data');
+        if (localCoursesStr) {
+          try {
+            const localCourses = JSON.parse(localCoursesStr);
+            const mapped = localCourses.map((c: any) => ({
+              ...c,
+              price: c.price ? parseFloat(c.price) : 0,
+              _count: { enrollments: c.students || 0 }
+            }));
+            setDbCourses(mapped);
+          } catch (e) {
+            console.error('Failed to parse local courses:', e);
+          }
+        }
       } finally {
         setIsLoading(false);
       }

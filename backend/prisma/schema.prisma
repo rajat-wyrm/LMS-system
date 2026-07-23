@@ -3,6 +3,22 @@ generator client {
 }
 
 datasource db {
+<<<<<<< HEAD
+  provider = "sqlite"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("user")
+  status    String   @default("pending") // pending, approved, rejected, suspended
+  bio       String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+=======
   provider = "postgresql"
 }
 
@@ -42,12 +58,34 @@ model User {
   avatar      String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+>>>>>>> b7cd94fa84e3298cbf9191e299f6d91035d1915a
 
   courses     Course[]     @relation("InstructorCourses")
   enrollments Enrollment[]
+
+  @@index([email])
+  @@index([name])
 }
 
 model Course {
+<<<<<<< HEAD
+  id               String   @id @default(cuid())
+  title            String
+  description      String
+  category         String
+  level            String   @default("Beginner")
+  price            Float    @default(0)
+  thumbnail        String?
+  celebrityTeacher String?
+  instructorId     String
+  status           String   @default("pending") // pending, approved, rejected
+  instructor       User     @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  lessons     Lesson[]
+  enrollments Enrollment[]
+=======
   id               String          @id @default(cuid())
   title            String
   description      String
@@ -72,17 +110,11 @@ model Course {
   enrollments      Enrollment[]
   learningPaths    LearningPath[]  @relation("LearningPathCourses")
 }
+>>>>>>> b7cd94fa84e3298cbf9191e299f6d91035d1915a
 
-model LearningPath {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  title       String
-  description String
-  duration    String
-  color       String   @default("teal")
-  courses     Course[] @relation("LearningPathCourses")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  @@index([title])
+  @@index([category])
+  @@index([level])
 }
 
 model Lesson {
@@ -104,7 +136,7 @@ model Enrollment {
   userId              String
   courseId            String
   progress            Int              @default(0)
-  status              EnrollmentStatus @default(active)
+  status              String           @default("active")
   certificateApproved Boolean          @default(false)
   mentor              String?
   createdAt           DateTime         @default(now())
@@ -114,6 +146,10 @@ model Enrollment {
   course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   completedLessons Lesson[] @relation("CompletedLessons")
 
+<<<<<<< HEAD
+  @@unique([userId, courseId]) // Prevent duplicate enrollments
+=======
   @@unique([userId, courseId])
   @@index([createdAt])
+>>>>>>> b7cd94fa84e3298cbf9191e299f6d91035d1915a
 }

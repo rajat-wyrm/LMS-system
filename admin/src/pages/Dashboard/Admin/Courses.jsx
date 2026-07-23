@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdClose } from 'react-icons/md';
 import CourseDrawer from '../../../components/admin/courses/CourseDrawer';
@@ -16,6 +17,7 @@ import {
 import { exportToCSV } from '../../../utils/export';
 
 const Courses = () => {
+  const navigate = useNavigate();
   const [courses, setCourses] = useState(loadCourses);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
@@ -175,8 +177,23 @@ const Courses = () => {
         onCreateCourse={handleOpenAddDrawer}
         onEdit={handleOpenEditDrawer}
         onClone={handleClone}
-        onAnalytics={() => showNotice('Course analytics — opening soon.')}
-        onPreview={() => showNotice('Course preview — opening soon.')}
+        onAnalytics={() => navigate('/dashboard/admin/analytics')}
+        onPreview={(course) => {
+          const params = new URLSearchParams({
+            preview: 'true',
+            id: String(course.id),
+            title: course.title || '',
+            category: course.category || '',
+            level: course.level || '',
+            price: String(course.price || 0),
+            hours: String(course.hours || 0),
+            students: String(course.students || 0),
+            rating: String(course.rating || 0),
+            teacher: course.teacher || '',
+            gradient: course.gradient || '',
+          });
+          window.open(`http://localhost:3000/courses/${course.id}?${params.toString()}`, '_blank');
+        }}
         onDelete={handleDelete}
         hasFilters={hasFilters}
         onClearFilters={handleClearFilters}
