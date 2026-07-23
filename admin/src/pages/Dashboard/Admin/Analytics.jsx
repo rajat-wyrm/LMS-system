@@ -62,7 +62,7 @@ const Analytics = () => {
   };
 
   return (
-    <div className="admin-page space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 -m-4 md:-m-6 border border-[var(--admin-border)] shadow-[var(--admin-shadow-card)] bg-[var(--admin-page-panel)]">
+    <div className="space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 border border-border shadow-sm bg-card/60 backdrop-blur-xl font-body">
       <AnalyticsHero
         revenueGrowth={heroStats.revenueGrowth}
         studentGrowth={heroStats.studentGrowth}
