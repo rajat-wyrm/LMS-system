@@ -242,7 +242,7 @@ exports.deleteCourse = async (req, res, next) => {
         .json({ success: false, error: "Course not found" });
     }
 
-    if (req.user.role !== "admin") {
+    if(req.user.role !=="admin") {
       return res.status(403).json({
         success: false,
         error: "Not authorized to delete this course. Admin only.",
