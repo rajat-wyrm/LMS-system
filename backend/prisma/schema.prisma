@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,6 +12,19 @@ enum Role {
   admin
 }
 
+enum UserStatus {
+  pending
+  approved
+  rejected
+  suspended
+}
+
+enum CourseStatus {
+  pending
+  approved
+  rejected
+}
+
 enum EnrollmentStatus {
   active
   completed
@@ -27,7 +37,7 @@ model User {
   email       String       @unique
   password    String
   role        Role         @default(user)
-  status      String       @default("pending") // pending, approved, rejected, suspended
+  status      UserStatus   @default(pending)
   bio         String?
   avatar      String?
   createdAt   DateTime     @default(now())
@@ -38,29 +48,29 @@ model User {
 }
 
 model Course {
-  id               String       @id @default(cuid())
+  id               String          @id @default(cuid())
   title            String
   description      String
   category         String
-  level            String       @default("Beginner")
-  price            Float        @default(0)
+  level            String          @default("Beginner")
+  price            Float           @default(0)
   thumbnail        String?
   celebrityTeacher String?
   instructorId     String
   duration         String?
-  rating           Float        @default(4.5)
+  rating           Float           @default(4.5)
   outcomes         String[]
   xp               String?
   gradient         String?
   icon             String?
-  status           String       @default("pending") // pending, approved, rejected
-  instructor       User         @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  status           CourseStatus    @default(pending)
+  instructor       User            @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 
-  lessons     Lesson[]
-  enrollments Enrollment[]
-  learningPaths LearningPath[] @relation("LearningPathCourses")
+  lessons          Lesson[]
+  enrollments      Enrollment[]
+  learningPaths    LearningPath[]  @relation("LearningPathCourses")
 }
 
 model LearningPath {
@@ -90,9 +100,9 @@ model Lesson {
 }
 
 model Enrollment {
-  id               String           @id @default(cuid())
-  userId           String
-  courseId         String
+  id                  String           @id @default(cuid())
+  userId              String
+  courseId            String
   progress            Int              @default(0)
   status              EnrollmentStatus @default(active)
   certificateApproved Boolean          @default(false)
@@ -104,6 +114,6 @@ model Enrollment {
   course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   completedLessons Lesson[] @relation("CompletedLessons")
 
-  @@unique([userId, courseId]) // Prevent duplicate enrollments
-   @@index([createdAt]) //for weekly stats performance
+  @@unique([userId, courseId])
+  @@index([createdAt])
 }

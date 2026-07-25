@@ -8,6 +8,7 @@ import {
 import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { getCourseImageUrl } from "@/utils/courseImage";
 
 type Tab = "courses" | "curriculum";
 
@@ -283,7 +284,7 @@ const InstructorPortal = () => {
                 {/* Thumbnail */}
                 <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted shrink-0">
                   {c.thumbnail ? (
-                    <img src={c.thumbnail} alt={c.title} className="w-full h-full object-cover" />
+                    <img src={getCourseImageUrl(c.thumbnail)} alt={c.title} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-primary/10">
                       <BookOpen className="w-5 h-5 text-primary" />

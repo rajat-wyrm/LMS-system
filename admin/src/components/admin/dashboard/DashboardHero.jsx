@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -9,18 +9,31 @@ import {
   MdTrendingUp,
   MdSchool,
   MdEmojiEvents,
+  MdOutlinePendingActions
 } from 'react-icons/md';
-import { todaySummary } from './dashboardData';
 import { useDateRange } from '../../../context/DateRangeContext';
-import { scaleTodaySummary } from '../../../utils/dashboardDateFilter';
+import { apiFetch } from '../../../api/config';
 
 const DashboardHero = () => {
   const navigate = useNavigate();
   const { startDate, endDate, label } = useDateRange();
-  const summary = useMemo(
-    () => scaleTodaySummary(todaySummary, startDate, endDate),
-    [startDate, endDate]
-  );
+  const [stats, setStats] = useState(null);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const query = startDate && endDate
+        ? `?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
+        : '';
+      const data = await apiFetch(`/admin/stats${query}`);
+      setStats(data.data);
+    } catch (err) {
+      console.error('Hero stats fetch failed:', err);
+    }
+  }, [startDate, endDate]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   return (
     <motion.section
@@ -62,10 +75,10 @@ const DashboardHero = () => {
             </p>
             <div className="flex flex-wrap gap-3">
               {[
-                { label: 'New enrollments', value: summary.newEnrollments, icon: MdPersonAdd, color: '#3B82F6' },
-                { label: 'Courses published', value: summary.coursesPublished, icon: MdSchool, color: '#8B5CF6' },
-                { label: 'Certificates', value: summary.certificatesIssued, icon: MdEmojiEvents, color: '#10B981' },
-                { label: 'Live sessions', value: summary.liveSessions, icon: MdTrendingUp, color: '#06B6D4' },
+                { label: 'New Students', value: stats?.studentsCount || 0, icon: MdPersonAdd, color: '#3B82F6' },
+                { label: 'Courses added', value: stats?.coursesCount || 0, icon: MdSchool, color: '#8B5CF6' },
+                { label: 'Active Enrolls', value: stats?.activeEnrollments || 0, icon: MdTrendingUp, color: '#10B981' },
+                { label: 'Pending Users', value: stats?.pendingUsers || 0, icon: MdOutlinePendingActions, color: '#06B6D4' },
               ].map((stat) => {
                 const Icon = stat.icon;
                 return (

@@ -162,7 +162,7 @@ exports.forgotPassword = async (req, res, next) => {
     const secret = process.env.JWT_SECRET + user.password;
     const token = jwt.sign({ email: user.email, id: user.id }, secret, { expiresIn: '15m' });
 
-    const resetLink = `${process.env.CLIENT_URL || 'http://localhost:8081'}/reset-password/${user.id}/${token}`;
+    const resetLink = `${process.env.CLIENT_URL || 'http://localhost:3000'}/reset-password/${user.id}/${token}`;
     
     // Dispatch async email job
     await addEmailJob({

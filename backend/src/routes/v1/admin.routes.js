@@ -1,7 +1,12 @@
 const express = require('express');
 const {
   getDashboardStats,
+  getTopPerformers,
+  getRecentActivity,
+  getStudentGrowth,
+  getAnalytics,
   getAdminUsers,
+  getAdminUser,
   updateUserStatus,
   deleteAdminUser,
   getAdminCourses,
@@ -17,10 +22,14 @@ router.use(authorize('admin')); // All admin routes are admin only
 
 // Stats
 router.route('/stats').get(getDashboardStats);
+router.route('/analytics').get(getAnalytics);
+router.route('/dashboard/top-performers').get(getTopPerformers);
+router.route('/dashboard/recent-activity').get(getRecentActivity);
+router.route('/dashboard/student-growth').get(getStudentGrowth);
 
 // User management
 router.route('/users').get(getAdminUsers);
-router.route('/users/:id').put(updateUserStatus).delete(deleteAdminUser);
+router.route('/users/:id').get(getAdminUser).put(updateUserStatus).delete(deleteAdminUser);
 
 // Course management
 router.route('/courses').get(getAdminCourses);

@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import { Star, Users, School, TrendingUp, Clock, BookOpen } from "lucide-react";
 import { useState } from "react";
-
-const FALLBACK = "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&q=80";
+import { getCourseImageUrl } from "@/utils/courseImage";
 
 const levelStyles: Record<string, { bg: string; border: string; color: string }> = {
   Beginner: { bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.35)', color: '#10B981' },
@@ -24,7 +23,7 @@ const Stat = ({ icon: Icon, label, value, accent }: any) => (
 export const CourseCard = ({ course, index = 0 }: { course: Course; index?: number }) => {
   const [imgError, setImgError] = useState(false);
   const lvl = levelStyles[course.level] || levelStyles.Beginner;
-  const thumbnail = !imgError && course.thumbnail ? course.thumbnail : FALLBACK;
+  const thumbnail = !imgError ? getCourseImageUrl(course.thumbnail) : getCourseImageUrl(undefined);
 
   const fullStars = Math.floor(course.rating || 0);
   const showProgress = course.progress !== undefined;

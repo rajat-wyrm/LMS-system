@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -8,7 +7,6 @@ import {
   MdUpdate,
   MdError,
 } from 'react-icons/md';
-import { notificationPreview } from './dashboardData';
 
 const CATEGORY_ICONS = {
   enrollment: MdPersonAdd,
@@ -17,6 +15,36 @@ const CATEGORY_ICONS = {
   courseUpdate: MdUpdate,
   critical: MdError,
 };
+
+const notificationPreview = [
+  {
+    id: 1,
+    title: 'Admin dashboard metrics are live',
+    desc: 'Cards are now reading values from the backend API.',
+    time: 'Just now',
+    category: 'completion',
+    accent: '#10B981',
+    priority: false,
+  },
+  {
+    id: 2,
+    title: 'Pending users require review',
+    desc: 'Check new instructor and learner signups awaiting approval.',
+    time: 'Today',
+    category: 'enrollment',
+    accent: '#3B82F6',
+    priority: false,
+  },
+  {
+    id: 3,
+    title: 'Analytics endpoint connected',
+    desc: 'Overview charts now have a valid backend route.',
+    time: 'Today',
+    category: 'courseUpdate',
+    accent: '#8B5CF6',
+    priority: false,
+  },
+];
 
 const DashboardNotificationPreview = () => (
   <motion.aside
