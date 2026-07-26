@@ -17,6 +17,7 @@ import {
 import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { getCourseImageUrl } from "@/utils/courseImage";
 
 const tabs = ["About", "Outcomes", "Curriculum", "Instructors"] as const;
 type Tab = typeof tabs[number];
@@ -56,11 +57,6 @@ const CourseDetails = () => {
   const [enrollLoading, setEnrollLoading] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   
-  // Mentor Selection State
-  const [mentorSelectionOpen, setMentorSelectionOpen] = useState(false);
-  const [selectedMentor, setSelectedMentor] = useState("");
-  const celebrities = ["Virat Kohli", "Salman Khan", "Narendra Modi", "Sachin Tendulkar", "Hardik Pandya", "Virtual Mentor"];
-
   // Wishlist state
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
@@ -100,16 +96,6 @@ const CourseDetails = () => {
           const enrollment = res.data.data?.find((e: any) => e.courseId === id);
           if (enrollment) {
             setIsEnrolled(true);
-            if (enrollment.mentor) {
-               setCourse((prev: any) => prev ? ({
-                  ...prev,
-                  instructors: [{
-                    name: enrollment.mentor,
-                    role: "Lead Instructor",
-                    avatar: "https://ui-avatars.com/api/?name=" + enrollment.mentor
-                  }]
-               }) : prev);
-            }
           }
         })
         .catch(() => {});
@@ -135,11 +121,6 @@ const CourseDetails = () => {
       return;
     }
 
-    setMentorSelectionOpen(true);
-  };
-
-  const proceedAfterMentorSelection = () => {
-    setMentorSelectionOpen(false);
     if (course.price && course.price > 0) {
       setCheckoutOpen(true);
     } else {
@@ -151,18 +132,8 @@ const CourseDetails = () => {
 
     setEnrollLoading(true);
     try {
-      await courseApi.enrollInCourse(id!, { mentor: selectedMentor });
+      await courseApi.enrollInCourse(id!);
       setIsEnrolled(true);
-      if (selectedMentor) {
-        setCourse((prev: any) => prev ? ({
-            ...prev,
-            instructors: [{
-              name: selectedMentor,
-              role: "Lead Instructor",
-              avatar: "https://ui-avatars.com/api/?name=" + selectedMentor
-            }]
-        }) : prev);
-      }
       toast({
         title: "Enrolled successfully! 🎉",
         description: "You are now enrolled. Head to your dashboard to start learning.",
@@ -248,7 +219,7 @@ const CourseDetails = () => {
       <div className="relative overflow-hidden border-b border-border">
         <div className="absolute inset-0">
           <img
-            src={course.thumbnail}
+            src={getCourseImageUrl(course.thumbnail)}
             alt=""
             className="w-full h-full object-cover opacity-20 blur-2xl"
           />
@@ -294,7 +265,7 @@ const CourseDetails = () => {
             <div className="glass-card overflow-hidden lg:sticky lg:top-20">
               <div className="relative aspect-video">
                 <img
-                  src={course.thumbnail}
+                  src={getCourseImageUrl(course.thumbnail)}
                   alt={course.title}
                   className="w-full h-full object-cover"
                 />
@@ -373,39 +344,6 @@ const CourseDetails = () => {
                         </>
                       )}
                     </button>
-
-                    {/* Mentor Selection Modal */}
-                    <AlertDialog open={mentorSelectionOpen} onOpenChange={setMentorSelectionOpen}>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Choose Your AI Mentor</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Select the celebrity you want as your AI teacher for this course.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <div className="py-4">
-                          <label className="text-sm font-medium text-foreground/80 mb-1.5 block">Preferred Mentor</label>
-                          <select
-                            value={selectedMentor}
-                            onChange={(e) => setSelectedMentor(e.target.value)}
-                            className="w-full bg-muted/30 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-                          >
-                            <option value="">Select a Mentor</option>
-                            {celebrities.map((c) => <option key={c} value={c}>{c}</option>)}
-                          </select>
-                        </div>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={proceedAfterMentorSelection}
-                            className="btn-primary"
-                            disabled={!selectedMentor}
-                          >
-                            Continue
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
 
                     {/* Simulated Checkout Modal */}
                     <AlertDialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
@@ -517,12 +455,12 @@ const CourseDetails = () => {
                 {course.instructor && (
                   <div className="glass-card p-5 flex items-center gap-4">
                     <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(course.celebrityTeacher || course.instructor?.name || 'Instructor')}&background=8B5CF6&color=fff&bold=true`}
+                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor?.name || 'Instructor')}&background=8B5CF6&color=fff&bold=true`}
                       alt={course.instructor?.name}
                       className="w-16 h-16 rounded-full object-cover border-2 border-secondary"
                     />
                     <div>
-                      <h4 className="font-display font-semibold">{course.celebrityTeacher || course.instructor?.name}</h4>
+                      <h4 className="font-display font-semibold">{course.instructor?.name || 'Instructor unavailable'}</h4>
                       <p className="text-xs text-muted-foreground">Lead Instructor</p>
                     </div>
                   </div>

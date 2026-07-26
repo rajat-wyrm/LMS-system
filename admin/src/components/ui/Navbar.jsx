@@ -17,7 +17,7 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="admin-navbar h-16 border-b flex items-center justify-between px-6 sticky top-0 z-40 bg-[var(--admin-nav-bg)] border-[var(--admin-nav-border)] backdrop-blur-lg">
+      <header className="admin-navbar h-16 border-b border-border flex items-center justify-between px-6 sticky top-0 z-40 bg-background/80 backdrop-blur-xl">
         <GlobalSearch />
 
         <div className="flex items-center gap-3">
@@ -25,14 +25,14 @@ const Navbar = () => {
             type="button"
             onClick={toggleTheme}
             title={isLight ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
-            className="w-8 h-8 rounded-lg text-[var(--admin-text-muted)] hover:text-amber-500 hover:bg-[var(--admin-surface-hover)] active:scale-95 focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2 transition-all flex items-center justify-center"
+            className="w-8 h-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted active:scale-95 focus:outline-none focus:ring-1 focus:ring-primary transition-all flex items-center justify-center"
           >
             {isLight ? <MdNightsStay size={18} /> : <MdWbSunny size={18} />}
           </button>
 
           <DateRangePicker />
 
-          <div className="w-px h-8 bg-[var(--admin-border-subtle)]" />
+          <div className="w-px h-8 bg-border" />
 
           <ProfileDropdown onToast={showToast} />
         </div>
@@ -41,7 +41,7 @@ const Navbar = () => {
       {toast && (
         <div
           role="status"
-          className="fixed top-20 right-6 z-[100] px-4 py-2.5 rounded-xl text-xs font-medium text-[var(--admin-text-primary)] border shadow-lg bg-[var(--admin-surface-raised)] border-[var(--admin-border)] backdrop-blur-lg animate-fade-in"
+          className="fixed top-20 right-6 z-[100] px-4 py-2.5 rounded-xl text-xs font-medium text-foreground border border-border shadow-lg bg-card/90 backdrop-blur-lg animate-fade-in"
         >
           {toast}
         </div>

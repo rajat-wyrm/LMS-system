@@ -8,15 +8,15 @@ import {
 import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { getCourseImageUrl } from "@/utils/courseImage";
 
-const celebrities = ["Virat Kohli", "Salman Khan", "Narendra Modi", "Sachin Tendulkar", "Hardik Pandya"];
 const levels      = ["Beginner", "Intermediate", "Advanced"];
 const categories  = ["Python", "CSS", "MERN Stack", "Data Science", "AI & Machine Learning"];
 
 interface Lesson { id: string; title: string; content: string; videoUrl?: string; order: number; }
 interface CourseDetail {
   id: string; title: string; description: string; category: string; level: string;
-  thumbnail?: string; celebrityTeacher?: string;
+  thumbnail?: string;
   instructor?: { id: string; name: string };
   lessons: Lesson[];
   _count?: { enrollments: number };
@@ -67,7 +67,7 @@ const ManageCourse = () => {
 
   // ── Edit form ──────────────────────────────────────────────────────────────
   const [editForm, setEditForm] = useState({
-    title: "", description: "", category: "", level: "", thumbnail: "", celebrityTeacher: "",
+    title: "", description: "", category: "", level: "", thumbnail: "",
   });
   const [saveLoading, setSaveLoading] = useState(false);
   const [thumbError, setThumbError] = useState(false);
@@ -94,7 +94,7 @@ const ManageCourse = () => {
       setCourse(c);
       setEditForm({
         title: c.title, description: c.description, category: c.category,
-        level: c.level, thumbnail: c.thumbnail ?? "", celebrityTeacher: c.celebrityTeacher ?? "",
+        level: c.level, thumbnail: c.thumbnail ?? "",
       });
       setLessonForm((f) => ({ ...f, order: (c.lessons?.length ?? 0) + 1 }));
     } catch {
@@ -215,7 +215,7 @@ const ManageCourse = () => {
           {/* Thumbnail preview */}
           <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted shrink-0 border border-border/50">
             {editForm.thumbnail && !thumbError ? (
-              <img src={editForm.thumbnail} alt={course?.title} className="w-full h-full object-cover"
+              <img src={getCourseImageUrl(editForm.thumbnail)} alt={course?.title} className="w-full h-full object-cover"
                 onError={() => setThumbError(true)} />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-primary/10">
@@ -285,15 +285,6 @@ const ManageCourse = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI Celebrity Teacher</label>
-              <select value={editForm.celebrityTeacher} onChange={(e) => setEditForm((f) => ({ ...f, celebrityTeacher: e.target.value }))}
-                className="w-full bg-muted/40 border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
-                <option value="">None</option>
-                {celebrities.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-
-            <div className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Thumbnail URL</label>
               <input value={editForm.thumbnail} onChange={(e) => { setEditForm((f) => ({ ...f, thumbnail: e.target.value })); setThumbError(false); }}
                 placeholder="https://example.com/image.jpg"
@@ -304,7 +295,7 @@ const ManageCourse = () => {
             {editForm.thumbnail && (
               <div className="md:col-span-2 rounded-xl overflow-hidden border border-border/50 h-40 bg-muted/20 relative">
                 {!thumbError ? (
-                  <img src={editForm.thumbnail} alt="preview" className="w-full h-full object-cover"
+                  <img src={getCourseImageUrl(editForm.thumbnail)} alt="preview" className="w-full h-full object-cover"
                     onError={() => setThumbError(true)} />
                 ) : (
                   <div className="flex items-center justify-center h-full text-sm text-destructive gap-2">

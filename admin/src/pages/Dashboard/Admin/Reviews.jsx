@@ -156,51 +156,32 @@ function KpiCard({ card, index }) {
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.1 + index * 0.08, ease: 'easeOut' }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      className={`relative overflow-hidden rounded-2xl border ${card.border} bg-gradient-to-br ${card.gradient} backdrop-blur-xl p-5 cursor-default group shadow-xl ${card.glowShadow}`}
-      style={{ boxShadow: `0 8px 32px -4px rgba(0,0,0,0.4)` }}
+      whileHover={{ y: -6, scale: 1.02 }}
+      className="relative overflow-hidden rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-5 cursor-default group shadow-sm transition-all duration-300"
     >
-      {/* Decorative glow orb */}
-      <div
-        className={`absolute -right-8 -top-8 w-32 h-32 rounded-full ${card.glow} opacity-10 blur-2xl group-hover:opacity-20 transition-opacity duration-500`}
-      />
-      <div
-        className={`absolute -right-4 -top-4 w-16 h-16 rounded-full ${card.glow} opacity-15 blur-xl`}
-      />
-
-      {/* Glassmorphism inner surface */}
-      <div className="absolute inset-0 rounded-2xl bg-white/[0.02]" />
-
-      {/* Top row: icon + trend badge */}
       <div className="relative z-10 flex items-start justify-between mb-4">
         <div className="text-2xl">{card.icon}</div>
         <span
-          className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full border ${card.badge}`}
+          className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border border-border bg-muted text-foreground font-display"
         >
           {card.trend === 'up'
-            ? <MdArrowUpward size={12} />
-            : <MdArrowDownward size={12} />}
+            ? <MdArrowUpward size={12} className="text-emerald-400" />
+            : <MdArrowDownward size={12} className="text-destructive" />}
           {card.trendVal}
         </span>
       </div>
 
-      {/* Value */}
       <div className="relative z-10 mb-1">
-        <span className="text-3xl font-black text-white tracking-tight">{card.value}</span>
+        <span className="text-3xl font-bold font-display text-foreground tracking-tight">{card.value}</span>
       </div>
 
-      {/* Title */}
-      <div className="relative z-10 text-xs font-semibold text-gray-300 mb-1 leading-tight">
+      <div className="relative z-10 text-xs font-semibold text-foreground mb-1 leading-tight font-display">
         {card.title}
       </div>
 
-      {/* Sub */}
-      <div className="relative z-10 text-[11px] text-gray-500">{card.sub}</div>
+      <div className="relative z-10 text-[11px] text-muted-foreground">{card.sub}</div>
 
-      {/* Bottom accent line */}
-      <div
-        className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${card.ring} opacity-40 group-hover:opacity-80 transition-opacity duration-300`}
-      />
+      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary opacity-40 group-hover:opacity-100 transition-opacity duration-300" />
     </motion.div>
   );
 }
@@ -216,18 +197,18 @@ function DateRangeModal({ onClose }) {
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+      className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
     >
       <motion.div
         initial={{ scale: 0.9, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#0B1120] border border-white/10 rounded-3xl w-full max-w-sm shadow-2xl p-6"
+        className="bg-card border border-border rounded-3xl w-full max-w-sm shadow-2xl p-6 font-body"
       >
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <MdDateRange size={18} className="text-purple-400" /> Date Range
+          <h3 className="text-base font-bold font-display text-foreground flex items-center gap-2">
+            <MdDateRange size={18} className="text-primary" /> Date Range
           </h3>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
             <MdClose size={18} />
           </button>
         </div>
@@ -238,8 +219,8 @@ function DateRangeModal({ onClose }) {
               onClick={() => setSelected(p)}
               className={`py-2.5 px-3 rounded-xl text-sm font-medium transition-all ${
                 selected === p
-                  ? 'bg-purple-600/30 border border-purple-500/50 text-white'
-                  : 'bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10'
+                  ? 'bg-primary/20 border border-primary text-foreground'
+                  : 'bg-muted/50 border border-border text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
             >
               {p}
@@ -248,7 +229,7 @@ function DateRangeModal({ onClose }) {
         </div>
         <button
           onClick={onClose}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-semibold text-sm hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all"
+          className="btn-primary w-full text-sm font-semibold !py-3"
         >
           Apply Range
         </button>
@@ -268,18 +249,18 @@ function AiSummaryModal({ onClose }) {
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+      className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
     >
       <motion.div
         initial={{ scale: 0.9, y: 16 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#0B1120] border border-purple-500/20 rounded-3xl w-full max-w-lg shadow-2xl p-6"
+        className="bg-card border border-border rounded-3xl w-full max-w-lg shadow-2xl p-6 font-body"
       >
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
-            <MdAutoAwesome size={18} className="text-purple-400" /> AI Summary
+          <h3 className="text-base font-bold font-display text-foreground flex items-center gap-2">
+            <MdAutoAwesome size={18} className="text-secondary" /> AI Summary
           </h3>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
             <MdClose size={18} />
           </button>
         </div>
@@ -287,32 +268,32 @@ function AiSummaryModal({ onClose }) {
         {loading ? (
           <div className="py-12 flex flex-col items-center gap-4">
             <div className="relative w-14 h-14">
-              <div className="absolute inset-0 rounded-full border-2 border-purple-500/20" />
-              <div className="absolute inset-0 rounded-full border-t-2 border-purple-500 animate-spin" />
-              <MdAutoAwesome size={22} className="absolute inset-0 m-auto text-purple-400" />
+              <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
+              <div className="absolute inset-0 rounded-full border-t-2 border-primary animate-spin" />
+              <MdAutoAwesome size={22} className="absolute inset-0 m-auto text-primary" />
             </div>
-            <p className="text-sm text-gray-500 animate-pulse">Analyzing {initialReviews.length} reviews with AI…</p>
+            <p className="text-sm text-muted-foreground animate-pulse font-body">Analyzing {initialReviews.length} reviews with AI…</p>
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="bg-gradient-to-br from-purple-600/10 to-cyan-600/5 border border-purple-500/20 rounded-2xl p-4 text-sm text-gray-300 leading-relaxed">
-              <p className="font-semibold text-white mb-2">📊 Platform Sentiment Overview</p>
+            <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 text-sm text-foreground leading-relaxed font-body">
+              <p className="font-semibold font-display text-foreground mb-2">📊 Platform Sentiment Overview</p>
               <p>Student sentiment is <span className="text-emerald-400 font-medium">highly positive</span> with 92% of reviews rated 4★ or above. The most praised attributes are <strong>instructor engagement</strong> and <strong>content depth</strong>.</p>
             </div>
-            <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-gray-300 space-y-2">
-              <p className="font-semibold text-white">🔍 Key Insights</p>
-              <ul className="space-y-1.5 text-gray-400">
-                <li>• <span className="text-cyan-400">DSA with Java</span> has the highest helpfulness ratio (61 helpful / 0 unhelpful).</li>
+            <div className="bg-muted/40 border border-border rounded-2xl p-4 text-sm text-foreground space-y-2 font-body">
+              <p className="font-semibold font-display text-foreground">🔍 Key Insights</p>
+              <ul className="space-y-1.5 text-muted-foreground">
+                <li>• <span className="text-primary font-medium">DSA with Java</span> has the highest helpfulness ratio (61 helpful / 0 unhelpful).</li>
                 <li>• 2 reviews flagged for policy violations — require immediate moderation.</li>
-                <li>• <span className="text-yellow-400">CSS & UI Design</span> shows declining satisfaction; pacing complaints in mid-modules.</li>
+                <li>• <span className="text-yellow-400 font-medium">CSS & UI Design</span> shows declining satisfaction; pacing complaints in mid-modules.</li>
                 <li>• Retention risk: 3 students gave 1–2★ ratings within 48 hrs of enrollment.</li>
               </ul>
             </div>
-            <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 text-sm">
-              <p className="font-semibold text-white mb-1">✅ Recommended Actions</p>
-              <p className="text-gray-400">Update CSS & UI Design curriculum in modules 6–9, and follow up with low-rated students to offer support or refunds proactively.</p>
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 text-sm font-body">
+              <p className="font-semibold font-display text-foreground mb-1">✅ Recommended Actions</p>
+              <p className="text-muted-foreground">Update CSS & UI Design curriculum in modules 6–9, and follow up with low-rated students to offer support or refunds proactively.</p>
             </div>
-            <button onClick={onClose} className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-semibold text-sm hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all">
+            <button onClick={onClose} className="btn-primary w-full text-sm font-semibold !py-3">
               Close
             </button>
           </div>
@@ -326,12 +307,12 @@ function AiSummaryModal({ onClose }) {
    REVIEW DATA
 ───────────────────────────────────────────── */
 const RATING_COLORS = {
-  5: 'text-emerald-400', 4: 'text-cyan-400', 3: 'text-yellow-400', 2: 'text-orange-400', 1: 'text-red-400',
+  5: 'text-emerald-400', 4: 'text-cyan-400', 3: 'text-yellow-400', 2: 'text-orange-400', 1: 'text-destructive',
 };
 const SENTIMENT_BADGE = {
   positive: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
   neutral:  'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
-  negative: 'bg-red-500/15 text-red-400 border-red-500/30',
+  negative: 'bg-destructive/15 text-destructive border-destructive/30',
 };
 
 const initialReviews = [
@@ -351,7 +332,7 @@ function Stars({ rating, size = 16 }) {
       {[1, 2, 3, 4, 5].map((s) =>
         s <= rating
           ? <MdStar key={s} size={size} className={RATING_COLORS[rating]} />
-          : <MdStarBorder key={s} size={size} className="text-gray-600" />
+          : <MdStarBorder key={s} size={size} className="text-muted-foreground/40" />
       )}
     </div>
   );
@@ -362,28 +343,28 @@ function ReplyModal({ review, onClose, onSave }) {
   if (!review) return null;
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose}
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
+      className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[200] flex items-center justify-center p-4"
     >
       <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9 }}
         onClick={(e) => e.stopPropagation()}
-        className="bg-[#0B1120] border border-white/10 rounded-3xl w-full max-w-lg shadow-2xl p-6"
+        className="bg-card border border-border rounded-3xl w-full max-w-lg shadow-2xl p-6 font-body"
       >
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-bold text-white">Reply to {review.student}</h3>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-colors"><MdClose size={20} /></button>
+          <h3 className="text-lg font-bold font-display text-foreground">Reply to {review.student}</h3>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"><MdClose size={20} /></button>
         </div>
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-5">
-          <div className="flex items-center gap-2 mb-2"><Stars rating={review.rating} size={14} /><span className="text-xs text-gray-500">{review.date}</span></div>
-          <p className="text-sm text-gray-300 line-clamp-3">{review.text}</p>
+        <div className="bg-muted/40 border border-border rounded-2xl p-4 mb-5">
+          <div className="flex items-center gap-2 mb-2"><Stars rating={review.rating} size={14} /><span className="text-xs text-muted-foreground">{review.date}</span></div>
+          <p className="text-sm text-foreground line-clamp-3 font-body">{review.text}</p>
         </div>
         <textarea value={text} onChange={(e) => setText(e.target.value)} rows={4}
           placeholder="Write your admin reply…"
-          className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500 focus:bg-white/10 focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1736] transition-all resize-none mb-5"
+          className="w-full bg-input border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all resize-none mb-5 font-body"
         />
         <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium">Cancel</button>
+          <button onClick={onClose} className="flex-1 py-3 rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-all text-sm font-medium font-body">Cancel</button>
           <button onClick={() => { if (text.trim()) { onSave(review.id, text); onClose(); } }}
-            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-semibold text-sm hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all"
+            className="btn-primary flex-1 text-sm font-semibold !py-3"
           >Send Reply</button>
         </div>
       </motion.div>
@@ -455,143 +436,76 @@ const Reviews = () => {
   };
 
   return (
-    <div className="min-h-screen text-white">
+    <div className="space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 border border-border shadow-sm bg-card/60 backdrop-blur-xl font-body">
 
-      {/* ══════════════════════════════════════════
-          HERO SECTION
-      ══════════════════════════════════════════ */}
-      <div className="relative rounded-[28px] overflow-hidden mb-8"
-        style={{ background: 'linear-gradient(135deg, #060B18 0%, #0D1433 40%, #100D2E 70%, #07111F 100%)' }}
-      >
-        {/* Purple glow orb */}
-        <div className="absolute -top-20 -left-20 w-[420px] h-[420px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 70%)' }}
-        />
-        {/* Cyan glow orb */}
-        <div className="absolute -bottom-24 -right-16 w-[380px] h-[380px] rounded-full pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.18) 0%, transparent 70%)' }}
-        />
-        {/* Extra accent orb */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] pointer-events-none opacity-30"
-          style={{ background: 'radial-gradient(ellipse, rgba(99,38,180,0.15) 0%, transparent 70%)' }}
-        />
+      {/* HERO SECTION */}
+      <div className="relative rounded-3xl overflow-hidden mb-8 border border-border bg-card/70 backdrop-blur-xl p-8 md:p-12">
+        <div className="aurora-bg" />
 
-        {/* Animated particles */}
-        <Particles />
-
-        {/* Glass overlay */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.015) 0%, transparent 100%)' }}
-        />
-
-        {/* Grid lines overlay */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
-        />
-
-        {/* Hero Content */}
-        <div className="relative z-10 px-8 py-10 md:px-12 md:py-14">
-          {/* Badge */}
+        <div className="relative z-10">
           <motion.div
             initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-xs font-semibold mb-5"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 text-secondary text-xs font-semibold mb-5 font-display"
           >
-            <MdAutoAwesome size={12} />
+            <MdAutoAwesome size={14} />
             AI-Powered Review Intelligence
           </motion.div>
 
-          {/* Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.06 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-4 leading-none"
+            className="text-4xl md:text-5xl lg:text-6xl font-extrabold font-display tracking-tight mb-4 text-foreground"
           >
-            <span className="text-white">Reviews &amp;</span>{' '}
-            <span className="bg-clip-text text-transparent"
-              style={{ backgroundImage: 'linear-gradient(135deg, #A78BFA 0%, #67E8F9 100%)' }}
-            >
-              Ratings
-            </span>
+            Reviews &amp; <span className="text-gradient">Ratings</span>
           </motion.h1>
 
-          {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.12 }}
-            className="text-gray-400 text-sm md:text-base max-w-2xl leading-relaxed mb-8"
+            className="text-muted-foreground text-sm md:text-base max-w-2xl leading-relaxed mb-8 font-body"
           >
             Monitor learner satisfaction, celebrity mentor performance, course quality, sentiment trends,
             retention risks, and platform reputation in real time.
           </motion.p>
 
-          {/* Action Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.18 }}
             className="flex flex-wrap gap-3"
           >
-            {/* Date Range */}
             <button
               onClick={() => setShowDate(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
-              style={{
-                background: 'rgba(255,255,255,0.07)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                backdropFilter: 'blur(12px)',
-              }}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-foreground border border-border bg-muted/50 hover:bg-muted transition-all"
             >
-              <MdDateRange size={16} className="text-purple-400" />
+              <MdDateRange size={16} className="text-primary" />
               {dateLabel}
             </button>
 
-            {/* Export Report */}
             <button
               onClick={handleExport}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
-              style={{
-                background: 'rgba(255,255,255,0.07)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                backdropFilter: 'blur(12px)',
-              }}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-foreground border border-border bg-muted/50 hover:bg-muted transition-all"
             >
-              <MdFileDownload size={16} className="text-cyan-400" />
+              <MdFileDownload size={16} className="text-primary" />
               Export Report
             </button>
 
-            {/* Generate AI Summary */}
             <button
               onClick={() => setShowAI(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_20px_rgba(124,58,237,0.4)]"
-              style={{
-                background: 'linear-gradient(135deg, rgba(124,58,237,0.4) 0%, rgba(6,182,212,0.25) 100%)',
-                border: '1px solid rgba(124,58,237,0.4)',
-                backdropFilter: 'blur(12px)',
-              }}
+              className="btn-primary text-sm font-semibold !py-2.5 !px-5"
             >
-              <MdAutoAwesome size={16} className="text-purple-300" />
+              <MdAutoAwesome size={16} />
               Generate AI Summary
             </button>
 
-            {/* Download Insights */}
             <button
               onClick={handleDownloadInsights}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5"
-              style={{
-                background: 'rgba(255,255,255,0.07)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                backdropFilter: 'blur(12px)',
-              }}
+              className="btn-outline-teal text-sm font-semibold !py-2.5 !px-5"
             >
-              <MdInsights size={16} className="text-emerald-400" />
+              <MdInsights size={16} />
               Download Insights
             </button>
           </motion.div>
 
-          {/* Floating stats strip */}
           <motion.div
             initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, delay: 0.26 }}
-            className="flex flex-wrap gap-6 mt-10 pt-8 border-t"
-            style={{ borderColor: 'rgba(255,255,255,0.07)' }}
+            className="flex flex-wrap gap-8 mt-10 pt-6 border-t border-border"
           >
             {[
               { label: 'Total Reviews',  value: totalReviews },
@@ -600,69 +514,65 @@ const Reviews = () => {
               { label: 'Flagged',        value: flaggedCount },
             ].map((s) => (
               <div key={s.label}>
-                <div className="text-2xl font-black text-white">{s.value}</div>
-                <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+                <div className="text-2xl font-bold font-display text-foreground">{s.value}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{s.label}</div>
               </div>
             ))}
           </motion.div>
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════
-          KPI CARDS — 6 Premium Cards
-      ══════════════════════════════════════════ */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8 px-0">
+      {/* KPI CARDS */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
         {KPI_CARDS.map((card, i) => (
           <KpiCard key={card.id} card={card} index={i} />
         ))}
       </div>
 
-      {/* ══════════════════════════════════════════
-          REVIEW MANAGEMENT PANEL
-      ══════════════════════════════════════════ */}
+      {/* REVIEW MANAGEMENT PANEL */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         {/* Sidebar */}
         <div className="lg:col-span-3 space-y-4">
 
           {/* Rating Distribution */}
-          <div className="bg-[#161b22] border border-white/5 rounded-3xl p-5">
-            <h2 className="text-sm font-semibold text-white mb-5">Rating Distribution</h2>
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+            <h2 className="text-sm font-bold font-display text-foreground mb-5">Rating Distribution</h2>
             <div className="space-y-3">
               {ratingDist.map(({ star, count, pct }) => (
                 <button
                   key={star}
                   onClick={() => setRatingFilter(ratingFilter === String(star) ? 'All' : String(star))}
-                  className={`w-full flex items-center gap-3 transition-all ${ratingFilter === String(star) ? 'opacity-100' : 'opacity-75 hover:opacity-100'}`}
+                  className={`w-full flex items-center gap-3 transition-all ${ratingFilter === String(star) ? 'opacity-100 font-semibold' : 'opacity-75 hover:opacity-100'}`}
                 >
-                  <span className="text-xs text-gray-400 w-4 text-right flex-shrink-0">{star}</span>
+                  <span className="text-xs text-muted-foreground w-4 text-right flex-shrink-0 font-body">{star}</span>
                   <MdStar size={14} className={RATING_COLORS[star]} />
-                  <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                  <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all duration-700 ${star === 5 ? 'bg-emerald-400' : star === 4 ? 'bg-cyan-400' : star === 3 ? 'bg-yellow-400' : star === 2 ? 'bg-orange-400' : 'bg-red-400'}`}
+                      className={`h-full rounded-full transition-all duration-700 ${star === 5 ? 'bg-emerald-400' : star === 4 ? 'bg-cyan-400' : star === 3 ? 'bg-yellow-400' : star === 2 ? 'bg-orange-400' : 'bg-destructive'}`}
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <span className="text-xs text-gray-500 w-5 text-right flex-shrink-0">{count}</span>
+                  <span className="text-xs text-muted-foreground w-5 text-right flex-shrink-0 font-body">{count}</span>
                 </button>
               ))}
             </div>
-            <div className="mt-6 pt-5 border-t border-white/5 text-center">
-              <div className="text-5xl font-black text-white mb-1">{avgRating}</div>
+            <div className="mt-6 pt-5 border-t border-border text-center">
+              <div className="text-5xl font-bold font-display text-foreground mb-1">{avgRating}</div>
               <div className="flex justify-center mb-1"><Stars rating={Math.round(Number(avgRating))} size={18} /></div>
-              <div className="text-xs text-gray-500">Based on {totalReviews} reviews</div>
+              <div className="text-xs text-muted-foreground">Based on {totalReviews} reviews</div>
             </div>
           </div>
 
           {/* Sentiment Filter */}
-          <div className="bg-[#161b22] border border-white/5 rounded-3xl p-5">
-            <h2 className="text-sm font-semibold text-white mb-4 flex items-center gap-2"><MdFilterList size={16} />Filter Sentiment</h2>
-            <div className="space-y-2">
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
+            <h2 className="text-sm font-bold font-display text-foreground mb-4 flex items-center gap-2"><MdFilterList size={16} />Filter Sentiment</h2>
+            <div className="space-y-1.5">
               {['All', 'Positive', 'Neutral', 'Negative'].map((s) => (
                 <button
                   key={s}
                   onClick={() => setSentimentFilter(s)}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all ${sentimentFilter === s ? 'bg-purple-600/20 border border-purple-500/30 text-white font-medium' : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'}`}
+                  className={`w-full text-left px-3.5 py-2 rounded-xl text-sm font-body transition-all ${sentimentFilter === s ? 'bg-primary/10 border border-primary/30 text-foreground font-semibold' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40 border border-transparent'}`}
                 >
                   {s === 'All' ? '✦ All Sentiments' : s === 'Positive' ? '😊 Positive' : s === 'Neutral' ? '😐 Neutral' : '😞 Negative'}
                 </button>
@@ -675,19 +585,19 @@ const Reviews = () => {
         <div className="lg:col-span-9 space-y-4">
           {/* Search bar */}
           <div className="relative">
-            <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+            <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
             <input
               type="text" placeholder="Search by student, course, or teacher…"
               value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#161b22] border border-white/5 rounded-2xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-purple-500/50 focus:bg-white/5 focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#161b22] transition-all text-white placeholder:text-gray-600"
+              className="w-full bg-input border border-border rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-all text-foreground placeholder:text-muted-foreground font-body"
             />
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500">{filtered.length} review{filtered.length !== 1 ? 's' : ''} found</span>
+            <span className="text-sm text-muted-foreground font-body">{filtered.length} review{filtered.length !== 1 ? 's' : ''} found</span>
             {(ratingFilter !== 'All' || sentimentFilter !== 'All' || search) && (
               <button onClick={() => { setRatingFilter('All'); setSentimentFilter('All'); setSearch(''); }}
-                className="text-xs text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1"
+                className="text-xs text-primary hover:underline transition-colors flex items-center gap-1 font-body"
               >
                 <MdClose size={14} /> Clear filters
               </button>
@@ -698,49 +608,49 @@ const Reviews = () => {
             {filtered.map((review) => (
               <motion.div key={review.id} layout
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.97 }}
-                className={`bg-[#161b22] border rounded-3xl p-5 transition-all duration-200 group ${review.flagged ? 'border-red-500/30' : 'border-white/5 hover:border-white/10'}`}
+                className={`bg-card/70 border rounded-2xl p-5 transition-all duration-200 shadow-sm ${review.flagged ? 'border-destructive/40' : 'border-border hover:border-primary/30'}`}
               >
                 <div className="flex items-start justify-between gap-4 mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-cyan-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-foreground text-xs font-bold font-display flex-shrink-0">
                       {review.avatar}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-white">{review.student}</span>
-                        {review.verified && <MdVerified size={14} className="text-cyan-400" />}
-                        {review.replied && <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/20">Replied</span>}
-                        {review.flagged && <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/20">Flagged</span>}
+                        <span className="text-sm font-semibold font-display text-foreground">{review.student}</span>
+                        {review.verified && <MdVerified size={14} className="text-primary" />}
+                        {review.replied && <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 font-body">Replied</span>}
+                        {review.flagged && <span className="text-[10px] px-2 py-0.5 rounded-full bg-destructive/15 text-destructive border border-destructive/20 font-body">Flagged</span>}
                       </div>
-                      <div className="text-[11px] text-gray-500">{review.course} · {review.teacher}</div>
+                      <div className="text-[11px] text-muted-foreground font-body">{review.course} · {review.teacher}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border capitalize ${SENTIMENT_BADGE[review.sentiment]}`}>{review.sentiment}</span>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border capitalize font-body ${SENTIMENT_BADGE[review.sentiment]}`}>{review.sentiment}</span>
                     <Stars rating={review.rating} size={14} />
-                    <span className="text-[11px] text-gray-500 ml-1">{review.date}</span>
+                    <span className="text-[11px] text-muted-foreground ml-1 font-body">{review.date}</span>
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-300 leading-relaxed mb-4">{review.text}</p>
+                <p className="text-sm text-foreground leading-relaxed mb-4 font-body">{review.text}</p>
 
-                <div className="flex items-center justify-between border-t border-white/5 pt-3">
+                <div className="flex items-center justify-between border-t border-border pt-3">
                   <div className="flex items-center gap-3">
-                    <button onClick={() => handleHelpful(review.id, 'helpful')} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-emerald-400 transition-colors">
+                    <button onClick={() => handleHelpful(review.id, 'helpful')} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors font-body">
                       <MdThumbUp size={14} /> {review.helpful}
                     </button>
-                    <button onClick={() => handleHelpful(review.id, 'unhelpful')} className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-red-400 transition-colors">
+                    <button onClick={() => handleHelpful(review.id, 'unhelpful')} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-destructive transition-colors font-body">
                       <MdThumbDown size={14} /> {review.unhelpful}
                     </button>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => setReplyTarget(review)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg text-gray-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all">
+                    <button onClick={() => setReplyTarget(review)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted border border-border transition-all font-body">
                       <MdReply size={14} /> Reply
                     </button>
-                    <button onClick={() => handleFlag(review.id)} className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-all ${review.flagged ? 'text-red-400 bg-red-500/10 border-red-500/20' : 'text-gray-400 hover:text-orange-400 hover:bg-orange-500/10 border-transparent hover:border-orange-500/20'}`}>
+                    <button onClick={() => handleFlag(review.id)} className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl border transition-all font-body ${review.flagged ? 'text-destructive bg-destructive/10 border-destructive/20' : 'text-muted-foreground hover:text-orange-400 hover:bg-orange-500/10 border-border'}`}>
                       <MdFlag size={14} /> {review.flagged ? 'Unflag' : 'Flag'}
                     </button>
-                    <button onClick={() => handleDelete(review.id)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all">
+                    <button onClick={() => handleDelete(review.id)} className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-border transition-all font-body">
                       <MdDelete size={14} /> Delete
                     </button>
                   </div>
@@ -750,9 +660,9 @@ const Reviews = () => {
           </AnimatePresence>
 
           {filtered.length === 0 && (
-            <div className="text-center py-20 text-gray-600">
+            <div className="text-center py-20 text-muted-foreground">
               <MdRateReview size={48} className="mx-auto mb-3 opacity-30" />
-              <p className="text-sm">No reviews match your filters.</p>
+              <p className="text-sm font-body">No reviews match your filters.</p>
             </div>
           )}
         </div>

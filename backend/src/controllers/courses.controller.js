@@ -21,7 +21,7 @@ exports.getCourses = async (req, res, next) => {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
-        { celebrityTeacher: { contains: search, mode: 'insensitive' } }
+        { instructor: { name: { contains: search, mode: 'insensitive' } } }
       ];
     }
 
@@ -99,15 +99,26 @@ exports.createCourse = async (req, res, next) => {
     if (req.user.role !== 'admin') {
       return res.status(403).json({ success: false, error: 'Only admins can create and generate courses' });
     }
-    const { title, description, category, level, thumbnail, celebrityTeacher, price, duration, rating, outcomes, xp, gradient, icon, status, generateAI } = req.body;
+    const { title, description, category, level, thumbnail, price, duration, rating, outcomes, xp, gradient, icon, status, generateAI } = req.body;
+    const categoryRecord = await prisma.category.findUnique({ where: { name: category } });
+    if (!categoryRecord) return res.status(400).json({ success: false, error: 'Select a category created through the admin panel.' });
+
+    const allowedStatuses = ['pending', 'approved', 'rejected'];
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid status. Allowed values are: pending, approved, rejected.',
+      });
+    }
+
     const course = await prisma.course.create({
       data: {
         title,
         description,
         category,
+        categoryId: categoryRecord.id,
         level,
         thumbnail,
-        celebrityTeacher,
         price: price ? parseFloat(price) : 0,
         duration: duration || 'Self-paced',
         rating: rating ? parseFloat(rating) : 4.5,
@@ -166,6 +177,11 @@ exports.updateCourse = async (req, res, next) => {
     }
 
     const dataToUpdate = { ...req.body };
+    if (dataToUpdate.category !== undefined) {
+      const categoryRecord = await prisma.category.findUnique({ where: { name: dataToUpdate.category } });
+      if (!categoryRecord) return res.status(400).json({ success: false, error: 'Selected category was not found.' });
+      dataToUpdate.categoryId = categoryRecord.id;
+    }
     if (dataToUpdate.price !== undefined) {
       dataToUpdate.price = parseFloat(dataToUpdate.price) || 0;
     }
