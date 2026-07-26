@@ -8,15 +8,18 @@ import TopPerformingCourses from '../../../components/admin/courses/TopPerformin
 import CoursesFilters from '../../../components/admin/courses/CoursesFilters';
 import CourseGrid from '../../../components/admin/courses/CourseGrid';
 import {
-  loadCourses,
   normalizeCourse,
   getCategories,
   computeRevenue,
 } from '../../../utils/courseUtils';
 import { exportToCSV } from '../../../utils/export';
+import { apiFetch } from '../../../api/config';
 
 const Courses = () => {
-  const [courses, setCourses] = useState(loadCourses);
+  const [courses, setCourses] = useState([]);
+  const [instructors, setInstructors] = useState([]);
+  const [databaseCategories, setDatabaseCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [levelFilter, setLevelFilter] = useState('');
@@ -25,9 +28,28 @@ const Courses = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
 
-  useEffect(() => {
-    localStorage.setItem('lms_courses_data', JSON.stringify(courses));
-  }, [courses]);
+  const loadData = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const [courseResult, instructorResult, categoryResult] = await Promise.all([
+        apiFetch('/v1/admin/courses?limit=1000'),
+        apiFetch('/v1/admin/instructors?limit=1000'),
+        apiFetch('/v1/categories'),
+      ]);
+      setCourses((courseResult.data || []).map(normalizeCourse));
+      setInstructors(instructorResult.data || []);
+      setDatabaseCategories((categoryResult.data || []).map((category) => category.name));
+    } catch (error) {
+      console.error('Unable to load courses:', error);
+      setCourses([]);
+      setInstructors([]);
+      setDatabaseCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadData(); }, [loadData]);
 
   useEffect(() => {
     if (!notice) return undefined;
@@ -35,7 +57,7 @@ const Courses = () => {
     return () => clearTimeout(t);
   }, [notice]);
 
-  const categories = useMemo(() => getCategories(courses), [courses]);
+  const categories = databaseCategories;
 
   const filtered = useMemo(
     () =>
@@ -58,8 +80,9 @@ const Courses = () => {
 
   const showNotice = (message) => setNotice(message);
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this course?')) {
+      await apiFetch(`/v1/admin/courses/${id}`, { method: 'DELETE' });
       setCourses((prev) => prev.filter((c) => c.id !== id));
       showNotice('Course deleted.');
     }
@@ -80,37 +103,32 @@ const Courses = () => {
     setIsDrawerOpen(false);
   };
 
-  const handleSaveCourse = (savedCourse) => {
-    setCourses((prev) => {
-      const normalized = normalizeCourse(
-        savedCourse,
-        prev.findIndex((c) => c.id === savedCourse.id)
-      );
-      const exists = prev.some((c) => c.id === savedCourse.id);
-      if (exists) {
-        return prev.map((c) => (c.id === savedCourse.id ? normalized : c));
-      }
-      return [normalized, ...prev];
-    });
+  const handleSaveCourse = async (savedCourse) => {
+    const payload = {
+      title: savedCourse.title,
+      description: savedCourse.fullDesc || savedCourse.shortDesc,
+      category: savedCourse.category,
+      level: savedCourse.level,
+      duration: savedCourse.duration ? `${savedCourse.duration} Hrs` : null,
+      price: savedCourse.price,
+      thumbnail: savedCourse.avatar || savedCourse.thumbnail || null,
+      instructorId: savedCourse.instructorId,
+      status: savedCourse.active ? 'approved' : 'pending',
+      xp: savedCourse.xp || null,
+      gradient: savedCourse.gradient || null,
+      icon: savedCourse.icon || null,
+    };
+    const result = selectedCourse
+      ? await apiFetch(`/v1/admin/courses/${selectedCourse.id}`, { method: 'PUT', body: JSON.stringify(payload) })
+      : await apiFetch('/v1/admin/courses', { method: 'POST', body: JSON.stringify(payload) });
+    const normalized = normalizeCourse(result.data);
+    setCourses((prev) => prev.some((course) => course.id === normalized.id)
+      ? prev.map((course) => course.id === normalized.id ? normalized : course)
+      : [normalized, ...prev]);
     showNotice(selectedCourse ? 'Course updated.' : 'Course created.');
   };
 
-  const handleClone = (course) => {
-    const clone = normalizeCourse(
-      {
-        ...course,
-        id: Date.now(),
-        title: `${course.title} (Copy)`,
-        students: 0,
-        completion: 0,
-        active: false,
-        revenue: 0,
-      },
-      courses.length
-    );
-    setCourses((prev) => [clone, ...prev]);
-    showNotice('Course cloned as draft.');
-  };
+  const handleClone = () => showNotice('Course cloning is disabled. Create courses through the admin form.');
 
   const handleExport = () => {
     exportToCSV(
@@ -148,7 +166,7 @@ const Courses = () => {
   return (
     <div className="space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 border border-border shadow-sm bg-card/60 backdrop-blur-xl font-body">
       <CoursesHero
-        totalCount={courses.length.toLocaleString()}
+        totalCount={loading ? '—' : courses.length.toLocaleString()}
         totalRevenue={totalRevenue}
         activeCount={activeCount}
         onCreateCourse={handleOpenAddDrawer}
@@ -187,6 +205,8 @@ const Courses = () => {
         onClose={handleCloseDrawer}
         onSave={handleSaveCourse}
         courseToEdit={selectedCourse}
+        teachers={instructors}
+        categories={categories}
       />
 
       <AnimatePresence>

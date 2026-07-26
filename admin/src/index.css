@@ -94,10 +94,10 @@
     --ring: 189 94% 43%;
 
     --admin-shell-bg: #f1f5f9;
-    --admin-page-bg: transparent;
+    --admin-page-bg: #f8fafc;
     --admin-page-panel: #ffffff;
     --admin-surface: #ffffff;
-    --admin-surface-raised: #ffffff;
+    --admin-surface-raised: #f8fafc;
     --admin-surface-hover: #f1f5f9;
     --admin-nav-bg: rgba(255, 255, 255, 0.9);
     --admin-nav-border: #e2e8f0;
@@ -201,6 +201,110 @@
   }
   .admin-navbar {
     @apply bg-background/80 backdrop-blur-xl border-border;
+  }
+
+  .admin-profile-dropdown {
+    isolation: isolate;
+    border: 1px solid hsl(var(--border));
+    border-radius: 1.25rem;
+    background:
+      linear-gradient(145deg, hsl(var(--card) / 0.96), hsl(var(--background) / 0.98)),
+      hsl(var(--card));
+    box-shadow: 0 24px 60px hsl(229 63% 0% / 0.45), 0 0 0 1px hsl(var(--foreground) / 0.04);
+    color: hsl(var(--foreground));
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  .admin-profile-dropdown::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .admin-profile-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+    border: 0;
+  }
+
+  .admin-profile-dropdown::-webkit-scrollbar-thumb {
+    border: 0;
+    border-radius: 999px;
+    background: hsl(var(--muted-foreground) / 0.32);
+  }
+
+  html.light .admin-profile-dropdown {
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98)),
+      #ffffff;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(15, 23, 42, 0.04);
+  }
+
+  /*
+   * Some of the older admin drawers and analytics cards were built before the
+   * shared theme tokens existed and still use literal dark utility classes.
+   * Keep this small compatibility layer at the theme boundary so those
+   * surfaces, their borders, and their copy follow the selected theme too.
+   * New components should use the semantic Tailwind tokens above instead.
+   */
+  html.light .bg-\[\#070b16\],
+  html.light .bg-\[\#0a0f18\],
+  html.light .bg-\[\#0B1120\],
+  html.light .bg-\[\#0b1324\],
+  html.light .bg-\[\#0d1117\],
+  html.light .bg-\[\#0f141e\],
+  html.light .bg-\[\#0f172a\],
+  html.light .bg-\[\#101726\],
+  html.light .bg-\[\#111827\],
+  html.light .bg-\[\#121826\],
+  html.light .bg-\[\#1a1f2e\],
+  html.light .bg-\[\#1a2a44\],
+  html.light .bg-gray-800 {
+    background-color: var(--admin-surface) !important;
+  }
+
+  html.light .bg-white\/5,
+  html.light .bg-white\/8,
+  html.light .bg-white\/10 {
+    background-color: var(--admin-surface-raised) !important;
+  }
+
+  html.light .border-white\/5,
+  html.light .border-white\/10,
+  html.light .border-white\/20,
+  html.light .border-gray-300,
+  html.light .border-gray-500,
+  html.light .border-\[\#0f141e\] {
+    border-color: var(--admin-border) !important;
+  }
+
+  html.light .bg-\[\#070b16\] .text-white,
+  html.light .bg-\[\#0a0f18\] .text-white,
+  html.light .bg-\[\#0B1120\] .text-white,
+  html.light .bg-\[\#0b1324\] .text-white,
+  html.light .bg-\[\#0d1117\] .text-white,
+  html.light .bg-\[\#0f141e\] .text-white,
+  html.light .bg-\[\#0f172a\] .text-white,
+  html.light .bg-\[\#101726\] .text-white,
+  html.light .bg-\[\#111827\] .text-white,
+  html.light .bg-\[\#121826\] .text-white,
+  html.light .bg-\[\#1a1f2e\] .text-white,
+  html.light .bg-\[\#1a2a44\] .text-white,
+  html.light .bg-gray-800 .text-white {
+    color: var(--admin-text-primary);
+  }
+
+  html.light .text-gray-200,
+  html.light .text-gray-300,
+  html.light .text-gray-400,
+  html.light .text-slate-200,
+  html.light .text-slate-300,
+  html.light .text-slate-400 {
+    color: var(--admin-text-secondary);
+  }
+
+  html.light .text-gray-500,
+  html.light .text-gray-600,
+  html.light .text-slate-500 {
+    color: var(--admin-text-muted);
   }
 }
 

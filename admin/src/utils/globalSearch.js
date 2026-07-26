@@ -1,4 +1,3 @@
-import { initialTeachers } from './teacherUtils';
 import { loadCourses } from './courseUtils';
 
 const STUDENTS_KEY = 'lms_students_data';
@@ -50,7 +49,7 @@ function loadJson(key, fallback) {
 
 export function loadSearchSources() {
   const students = loadJson(STUDENTS_KEY, FALLBACK_STUDENTS);
-  const teachers = loadJson(TEACHERS_KEY, initialTeachers);
+  const teachers = loadJson(TEACHERS_KEY, []);
   const courses = loadCourses();
 
   return {

@@ -32,20 +32,6 @@ const TrendBadge = ({ trend, trendUp }) => {
   );
 };
 
-const FALLBACK_ITEMS = [
-  {
-    label: 'Top Course',
-    name: 'No data yet',
-    iconKey: 'course',
-    accent: '#3B82F6',
-    glow: 'rgba(59,130,246,0.35)',
-    trend: '0%',
-    trendUp: true,
-    enrollmentsDisplay: '0',
-    progress: 0,
-  },
-];
-
 const ProgressBar = ({ value, accent }) => (
   <div className="w-full">
     <div
@@ -115,7 +101,8 @@ const PerformerMetrics = ({ item }) => {
 };
 
 const DashboardTopPerformers = () => {
-  const [items, setItems] = useState(FALLBACK_ITEMS);
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchPerformers = useCallback(async () => {
     try {
@@ -166,9 +153,12 @@ const DashboardTopPerformers = () => {
         });
       }
 
-      setItems(nextItems.length > 0 ? nextItems : FALLBACK_ITEMS);
+      setItems(nextItems);
     } catch (error) {
       console.error('Top performers fetch failed:', error);
+      setItems([]);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -188,7 +178,7 @@ const DashboardTopPerformers = () => {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+      {isLoading ? <p className="text-sm admin-text-secondary py-5">Loading performers…</p> : items.length === 0 ? <p className="text-sm admin-text-secondary py-5">No course, instructor, or learner activity yet.</p> : <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
         {items.map((item, index) => {
           const Icon = ICONS[item.iconKey];
           return (
@@ -252,7 +242,7 @@ const DashboardTopPerformers = () => {
             </motion.article>
           );
         })}
-      </div>
+      </div>}
     </section>
   );
 };

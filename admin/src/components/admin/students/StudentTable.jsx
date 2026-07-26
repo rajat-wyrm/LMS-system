@@ -74,15 +74,9 @@ const getStatusBadge = (status) => {
   );
 };
 
-const deriveLastActive = (student) =>
-  student.lastActive ||
-  (student.status === 'Active' ? '2h ago' : student.status === 'Pending' ? '5d ago' : '1w ago');
-
-const deriveCertificates = (student) =>
-  student.certificates ?? Math.max(0, Math.floor((student.progress ?? 0) / 25));
-
-const deriveStreak = (student) =>
-  student.streak ?? Math.max(1, Math.floor((student.progress ?? 0) / 12));
+const deriveLastActive = (student) => student.lastActive || '—';
+const deriveCertificates = (student) => Number(student.certificates || 0);
+const deriveStreak = (student) => student.streak ?? '—';
 
 const StudentTable = ({ students, onViewProfile, onNotify, onEdit, onDelete, hasFilters, onClearFilters }) => {
   const [activeDropdownId, setActiveDropdownId] = useState(null);

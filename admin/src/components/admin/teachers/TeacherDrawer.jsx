@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MdClose, MdPhotoCamera, MdCheckCircle, MdCancel } from 'react-icons/md';
-import { COLORS } from '../../../utils/teacherUtils';
 import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
 function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
   const [form, setForm] = useState({
     name: '',
-    style: '',
     email: '',
-    phone: '',
+    password: '',
     bio: '',
     enabled: true,
-    color: COLORS[0].value,
     avatar: null,
   });
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -21,10 +18,11 @@ function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.onloadend = () => {
       setAvatarPreview(reader.result);
-      setForm((f) => ({ ...f, avatar: reader.result }));
+      setForm((currentForm) => ({ ...currentForm, avatar: reader.result }));
     };
     reader.readAsDataURL(file);
   };
@@ -33,34 +31,30 @@ function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
     if (teacher) {
       setForm({
         name: teacher.name,
-        style: teacher.style,
         email: teacher.email,
-        phone: teacher.phone,
+        password: '',
         bio: teacher.bio,
         enabled: teacher.enabled,
-        color: teacher.color,
         avatar: teacher.photo || null,
       });
       setAvatarPreview(teacher.photo || null);
-    } else {
-      setForm({
-        name: '',
-        style: '',
-        email: '',
-        phone: '',
-        bio: '',
-        enabled: true,
-        color: COLORS[0].value,
-        avatar: null,
-      });
-      setAvatarPreview(null);
+      return;
     }
+
+    setForm({
+      name: '',
+      email: '',
+      password: '',
+      bio: '',
+      enabled: true,
+      avatar: null,
+    });
+    setAvatarPreview(null);
   }, [teacher, isOpen]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(form);
-    onClose();
+    await onSave(form);
   };
 
   return (
@@ -118,69 +112,64 @@ function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
                       className="sr-only"
                     />
                   </label>
-                  {avatarPreview && (
+                  {avatarPreview ? (
                     <img
                       src={avatarPreview}
                       alt="Preview"
                       className="absolute w-28 h-28 rounded-full object-cover pointer-events-none"
                     />
-                  )}
+                  ) : null}
                 </div>
-                <Field label="Teacher Name" required>
+
+                <Field label="Instructor Name" required>
                   <input
                     type="text"
                     required
                     value={form.name}
-                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                    onChange={(e) => setForm((currentForm) => ({ ...currentForm, name: e.target.value }))}
                     placeholder="e.g. John Doe"
                     className={inputClass}
                   />
                 </Field>
-                <Field label="Teaching Style / Personality" required>
+
+                <Field label="Email" required>
                   <input
-                    type="text"
+                    type="email"
                     required
-                    value={form.style}
-                    onChange={(e) => setForm((f) => ({ ...f, style: e.target.value }))}
-                    placeholder="e.g. Fun & Motivational"
+                    value={form.email}
+                    onChange={(e) => setForm((currentForm) => ({ ...currentForm, email: e.target.value }))}
                     className={inputClass}
                   />
                 </Field>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Email" required>
-                    <input
-                      type="email"
-                      required
-                      value={form.email}
-                      onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                      className={inputClass}
-                    />
-                  </Field>
-                  <Field label="Phone" required>
-                    <input
-                      type="tel"
-                      required
-                      value={form.phone}
-                      onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-                      className={inputClass}
-                    />
-                  </Field>
-                </div>
+
+                <Field label={teacher ? 'New Password (optional)' : 'Password'} required={!teacher}>
+                  <input
+                    type="password"
+                    required={!teacher}
+                    minLength={8}
+                    value={form.password}
+                    onChange={(e) => setForm((currentForm) => ({ ...currentForm, password: e.target.value }))}
+                    placeholder={teacher ? 'Leave blank to keep current password' : 'Minimum 8 characters'}
+                    className={inputClass}
+                  />
+                </Field>
+
                 <Field label="Bio" required>
                   <textarea
                     rows={4}
                     required
                     value={form.bio}
-                    onChange={(e) => setForm((f) => ({ ...f, bio: e.target.value }))}
+                    onChange={(e) => setForm((currentForm) => ({ ...currentForm, bio: e.target.value }))}
                     className={`${inputClass} resize-none`}
                   />
                 </Field>
+
                 <div className="space-y-3">
                   <label className="text-sm font-medium admin-text-secondary">Status</label>
                   <div className="flex gap-4">
                     <button
                       type="button"
-                      onClick={() => setForm((f) => ({ ...f, enabled: true }))}
+                      onClick={() => setForm((currentForm) => ({ ...currentForm, enabled: true }))}
                       className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border transition-all ${
                         form.enabled
                           ? 'border-emerald-500/60 bg-emerald-500/20 text-emerald-400'
@@ -191,7 +180,7 @@ function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setForm((f) => ({ ...f, enabled: false }))}
+                      onClick={() => setForm((currentForm) => ({ ...currentForm, enabled: false }))}
                       className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border transition-all ${
                         !form.enabled
                           ? 'border-red-500/60 bg-red-500/20 text-red-400'
@@ -202,22 +191,7 @@ function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
                     </button>
                   </div>
                 </div>
-                <div className="space-y-3">
-                  <label className="text-sm font-medium admin-text-secondary">Theme Color</label>
-                  <div className="flex gap-3 flex-wrap">
-                    {COLORS.map((c) => (
-                      <button
-                        key={c.value}
-                        type="button"
-                        onClick={() => setForm((f) => ({ ...f, color: c.value }))}
-                        className={`w-10 h-10 rounded-full bg-gradient-to-r ${c.value} transition-all hover:scale-110 ${
-                          form.color === c.value ? 'ring-2 ring-[#8B5CF6] scale-110' : ''
-                        }`}
-                        title={c.label}
-                      />
-                    ))}
-                  </div>
-                </div>
+
                 <button
                   type="submit"
                   className="w-full mt-4 py-4 rounded-xl text-white font-bold text-base transition-all hover:-translate-y-1 active:scale-95"
@@ -225,7 +199,7 @@ function TeacherDrawer({ isOpen, onClose, title, teacher, onSave }) {
                     background: 'linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%)',
                   }}
                 >
-                  Save Teacher
+                  Save Instructor
                 </button>
               </form>
             </div>
@@ -244,7 +218,7 @@ function Field({ label, children, required }) {
     <div className="space-y-2">
       <label className="text-sm font-medium admin-text-secondary">
         {label}
-        {required && ' *'}
+        {required ? ' *' : ''}
       </label>
       {children}
     </div>

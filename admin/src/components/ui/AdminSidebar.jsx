@@ -24,7 +24,7 @@ import {
 const ACCENT = {
   Dashboard:          { color: 'hsl(var(--primary))',   rgb: '6,182,212'   },
   Students:           { color: 'hsl(var(--primary))',   rgb: '6,182,212'   },
-  'Celebrity Teachers': { color: 'hsl(var(--secondary))', rgb: '139,92,246' },
+  Instructors:        { color: 'hsl(var(--secondary))', rgb: '139,92,246' },
   Courses:            { color: 'hsl(var(--orange))',    rgb: '255,102,51'  },
   Analytics:          { color: 'hsl(175 100% 35%)',     rgb: '0,178,149'   },
   'Reviews & Ratings':{ color: 'hsl(var(--secondary))', rgb: '139,92,246' },
@@ -92,7 +92,7 @@ const AdminSidebar = () => {
     { name: 'Dashboard',           path: '/dashboard/admin',              icon: LuLayoutDashboard, end: true },
     { name: 'Users',               path: '/dashboard/admin/users',        icon: LuShield },
     { name: 'Students',            path: '/dashboard/admin/students',     icon: LuUsers },
-    { name: 'Celebrity Teachers',  path: '/dashboard/admin/teachers',     icon: LuStar },
+    { name: 'Instructors',         path: '/dashboard/admin/teachers',     icon: LuStar },
     { name: 'Courses',             path: '/dashboard/admin/courses',      icon: LuBookOpen },
     { name: 'Analytics',           path: '/dashboard/admin/analytics',    icon: LuChartBar },
     { name: 'Reviews & Ratings',   path: '/dashboard/admin/reviews',      icon: LuMessageSquare },

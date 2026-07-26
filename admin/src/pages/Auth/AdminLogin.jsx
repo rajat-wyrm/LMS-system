@@ -100,7 +100,7 @@ const AdminLogin = () => {
           <h2 className="text-3xl font-bold text-[#f8fafc] mb-2 tracking-tight">Admin Sign In</h2>
           <p className="text-[#cbd5e1] text-sm mb-4">Use the backend admin account to manage real database users.</p>
           <div className="bg-blue-500/10 border border-blue-500/30 p-2.5 rounded-lg text-xs text-blue-200 flex flex-col gap-1 items-center justify-center">
-            <span className="font-semibold text-blue-400 uppercase tracking-wider text-[10px]">Seeded Backend Admin</span>
+            <span className="font-semibold text-blue-400 uppercase tracking-wider text-[10px]">Administrator sign in</span>
             <span>Email: <strong>admin.amit@lms.com</strong></span>
             <span>Password: <strong>password123</strong></span>
           </div>
