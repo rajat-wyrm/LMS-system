@@ -31,6 +31,8 @@ const Dashboard = () => {
           ...e.course,
           progress: e.progress || 0,
           lessons: e.course.lessons?.length || 0,
+          completedLessons: e.completedLessons || [],
+          certificateApproved: e.certificateApproved,
           thumbnail: getCourseImageUrl(e.course.thumbnail)
         })));
         
@@ -40,10 +42,10 @@ const Dashboard = () => {
           .map((c: any) => ({
             ...c,
             thumbnail: getCourseImageUrl(c.thumbnail),
-            level: c.level || "Beginner",
-            rating: c.rating || 4.8,
+            level: c.level,
+            rating: c.rating,
             enrollments: c._count?.enrollments || 0,
-            duration: c.duration || "4h 30m",
+            duration: c.duration,
             lessons: c.lessons?.length || 0,
             instructor: c.celebrityTeacher || c.instructor?.name || "",
           }));
@@ -67,18 +69,9 @@ const Dashboard = () => {
 
   const stats = [
     { icon: BookOpen, label: "Courses Enrolled", val: inProgress.length, color: "text-primary" },
-    { icon: Clock, label: "Hours Learned", val: user?.hoursLearned || 0, color: "text-secondary" },
-    { icon: Award, label: "Certificates", val: user?.certificates || 0, color: "text-primary" },
-    { icon: Flame, label: "Day Streak", val: user?.streak || 0, color: "text-secondary" },
-  ];
-
-  const achievements = [
-    { icon: Trophy, name: "First Course", earned: true },
-    { icon: Star, name: "5-Star Rating", earned: true },
-    { icon: Zap, name: "10-Day Streak", earned: true },
-    { icon: Target, name: "Goal Crusher", earned: true },
-    { icon: Medal, name: "Top Learner", earned: false },
-    { icon: Award, name: "AI Master", earned: false },
+    { icon: CheckCircle2, label: "Completed Courses", val: inProgress.filter((course) => course.progress === 100).length, color: "text-secondary" },
+    { icon: Award, label: "Certificates", val: inProgress.filter((course) => course.progress === 100 && course.certificateApproved).length, color: "text-primary" },
+    { icon: Layers, label: "Lessons Completed", val: inProgress.reduce((total, course) => total + (course.completedLessons?.length || 0), 0), color: "text-secondary" },
   ];
 
   return (
@@ -157,21 +150,6 @@ const Dashboard = () => {
         </div>
       </section>
 
-
-      {/* Achievements */}
-      <section className="mb-14">
-        <h2 className="font-display font-bold text-2xl mb-6">Achievements</h2>
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
-          {achievements.map((a, i) => (
-            <div key={i} className={`glass-card p-5 text-center transition-all ${a.earned ? "border-primary/40" : "opacity-40 grayscale"}`}>
-              <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-3 ${a.earned ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}>
-                <a.icon className="w-6 h-6" />
-              </div>
-              <p className="text-xs font-medium">{a.name}</p>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* Recommended */}
       <section>

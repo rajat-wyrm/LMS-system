@@ -21,7 +21,8 @@ export interface CourseData {
 
 
 export const courseApi = {
-  getAllCourses: () => API.get("/courses"),
+  getAllCourses: (config?: object) => API.get("/courses", config),
+  getCategories: () => API.get("/categories"),
   getLearningPaths: () => API.get("/courses/learning-paths"),
   getCourseById: (id: string) => API.get(`/courses/${id}`),
   createCourse: (data: CourseData) => API.post("/courses", data),

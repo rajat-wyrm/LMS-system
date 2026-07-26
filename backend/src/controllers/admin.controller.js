@@ -701,6 +701,11 @@ exports.getAnalytics = async (req, res, next) => {
         courseDistribution,
         engagementData,
         funnelStages,
+        // Reviews/session tracking are not persisted yet. Empty series are intentional:
+        // the client renders an empty state instead of fabricated analytics.
+        satisfactionData: { daily: [], weekly: [], monthly: [], quarterly: [] },
+        cohortRetention: { weeks: [], cohorts: [] },
+        engagementOverview: [],
         kpiSummary: {
           revenue: { value: formatRevenue(totalRevenue), raw: totalRevenue },
           students: { value: totalStudents.toLocaleString(), raw: totalStudents },
@@ -1021,6 +1026,10 @@ exports.createAdminCourse = async (req, res, next) => {
         error: 'Title, description, category, and instructor are required.',
       });
     }
+    const categoryRecord = await prisma.category.findUnique({ where: { name: category } });
+    if (!categoryRecord) {
+      return res.status(400).json({ success: false, error: 'Selected category was not found.' });
+    }
 
     const instructor = await prisma.user.findFirst({
       where: { id: instructorId, role: 'instructor' },
@@ -1043,6 +1052,7 @@ exports.createAdminCourse = async (req, res, next) => {
         title,
         description,
         category,
+        categoryId: categoryRecord.id,
         level,
         price: price !== undefined && price !== '' ? parseFloat(price) || 0 : 0,
         thumbnail: thumbnail || null,
@@ -1153,6 +1163,11 @@ exports.updateCourseStatus = async (req, res, next) => {
       if (!instructor) {
         return res.status(400).json({ success: false, error: 'Selected instructor was not found.' });
       }
+    }
+    if (updateData.category !== undefined) {
+      const categoryRecord = await prisma.category.findUnique({ where: { name: updateData.category } });
+      if (!categoryRecord) return res.status(400).json({ success: false, error: 'Selected category was not found.' });
+      updateData.categoryId = categoryRecord.id;
     }
 
     const allowedStatuses = ['pending', 'approved', 'rejected'];

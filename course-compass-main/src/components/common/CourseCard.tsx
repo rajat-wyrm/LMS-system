@@ -27,7 +27,8 @@ export const CourseCard = ({ course, index = 0 }: { course: Course; index?: numb
 
   const fullStars = Math.floor(course.rating || 0);
   const showProgress = course.progress !== undefined;
-  const progressVal = course.progress || 94; // fallback fake completion rate for UI
+  // Progress exists only for a learner's enrollment; catalog cards must not invent it.
+  const progressVal = Number(course.progress ?? 0);
 
   return (
     <Link
@@ -99,15 +100,10 @@ export const CourseCard = ({ course, index = 0 }: { course: Course; index?: numb
               value={course._count?.enrollments ?? course.enrollments ?? 0}
               accent="#8B5CF6"
             />
-            <Stat
-              icon={TrendingUp}
-              label="Completion"
-              value={`${progressVal}%`}
-              accent="#06B6D4"
-            />
+            {showProgress && <Stat icon={TrendingUp} label="Progress" value={`${progressVal}%`} accent="#06B6D4" />}
           </div>
 
-          <div className="mt-1">
+          {showProgress && <div className="mt-1">
              <div className="w-full h-1.5 rounded-full bg-muted/50 overflow-hidden shadow-inner">
                <div
                  className="h-full rounded-full transition-all duration-1000 ease-out"
@@ -117,7 +113,7 @@ export const CourseCard = ({ course, index = 0 }: { course: Course; index?: numb
                  }}
                />
              </div>
-          </div>
+          </div>}
         </div>
       </article>
     </Link>

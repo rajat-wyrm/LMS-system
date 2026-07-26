@@ -10,7 +10,6 @@ import FunnelAnalytics from '../../../components/admin/analytics/FunnelAnalytics
 import CohortRetention from '../../../components/admin/analytics/CohortRetention';
 import EngagementOverview from '../../../components/admin/analytics/EngagementOverview';
 import LearnerSatisfactionTrendsCard from '../../../components/admin/analytics/LearnerSatisfactionTrendsCard';
-import { satisfactionData } from '../../../components/admin/analytics/analyticsData';
 import { apiFetch } from '../../../api/config';
 
 const Analytics = () => {
@@ -83,13 +82,13 @@ const Analytics = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <FunnelAnalytics data={analyticsData?.funnelStages} loading={loading} />
-        <CohortRetention loading={loading} />
+        <CohortRetention data={analyticsData?.cohortRetention} loading={loading} />
       </div>
 
-      <EngagementOverview loading={loading} />
+      <EngagementOverview metrics={analyticsData?.engagementOverview} loading={loading} />
 
       <div className="grid grid-cols-1">
-        <LearnerSatisfactionTrendsCard satisfactionData={analyticsData?.satisfactionData ?? satisfactionData} isLoading={loading} />
+        <LearnerSatisfactionTrendsCard satisfactionData={analyticsData?.satisfactionData} isLoading={loading} />
       </div>
     </div>
   );

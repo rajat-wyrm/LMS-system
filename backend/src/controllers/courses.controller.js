@@ -100,6 +100,10 @@ exports.createCourse = async (req, res, next) => {
       return res.status(403).json({ success: false, error: 'Only admins can create and generate courses' });
     }
     const { title, description, category, level, thumbnail, celebrityTeacher, price, duration, rating, outcomes, xp, gradient, icon, status, generateAI } = req.body;
+    const categoryRecord = await prisma.category.findUnique({ where: { name: category } });
+    if (!categoryRecord) {
+      return res.status(400).json({ success: false, error: 'Select a category created through the admin panel.' });
+    }
 
     const allowedStatuses = ['pending', 'approved', 'rejected'];
     if (status && !allowedStatuses.includes(status)) {
@@ -114,6 +118,7 @@ exports.createCourse = async (req, res, next) => {
         title,
         description,
         category,
+        categoryId: categoryRecord.id,
         level,
         thumbnail,
         celebrityTeacher,
@@ -175,6 +180,11 @@ exports.updateCourse = async (req, res, next) => {
     }
 
     const dataToUpdate = { ...req.body };
+    if (dataToUpdate.category !== undefined) {
+      const categoryRecord = await prisma.category.findUnique({ where: { name: dataToUpdate.category } });
+      if (!categoryRecord) return res.status(400).json({ success: false, error: 'Selected category was not found.' });
+      dataToUpdate.categoryId = categoryRecord.id;
+    }
     if (dataToUpdate.price !== undefined) {
       dataToUpdate.price = parseFloat(dataToUpdate.price) || 0;
     }
