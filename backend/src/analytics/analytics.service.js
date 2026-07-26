@@ -423,8 +423,8 @@ const getAllEnrollmentsReportData = async () => {
     const course = courses.find(c => c.id === e.courseId);
     return {
       id: e.id,
-      userName: user ? user.name : 'Unknown User',
-      courseName: course ? course.name : 'Unknown Course',
+      userName: user ? user.name : null,
+      courseName: course ? course.name : null,
       progress: e.progress,
       status: e.status,
       learningTime: e.learningTime,
@@ -440,7 +440,7 @@ const getAllProgressReportData = async () => {
     const course = courses.find(c => c.id === e.courseId);
     if (!course) continue;
 
-    const userName = user ? user.name : 'Unknown User';
+    const userName = user ? user.name : null;
     const courseName = course.name;
 
     const courseLessons = course.lessons || [];

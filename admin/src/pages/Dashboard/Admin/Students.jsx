@@ -1,12 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import {
   MdSearch,
   MdOutlineCalendarToday,
   MdKeyboardArrowDown,
+  MdRefresh,
 } from 'react-icons/md';
 import { exportToCSV } from '../../../utils/export';
+import { apiRequest, clearAdminAuth } from '../../../utils/api';
 
 import StudentsHero from '../../../components/admin/students/StudentsHero';
 import StudentAnalyticsCards from '../../../components/admin/students/StudentAnalyticsCards';
@@ -17,174 +19,69 @@ import AddStudentDrawer from '../../../components/admin/students/AddStudentDrawe
 import NotificationModal from '../../../components/admin/students/NotificationModal';
 import DeleteStudentModal from '../../../components/admin/students/DeleteStudentModal';
 
-const initialStudents = [
-  {
-    id: 1,
-    name: 'Deepika Mishra',
-    email: 'dipmish9898@gmail.com',
-    avatar: '/owl_avatar.png',
-    enrolledCourse: 'DSA with Java',
-    mentorName: 'MS Dhoni',
-    progress: 72,
-    status: 'Active',
-    joinedDate: '2026-05-15',
-    badge: 'Top Learner',
-    phone: '+91 98765 43210',
-    plan: 'Pro Plan',
-    xp: 4200,
-    lastActive: '2h ago',
-    certificates: 3,
-    streak: 14,
-  },
-  {
-    id: 2,
-    name: 'Rahul Mishra',
-    email: 'rahul@gmail.com',
-    avatar: null,
-    enrolledCourse: 'MERN',
-    mentorName: 'Alia Bhatt',
-    progress: 48,
-    status: 'Active',
-    joinedDate: '2026-05-18',
-    badge: 'Quiz Master',
-    phone: '+91 87654 32109',
-    plan: 'Premium Plan',
-    xp: 3100,
-    lastActive: '5h ago',
-    certificates: 2,
-    streak: 9,
-  },
-  {
-    id: 3,
-    name: 'john',
-    email: 'john.doe@gmail.com',
-    avatar: '/owl_avatar.png',
-    enrolledCourse: 'DSA with Java',
-    mentorName: 'Salman Khan',
-    progress: 23,
-    status: 'Completed',
-    joinedDate: '2026-05-10',
-    badge: 'Top Learner',
-    phone: '+91 76543 21098',
-    plan: 'Basic Plan',
-    xp: 1800,
-    lastActive: '1d ago',
-    certificates: 1,
-    streak: 4,
-  },
-  {
-    id: 4,
-    name: 'Anjali Verma',
-    email: 'anjali.verma@gmail.com',
-    avatar: null,
-    enrolledCourse: 'Python Basics',
-    mentorName: 'Katrina Kaif',
-    progress: 12,
-    status: 'Pending',
-    joinedDate: '2026-04-20',
-    badge: 'Quiz Master',
-    phone: '+91 65432 10987',
-    plan: 'Basic Plan',
-    xp: 1200,
-    lastActive: '8d ago',
-    certificates: 0,
-    streak: 1,
-  },
-];
-
 const filterSelectClass =
   'w-full rounded-xl py-2.5 pl-4 pr-10 text-xs admin-text-primary focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all cursor-pointer appearance-none border bg-[var(--admin-surface)] border-[var(--admin-border)]';
 const filterInputClass =
   'w-full rounded-xl py-2.5 pl-10 pr-4 text-xs admin-text-primary placeholder-[var(--admin-text-muted)] focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/50 transition-all border bg-[var(--admin-surface)] border-[var(--admin-border)]';
+
+const STATUS_TO_UI = {
+  approved: 'Active',
+  pending: 'Pending',
+  rejected: 'Inactive',
+  suspended: 'Suspended',
+  active: 'Active',
+  completed: 'Completed',
+};
+
+const UI_TO_STATUS = {
+  Active: 'approved',
+  Pending: 'pending',
+  Inactive: 'rejected',
+  Suspended: 'suspended',
+  Completed: 'approved',
+};
+
+const formatDate = (value) => {
+  if (!value) return '—';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '—' : date.toISOString().slice(0, 10);
+};
+
+const normalizeStudent = (user) => ({
+  id: user.id,
+  name: user.name || 'Unnamed student',
+  email: user.email || '',
+  avatar: user.avatar || null,
+  enrolledCourse: user.enrolledCourse || null,
+  mentorName: user.mentorName || null,
+  progress: Number.isFinite(user.progress) ? user.progress : 0,
+  status: STATUS_TO_UI[user.status] || user.status || 'Pending',
+  joinedDate: formatDate(user.createdAt),
+  badge: null,
+  phone: null,
+  plan: null,
+  xp: null,
+  lastActive: null,
+  certificates: user.certificates ?? 0,
+  streak: null,
+  rawStatus: user.status,
+  enrollmentsCount: user.enrollmentsCount ?? user.enrollments?.length ?? 0,
+});
 
 const Students = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const filter = searchParams.get('filter');
 
-  const [students, setStudents] = useState(() => {
-    const saved = localStorage.getItem('lms_students_data');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return initialStudents;
-      }
-    }
-    return initialStudents;
-  });
-
-  React.useEffect(() => {
-    localStorage.setItem('lms_students_data', JSON.stringify(students));
-  }, [students]);
-
+  const [students, setStudents] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [courseFilter, setCourseFilter] = useState('');
   const [teacherFilter, setTeacherFilter] = useState('');
-  const [badgeFilter, setBadgeFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
-  const hasFilters = Boolean(searchQuery || statusFilter || courseFilter || teacherFilter || badgeFilter || dateFilter);
-
-  const handleClearFilters = () => {
-    setSearchQuery('');
-    setStatusFilter('');
-    setCourseFilter('');
-    setTeacherFilter('');
-    setBadgeFilter('');
-    setDateFilter('');
-  };
-
-  const displayedStudents = useMemo(
-    () =>
-      students.filter((student) => {
-        const matchesSearch =
-          searchQuery === '' ||
-          student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          student.enrolledCourse.toLowerCase().includes(searchQuery.toLowerCase());
-
-        const matchesStatus = statusFilter === '' || student.status === statusFilter;
-        const matchesCourse =
-          courseFilter === '' ||
-          student.enrolledCourse.toLowerCase().includes(courseFilter.toLowerCase());
-        const matchesTeacher = teacherFilter === '' || student.mentorName === teacherFilter;
-        const matchesBadge = badgeFilter === '' || student.badge === badgeFilter;
-        const matchesDate = dateFilter === '' || student.joinedDate.includes(dateFilter);
-
-        let matchesRoute = true;
-        if (filter === 'active') matchesRoute = student.status === 'Active';
-        else if (filter === 'new') matchesRoute = student.joinedDate.includes('2026-05');
-        else if (filter === 'analytics') matchesRoute = student.progress > 80;
-
-        return (
-          matchesSearch &&
-          matchesStatus &&
-          matchesCourse &&
-          matchesTeacher &&
-          matchesBadge &&
-          matchesDate &&
-          matchesRoute
-        );
-      }),
-    [
-      students,
-      searchQuery,
-      statusFilter,
-      courseFilter,
-      teacherFilter,
-      badgeFilter,
-      dateFilter,
-      filter,
-    ]
-  );
-
-  const monthlyGrowth = useMemo(() => {
-    const thisMonth = students.filter((s) => s.joinedDate?.includes('2026-05')).length;
-    if (students.length === 0) return '0%';
-    const pct = Math.round((thisMonth / students.length) * 100);
-    return `+${pct}%`;
-  }, [students]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState('');
 
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -192,6 +89,91 @@ const Students = () => {
   const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [studentToModify, setStudentToModify] = useState(null);
+
+  const loadStudents = async ({ silent = false } = {}) => {
+    if (silent) setIsRefreshing(true);
+    else setIsLoading(true);
+    setError('');
+
+    try {
+      const result = await apiRequest('/v1/admin/users?role=user&limit=1000');
+      setStudents((result.data || []).map(normalizeStudent));
+    } catch (requestError) {
+      if (requestError.status === 401 || requestError.status === 403) {
+        clearAdminAuth();
+      }
+      setError(requestError.message || 'Unable to load students from the database.');
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadStudents();
+  }, []);
+
+  const courseOptions = useMemo(
+    () => [...new Set(students.map((student) => student.enrolledCourse).filter(Boolean))],
+    [students],
+  );
+  const teacherOptions = useMemo(
+    () => [...new Set(students.map((student) => student.mentorName).filter(Boolean))],
+    [students],
+  );
+
+  const hasFilters = Boolean(searchQuery || statusFilter || courseFilter || teacherFilter || dateFilter);
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('');
+    setCourseFilter('');
+    setTeacherFilter('');
+    setDateFilter('');
+  };
+
+  const displayedStudents = useMemo(
+    () =>
+      students.filter((student) => {
+        const searchable = [
+          student.name,
+          student.email,
+          student.enrolledCourse,
+          student.mentorName,
+        ].filter(Boolean).join(' ').toLowerCase();
+
+        const matchesSearch = searchQuery === '' || searchable.includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === '' || student.status === statusFilter;
+        const matchesCourse = courseFilter === '' || student.enrolledCourse === courseFilter;
+        const matchesTeacher = teacherFilter === '' || student.mentorName === teacherFilter;
+        const matchesDate = dateFilter === '' || student.joinedDate === dateFilter;
+
+        let matchesRoute = true;
+        if (filter === 'active') matchesRoute = student.status === 'Active';
+        else if (filter === 'new') {
+          const joined = new Date(student.joinedDate);
+          const monthAgo = new Date();
+          monthAgo.setDate(monthAgo.getDate() - 30);
+          matchesRoute = !Number.isNaN(joined.getTime()) && joined >= monthAgo;
+        } else if (filter === 'analytics') {
+          matchesRoute = student.progress > 80;
+        }
+
+        return matchesSearch && matchesStatus && matchesCourse && matchesTeacher && matchesDate && matchesRoute;
+      }),
+    [students, searchQuery, statusFilter, courseFilter, teacherFilter, dateFilter, filter],
+  );
+
+  const monthlyGrowth = useMemo(() => {
+    const monthAgo = new Date();
+    monthAgo.setDate(monthAgo.getDate() - 30);
+    const recent = students.filter((student) => {
+      const joined = new Date(student.joinedDate);
+      return !Number.isNaN(joined.getTime()) && joined >= monthAgo;
+    }).length;
+    if (students.length === 0) return '0%';
+    return `+${Math.round((recent / students.length) * 100)}%`;
+  }, [students]);
 
   const handleOpenDrawer = (student) => {
     setSelectedStudent(student);
@@ -203,13 +185,13 @@ const Students = () => {
     setTimeout(() => setSelectedStudent(null), 300);
   };
 
-  const handleOpenAddModal = () => setIsAddModalOpen(true);
   const handleCloseAddModal = () => setIsAddModalOpen(false);
 
   const handleOpenNotifyModal = (student) => {
     setStudentToModify(student);
     setIsNotifyModalOpen(true);
   };
+
   const handleCloseNotifyModal = () => {
     setIsNotifyModalOpen(false);
     setTimeout(() => setStudentToModify(null), 300);
@@ -219,58 +201,85 @@ const Students = () => {
     setStudentToModify(student);
     setIsDeleteModalOpen(true);
   };
+
   const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setTimeout(() => setStudentToModify(null), 300);
   };
 
-  const handleDeleteStudent = (id) => {
-    setStudents(students.filter((s) => s.id !== id));
-    handleCloseDeleteModal();
-    if (selectedStudent?.id === id) handleCloseDrawer();
+  const handleDeleteStudent = async (id) => {
+    setError('');
+    try {
+      await apiRequest(`/v1/admin/users/${id}`, { method: 'DELETE' });
+      setStudents((current) => current.filter((student) => student.id !== id));
+      handleCloseDeleteModal();
+      if (selectedStudent?.id === id) handleCloseDrawer();
+    } catch (requestError) {
+      setError(requestError.message || 'Unable to delete student.');
+    }
+  };
+
+  const handleSaveStudent = async (studentForm) => {
+    setError('');
+    try {
+      const payload = {
+        name: studentForm.name,
+        email: studentForm.email,
+        avatar: studentForm.avatar || null,
+        status: UI_TO_STATUS[studentForm.status] || 'approved',
+      };
+
+      const result = studentToModify
+        ? await apiRequest(`/v1/admin/users/${studentToModify.id}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+          })
+        : await apiRequest('/v1/admin/users', {
+            method: 'POST',
+            body: JSON.stringify({
+              ...payload,
+              password: studentForm.password,
+              role: 'user',
+            }),
+          });
+
+      const normalized = normalizeStudent(result.data);
+      setStudents((current) =>
+        studentToModify
+          ? current.map((student) => (student.id === studentToModify.id ? normalized : student))
+          : [normalized, ...current],
+      );
+      handleCloseAddModal();
+      setStudentToModify(null);
+    } catch (requestError) {
+      setError(requestError.message || 'Unable to save student.');
+    }
   };
 
   const handleExport = () => {
     exportToCSV(
       displayedStudents,
-      [
-        'name',
-        'email',
-        'phone',
-        'enrolledCourse',
-        'mentorName',
-        'plan',
-        'status',
-        'joinedDate',
-        'progress',
-        'xp',
-        'lastActive',
-        'certificates',
-        'streak',
-      ],
-      'lms-students.csv'
+      ['name', 'email', 'enrolledCourse', 'mentorName', 'status', 'joinedDate', 'progress', 'certificates'],
+      'lms-students.csv',
     );
   };
 
   const handleGenerateReport = () => {
-    const active = students.filter((s) => s.status === 'Active').length;
+    const active = students.filter((student) => student.status === 'Active').length;
     const avgProgress =
       students.length > 0
-        ? Math.round(students.reduce((sum, s) => sum + (s.progress ?? 0), 0) / students.length)
+        ? Math.round(students.reduce((sum, student) => sum + (student.progress ?? 0), 0) / students.length)
         : 0;
-    const report = [
-      {
+    exportToCSV(
+      [{
         reportDate: new Date().toISOString().split('T')[0],
         totalStudents: students.length,
         activeStudents: active,
         averageCompletion: `${avgProgress}%`,
         filteredCount: displayedStudents.length,
-      },
-    ];
-    exportToCSV(
-      report,
+      }],
       ['reportDate', 'totalStudents', 'activeStudents', 'averageCompletion', 'filteredCount'],
-      'lms-students-report.csv'
+      'lms-students-report.csv',
     );
   };
 
@@ -279,117 +288,69 @@ const Students = () => {
       <StudentsHero
         totalCount={students.length.toLocaleString()}
         monthlyGrowth={monthlyGrowth}
-        onAddStudent={handleOpenAddModal}
+        onAddStudent={() => setIsAddModalOpen(true)}
         onExport={handleExport}
         onGenerateReport={handleGenerateReport}
       />
 
-      <StudentAnalyticsCards students={students} />
+      {error && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          {error}
+        </div>
+      )}
 
+      <StudentAnalyticsCards students={students} />
       <StudentInsightsStrip students={students} />
 
       <div className="relative z-10 flex flex-wrap gap-3 items-center rounded-2xl p-4 border shadow-lg admin-surface border-[var(--admin-border)]">
         <div className="relative min-w-[200px] flex-1">
-          <MdSearch
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 admin-text-secondary"
-            size={18}
-          />
+          <MdSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 admin-text-secondary" size={18} />
           <input
             type="text"
-            placeholder="Search students, email, or course..."
+            placeholder="Search students, email, course, or mentor..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(event) => setSearchQuery(event.target.value)}
             className={filterInputClass}
           />
         </div>
 
+        {isRefreshing && <MdRefresh className="text-cyan-400 animate-spin" size={18} />}
+
         <div className="relative min-w-[110px]">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className={filterSelectClass}
-          >
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className={filterSelectClass}>
             <option value="">Status</option>
             <option value="Active">Active</option>
-            <option value="Completed">Completed</option>
             <option value="Pending">Pending</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Suspended">Suspended</option>
           </select>
-          <MdKeyboardArrowDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
-            size={16}
-          />
+          <MdKeyboardArrowDown className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none" size={16} />
         </div>
 
         <div className="relative min-w-[120px]">
-          <select
-            value={courseFilter}
-            onChange={(e) => setCourseFilter(e.target.value)}
-            className={filterSelectClass}
-          >
+          <select value={courseFilter} onChange={(event) => setCourseFilter(event.target.value)} className={filterSelectClass}>
             <option value="">Course</option>
-            <option value="DSA with Java">DSA with Java</option>
-            <option value="MERN">MERN</option>
-            <option value="Python">Python</option>
-            <option value="C++">C++</option>
-            <option value="HTML">HTML</option>
-            <option value="CSS">CSS</option>
-            <option value="JavaScript">JavaScript</option>
-            <option value="ReactJS">ReactJS</option>
+            {courseOptions.map((course) => <option key={course} value={course}>{course}</option>)}
           </select>
-          <MdKeyboardArrowDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
-            size={16}
-          />
+          <MdKeyboardArrowDown className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none" size={16} />
         </div>
 
         <div className="relative min-w-[120px]">
-          <select
-            value={teacherFilter}
-            onChange={(e) => setTeacherFilter(e.target.value)}
-            className={filterSelectClass}
-          >
+          <select value={teacherFilter} onChange={(event) => setTeacherFilter(event.target.value)} className={filterSelectClass}>
             <option value="">Teacher</option>
-            <option value="MS Dhoni">MS Dhoni</option>
-            <option value="Alia Bhatt">Alia Bhatt</option>
-            <option value="Salman Khan">Salman Khan</option>
-            <option value="Katrina Kaif">Katrina Kaif</option>
-            <option value="Anushka Sharma">Anushka Sharma</option>
-            <option value="Virat Kohli">Virat Kohli</option>
-            <option value="Sachin Tendulkar">Sachin Tendulkar</option>
+            {teacherOptions.map((teacher) => <option key={teacher} value={teacher}>{teacher}</option>)}
           </select>
-          <MdKeyboardArrowDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
-            size={16}
-          />
-        </div>
-
-        <div className="relative min-w-[110px]">
-          <select
-            value={badgeFilter}
-            onChange={(e) => setBadgeFilter(e.target.value)}
-            className={filterSelectClass}
-          >
-            <option value="">Badge</option>
-            <option value="Top Learner">Top Learner</option>
-            <option value="Quiz Master">Quiz Master</option>
-          </select>
-          <MdKeyboardArrowDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none"
-            size={16}
-          />
+          <MdKeyboardArrowDown className="absolute right-3 top-1/2 -translate-y-1/2 admin-text-secondary pointer-events-none" size={16} />
         </div>
 
         <div className="relative flex items-center rounded-xl px-3 py-2 text-xs admin-text-primary min-w-[160px] border admin-surface border-[var(--admin-border)]">
           <input
             type="date"
             value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
+            onChange={(event) => setDateFilter(event.target.value)}
             className="bg-transparent border-none w-full text-xs admin-text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 rounded-md cursor-pointer [color-scheme:var(--color-scheme)]"
           />
-          <MdOutlineCalendarToday
-            className="admin-text-secondary ml-2 pointer-events-none shrink-0"
-            size={16}
-          />
+          <MdOutlineCalendarToday className="admin-text-secondary ml-2 pointer-events-none shrink-0" size={16} />
         </div>
       </div>
 
@@ -404,13 +365,10 @@ const Students = () => {
         onDelete={handleOpenDeleteModal}
         hasFilters={hasFilters}
         onClearFilters={handleClearFilters}
+        isLoading={isLoading}
       />
 
-      <StudentProfileDrawer
-        isOpen={isDrawerOpen}
-        onClose={handleCloseDrawer}
-        student={selectedStudent}
-      />
+      <StudentProfileDrawer isOpen={isDrawerOpen} onClose={handleCloseDrawer} student={selectedStudent} />
 
       <AddStudentDrawer
         isOpen={isAddModalOpen}
@@ -419,28 +377,7 @@ const Students = () => {
           setStudentToModify(null);
         }}
         studentToEdit={studentToModify}
-        onAdd={(newStudent) => {
-          if (studentToModify) {
-            setStudents(
-              students.map((s) =>
-                s.id === studentToModify.id ? { ...s, ...newStudent } : s
-              )
-            );
-          } else {
-            setStudents([
-              {
-                ...newStudent,
-                id: Date.now(),
-                lastActive: 'Just now',
-                certificates: 0,
-                streak: 1,
-              },
-              ...students,
-            ]);
-          }
-          handleCloseAddModal();
-          setStudentToModify(null);
-        }}
+        onAdd={handleSaveStudent}
       />
 
       <AnimatePresence>

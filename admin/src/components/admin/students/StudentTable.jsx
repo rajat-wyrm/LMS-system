@@ -74,15 +74,11 @@ const getStatusBadge = (status) => {
   );
 };
 
-const deriveLastActive = (student) =>
-  student.lastActive ||
-  (student.status === 'Active' ? '2h ago' : student.status === 'Pending' ? '5d ago' : '1w ago');
+const deriveLastActive = (student) => student.lastActive || '—';
 
-const deriveCertificates = (student) =>
-  student.certificates ?? Math.max(0, Math.floor((student.progress ?? 0) / 25));
+const deriveCertificates = (student) => student.certificates ?? 0;
 
-const deriveStreak = (student) =>
-  student.streak ?? Math.max(1, Math.floor((student.progress ?? 0) / 12));
+const deriveStreak = (student) => student.streak ?? '—';
 
 const StudentTable = ({ students, onViewProfile, onNotify, onEdit, onDelete, hasFilters, onClearFilters }) => {
   const [activeDropdownId, setActiveDropdownId] = useState(null);
@@ -181,7 +177,7 @@ const StudentTable = ({ students, onViewProfile, onNotify, onEdit, onDelete, has
                       >
                         <MdSchool size={14} className="text-[#8B5CF6]" />
                       </div>
-                      <span className="text-xs font-medium admin-text-primary">{student.enrolledCourse}</span>
+                      <span className="text-xs font-medium admin-text-primary">{student.enrolledCourse || '—'}</span>
                     </div>
                   </td>
 
@@ -219,7 +215,7 @@ const StudentTable = ({ students, onViewProfile, onNotify, onEdit, onDelete, has
                     <div className="flex items-center gap-1.5">
                       <MdLocalFireDepartment size={16} className="text-[#F59E0B]" />
                       <span className="text-xs font-semibold admin-text-primary">
-                        {deriveStreak(student)}d
+                        {deriveStreak(student) === '—' ? '—' : `${deriveStreak(student)}d`}
                       </span>
                     </div>
                   </td>

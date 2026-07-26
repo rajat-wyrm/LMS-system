@@ -139,7 +139,7 @@ export const Certificate = () => {
 
             <div className="flex flex-col items-center w-48">
               <span className="text-slate-700 font-signature text-xl border-b border-slate-400 pb-2 mb-2 w-full text-center" style={{ fontFamily: "cursive" }}>
-                {course?.instructor?.name || "Instructor Name"}
+                {course?.instructor?.name || "—"}
               </span>
               <span className="text-slate-500 text-sm uppercase tracking-wider">Instructor</span>
             </div>

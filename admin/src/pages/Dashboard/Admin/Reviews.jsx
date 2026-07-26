@@ -8,9 +8,9 @@ import {
   MdArrowUpward, MdArrowDownward,
 } from 'react-icons/md';
 
-/* ─────────────────────────────────────────────
+/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
    ANIMATED PARTICLES
-───────────────────────────────────────────── */
+Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 function Particles() {
   const particles = useRef(
     Array.from({ length: 28 }, (_, i) => ({
@@ -54,18 +54,18 @@ function Particles() {
   );
 }
 
-/* ─────────────────────────────────────────────
+/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
    KPI CARD
-───────────────────────────────────────────── */
+Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 const KPI_CARDS = [
   {
     id: 'satisfaction',
     title: 'Overall Satisfaction Score',
-    value: '98%',
-    sub: '+4% vs last month',
+    value: '0%',
+    sub: 'No database reviews',
     trend: 'up',
-    trendVal: '+4%',
-    icon: '😊',
+    trendVal: '0%',
+    icon: 'Ã°Å¸ËœÅ ',
     gradient: 'from-blue-600/30 via-blue-500/10 to-transparent',
     border: 'border-blue-500/30',
     glow: 'bg-blue-500',
@@ -76,11 +76,11 @@ const KPI_CARDS = [
   {
     id: 'rating',
     title: 'Average Platform Rating',
-    value: '4.8★',
-    sub: 'Across all courses',
+    value: '0.0â˜…',
+    sub: 'No database reviews',
     trend: 'up',
-    trendVal: '+0.2',
-    icon: '⭐',
+    trendVal: '0',
+    icon: 'Ã¢Â­Â',
     gradient: 'from-purple-600/30 via-purple-500/10 to-transparent',
     border: 'border-purple-500/30',
     glow: 'bg-purple-500',
@@ -91,11 +91,11 @@ const KPI_CARDS = [
   {
     id: 'nps',
     title: 'Net Promoter Score',
-    value: '+68',
-    sub: 'Industry leading',
+    value: '0',
+    sub: 'No database reviews',
     trend: 'up',
-    trendVal: '+5 pts',
-    icon: '🚀',
+    trendVal: '0 pts',
+    icon: 'Ã°Å¸Å¡â‚¬',
     gradient: 'from-emerald-600/30 via-emerald-500/10 to-transparent',
     border: 'border-emerald-500/30',
     glow: 'bg-emerald-500',
@@ -106,11 +106,11 @@ const KPI_CARDS = [
   {
     id: 'retention',
     title: 'Retention Rate',
-    value: '84%',
-    sub: '+3.2% this month',
+    value: '0%',
+    sub: 'No database reviews',
     trend: 'up',
-    trendVal: '+3.2%',
-    icon: '🔁',
+    trendVal: '0%',
+    icon: 'Ã°Å¸â€Â',
     gradient: 'from-cyan-600/30 via-cyan-500/10 to-transparent',
     border: 'border-cyan-500/30',
     glow: 'bg-cyan-500',
@@ -121,11 +121,11 @@ const KPI_CARDS = [
   {
     id: 'sentiment',
     title: 'Positive Sentiment',
-    value: '92%',
-    sub: 'AI analyzed',
+    value: '0%',
+    sub: 'No database reviews',
     trend: 'up',
-    trendVal: '+1.8%',
-    icon: '🤖',
+    trendVal: '0%',
+    icon: 'Ã°Å¸Â¤â€“',
     gradient: 'from-pink-600/30 via-pink-500/10 to-transparent',
     border: 'border-pink-500/30',
     glow: 'bg-pink-500',
@@ -136,11 +136,11 @@ const KPI_CARDS = [
   {
     id: 'moderation',
     title: 'Moderation Queue',
-    value: '37',
-    sub: 'Reviews require action',
+    value: '0',
+    sub: 'No database reviews',
     trend: 'down',
-    trendVal: '+12',
-    icon: '⚠️',
+    trendVal: '0',
+    icon: 'Ã¢Å¡Â Ã¯Â¸Â',
     gradient: 'from-red-600/30 via-red-500/10 to-transparent',
     border: 'border-red-500/30',
     glow: 'bg-red-500',
@@ -205,9 +205,9 @@ function KpiCard({ card, index }) {
   );
 }
 
-/* ─────────────────────────────────────────────
+/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
    DATE RANGE MODAL
-───────────────────────────────────────────── */
+Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 const DATE_PRESETS = ['Today', 'Last 7 Days', 'Last 30 Days', 'Last 3 Months', 'This Year', 'Custom'];
 
 function DateRangeModal({ onClose }) {
@@ -257,9 +257,9 @@ function DateRangeModal({ onClose }) {
   );
 }
 
-/* ─────────────────────────────────────────────
+/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
    AI SUMMARY MODAL
-───────────────────────────────────────────── */
+Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 function AiSummaryModal({ onClose }) {
   const [loading, setLoading] = useState(true);
   useEffect(() => { const t = setTimeout(() => setLoading(false), 1800); return () => clearTimeout(t); }, []);
@@ -291,26 +291,21 @@ function AiSummaryModal({ onClose }) {
               <div className="absolute inset-0 rounded-full border-t-2 border-purple-500 animate-spin" />
               <MdAutoAwesome size={22} className="absolute inset-0 m-auto text-purple-400" />
             </div>
-            <p className="text-sm text-gray-500 animate-pulse">Analyzing {initialReviews.length} reviews with AI…</p>
+            <p className="text-sm text-gray-500 animate-pulse">Checking database-backed reviewsâ€¦</p>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="bg-gradient-to-br from-purple-600/10 to-cyan-600/5 border border-purple-500/20 rounded-2xl p-4 text-sm text-gray-300 leading-relaxed">
-              <p className="font-semibold text-white mb-2">📊 Platform Sentiment Overview</p>
-              <p>Student sentiment is <span className="text-emerald-400 font-medium">highly positive</span> with 92% of reviews rated 4★ or above. The most praised attributes are <strong>instructor engagement</strong> and <strong>content depth</strong>.</p>
+              <p className="font-semibold text-white mb-2">Ã°Å¸â€œÅ  Platform Sentiment Overview</p>
+              <p>No database-backed reviews are available yet. Review insights will appear after real learner reviews are stored.</p>
             </div>
             <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-4 text-sm text-gray-300 space-y-2">
-              <p className="font-semibold text-white">🔍 Key Insights</p>
-              <ul className="space-y-1.5 text-gray-400">
-                <li>• <span className="text-cyan-400">DSA with Java</span> has the highest helpfulness ratio (61 helpful / 0 unhelpful).</li>
-                <li>• 2 reviews flagged for policy violations — require immediate moderation.</li>
-                <li>• <span className="text-yellow-400">CSS & UI Design</span> shows declining satisfaction; pacing complaints in mid-modules.</li>
-                <li>• Retention risk: 3 students gave 1–2★ ratings within 48 hrs of enrollment.</li>
-              </ul>
+              <p className="font-semibold text-white">Ã°Å¸â€Â Key Insights</p>
+              <ul className="space-y-1.5 text-gray-400"><li>â€¢ No real review records found.</li><li>â€¢ Add a reviews table/API before showing sentiment, helpfulness, or moderation analytics.</li></ul>
             </div>
             <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-4 text-sm">
-              <p className="font-semibold text-white mb-1">✅ Recommended Actions</p>
-              <p className="text-gray-400">Update CSS & UI Design curriculum in modules 6–9, and follow up with low-rated students to offer support or refunds proactively.</p>
+              <p className="font-semibold text-white mb-1">Ã¢Å“â€¦ Recommended Actions</p>
+              <p className="text-gray-400">Collect real learner reviews before generating recommendations.</p>
             </div>
             <button onClick={onClose} className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-semibold text-sm hover:shadow-[0_0_20px_rgba(124,58,237,0.4)] transition-all">
               Close
@@ -322,9 +317,9 @@ function AiSummaryModal({ onClose }) {
   );
 }
 
-/* ─────────────────────────────────────────────
+/* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
    REVIEW DATA
-───────────────────────────────────────────── */
+Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
 const RATING_COLORS = {
   5: 'text-emerald-400', 4: 'text-cyan-400', 3: 'text-yellow-400', 2: 'text-orange-400', 1: 'text-red-400',
 };
@@ -334,16 +329,7 @@ const SENTIMENT_BADGE = {
   negative: 'bg-red-500/15 text-red-400 border-red-500/30',
 };
 
-const initialReviews = [
-  { id: 1, student: 'Rahul Sharma',    avatar: 'RS', course: 'Full Stack Web Development', teacher: 'Virat Kohli',     rating: 5, date: 'May 28, 2025', text: 'Absolutely phenomenal course! Virat sir explains concepts with the same intensity as he bats. Every module felt like a century partnership. Best investment ever.', helpful: 42, unhelpful: 2,  verified: true,  flagged: false, replied: false, sentiment: 'positive' },
-  { id: 2, student: 'Priya Patel',     avatar: 'PP', course: 'Python Foundations',         teacher: 'Sachin Tendulkar',rating: 5, date: 'May 27, 2025', text: "Sachin sir's teaching style is just like his batting — flawless and textbook perfect. The Python curriculum is well-structured and covers everything from basics to advanced topics.", helpful: 38, unhelpful: 1,  verified: true,  flagged: false, replied: true,  sentiment: 'positive' },
-  { id: 3, student: 'Aman Verma',      avatar: 'AV', course: 'JavaScript Mastery',         teacher: 'Virat Kohli',     rating: 4, date: 'May 26, 2025', text: 'Great course overall! The content is very comprehensive and up to date. Only wish there were more live coding sessions. The practice problems are well-chosen.', helpful: 27, unhelpful: 3,  verified: true,  flagged: false, replied: false, sentiment: 'positive' },
-  { id: 4, student: 'Sneha Singh',     avatar: 'SS', course: 'ReactJS',                    teacher: 'Anushka Sharma',  rating: 3, date: 'May 25, 2025', text: 'The course content is decent but I expected more advanced topics. The explanations are clear but the pacing feels a bit slow in the middle modules. Overall an okay experience.', helpful: 15, unhelpful: 8,  verified: true,  flagged: false, replied: false, sentiment: 'neutral'  },
-  { id: 5, student: 'Karan Mehta',     avatar: 'KM', course: 'CSS & UI Design',            teacher: 'Katrina Kaif',    rating: 2, date: 'May 24, 2025', text: 'Expected more depth in the advanced CSS topics. The fundamentals section is good but the course drops off significantly towards the end. Hope the team updates the content soon.', helpful: 9,  unhelpful: 4,  verified: false, flagged: true,  replied: false, sentiment: 'negative' },
-  { id: 6, student: 'Divya Krishnan', avatar: 'DK', course: 'DSA with Java',              teacher: 'Salman Khan',     rating: 5, date: 'May 23, 2025', text: 'Bhai ne toh kamaal kar diya! 🔥 Seriously though, Salman sir makes DSA genuinely fun. Cracked my Google interview after this!', helpful: 61, unhelpful: 0,  verified: true,  flagged: false, replied: true,  sentiment: 'positive' },
-  { id: 7, student: 'Rohan Das',       avatar: 'RD', course: 'Python Foundations',         teacher: 'Sachin Tendulkar',rating: 4, date: 'May 22, 2025', text: 'Solid Python course. The real-world examples are very helpful. Sachin sir clearly knows his subject inside out. Would recommend to anyone starting their coding journey.', helpful: 22, unhelpful: 2,  verified: true,  flagged: false, replied: false, sentiment: 'positive' },
-  { id: 8, student: 'Neha Gupta',      avatar: 'NG', course: 'Full Stack Web Development', teacher: 'Virat Kohli',     rating: 1, date: 'May 20, 2025', text: 'The videos kept buffering and the assignments had errors that were never corrected. Very disappointed with the technical quality.', helpful: 7,  unhelpful: 12, verified: false, flagged: true,  replied: false, sentiment: 'negative' },
-];
+const initialReviews = [];
 
 function Stars({ rating, size = 16 }) {
   return (
@@ -377,7 +363,7 @@ function ReplyModal({ review, onClose, onSave }) {
           <p className="text-sm text-gray-300 line-clamp-3">{review.text}</p>
         </div>
         <textarea value={text} onChange={(e) => setText(e.target.value)} rows={4}
-          placeholder="Write your admin reply…"
+          placeholder="Write your admin replyÃ¢â‚¬Â¦"
           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-purple-500 focus:bg-white/10 focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0b1736] transition-all resize-none mb-5"
         />
         <div className="flex gap-3">
@@ -391,9 +377,9 @@ function ReplyModal({ review, onClose, onSave }) {
   );
 }
 
-/* ═══════════════════════════════════════════════
+/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
    MAIN PAGE
-═══════════════════════════════════════════════ */
+Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */
 const Reviews = () => {
   const [reviews, setReviews]         = useState(initialReviews);
   const [search, setSearch]           = useState('');
@@ -406,7 +392,7 @@ const Reviews = () => {
 
   /* KPI derivations */
   const totalReviews  = reviews.length;
-  const avgRating     = (reviews.reduce((a, r) => a + r.rating, 0) / totalReviews).toFixed(1);
+  const avgRating     = totalReviews > 0 ? (reviews.reduce((a, r) => a + r.rating, 0) / totalReviews).toFixed(1) : '0.0';
   const positiveCount = reviews.filter((r) => r.sentiment === 'positive').length;
   const flaggedCount  = reviews.filter((r) => r.flagged).length;
 
@@ -414,7 +400,7 @@ const Reviews = () => {
   const ratingDist = [5, 4, 3, 2, 1].map((n) => ({
     star: n,
     count: reviews.filter((r) => r.rating === n).length,
-    pct: Math.round((reviews.filter((r) => r.rating === n).length / totalReviews) * 100),
+    pct: totalReviews > 0 ? Math.round((reviews.filter((r) => r.rating === n).length / totalReviews) * 100) : 0,
   }));
 
   /* Filtered list */
@@ -446,7 +432,7 @@ const Reviews = () => {
   };
 
   const handleDownloadInsights = () => {
-    const content = `UpToSkills — Review Insights Report\n====================================\n\nPeriod: ${dateLabel}\n\nKPI Summary\n-----------\nOverall Satisfaction: 98%\nAverage Rating: ${avgRating} / 5\nNet Promoter Score: +68\nRetention Rate: 84%\nPositive Sentiment: ${Math.round((positiveCount / totalReviews) * 100)}%\nModeration Queue: ${flaggedCount} reviews\n\nTotal Reviews Analyzed: ${totalReviews}\n`;
+    const content = `UpToSkills Ã¢â‚¬â€ Review Insights Report\n====================================\n\nPeriod: ${dateLabel}\n\nKPI Summary\n-----------\nOverall Satisfaction: 0%\nAverage Rating: ${avgRating} / 5\nNet Promoter Score: 0\nRetention Rate: 0%\nPositive Sentiment: ${Math.round((positiveCount / totalReviews) * 100)}%\nModeration Queue: ${flaggedCount} reviews\n\nTotal Reviews Analyzed: ${totalReviews}\n`;
     const blob = new Blob([content], { type: 'text/plain' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
@@ -457,9 +443,9 @@ const Reviews = () => {
   return (
     <div className="min-h-screen text-white">
 
-      {/* ══════════════════════════════════════════
+      {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
           HERO SECTION
-      ══════════════════════════════════════════ */}
+      Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
       <div className="relative rounded-[28px] overflow-hidden mb-8"
         style={{ background: 'linear-gradient(135deg, #060B18 0%, #0D1433 40%, #100D2E 70%, #07111F 100%)' }}
       >
@@ -595,8 +581,8 @@ const Reviews = () => {
           >
             {[
               { label: 'Total Reviews',  value: totalReviews },
-              { label: 'Avg Rating',     value: `${avgRating} ★` },
-              { label: 'Positive',       value: `${Math.round((positiveCount / totalReviews) * 100)}%` },
+              { label: 'Avg Rating',     value: `${avgRating} Ã¢Ëœâ€¦` },
+              { label: 'Positive',       value: `${totalReviews > 0 ? Math.round((positiveCount / totalReviews) * 100) : 0}%` },
               { label: 'Flagged',        value: flaggedCount },
             ].map((s) => (
               <div key={s.label}>
@@ -608,18 +594,18 @@ const Reviews = () => {
         </div>
       </div>
 
-      {/* ══════════════════════════════════════════
-          KPI CARDS — 6 Premium Cards
-      ══════════════════════════════════════════ */}
+      {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
+          KPI CARDS Ã¢â‚¬â€ 6 Premium Cards
+      Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-8 px-0">
         {KPI_CARDS.map((card, i) => (
           <KpiCard key={card.id} card={card} index={i} />
         ))}
       </div>
 
-      {/* ══════════════════════════════════════════
+      {/* Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â
           REVIEW MANAGEMENT PANEL
-      ══════════════════════════════════════════ */}
+      Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         {/* Sidebar */}
@@ -664,7 +650,7 @@ const Reviews = () => {
                   onClick={() => setSentimentFilter(s)}
                   className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all ${sentimentFilter === s ? 'bg-purple-600/20 border border-purple-500/30 text-white font-medium' : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'}`}
                 >
-                  {s === 'All' ? '✦ All Sentiments' : s === 'Positive' ? '😊 Positive' : s === 'Neutral' ? '😐 Neutral' : '😞 Negative'}
+                  {s === 'All' ? 'Ã¢Å“Â¦ All Sentiments' : s === 'Positive' ? 'Ã°Å¸ËœÅ  Positive' : s === 'Neutral' ? 'Ã°Å¸ËœÂ Neutral' : 'Ã°Å¸ËœÅ¾ Negative'}
                 </button>
               ))}
             </div>
@@ -677,7 +663,7 @@ const Reviews = () => {
           <div className="relative">
             <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
             <input
-              type="text" placeholder="Search by student, course, or teacher…"
+              type="text" placeholder="Search by student, course, or teacherÃ¢â‚¬Â¦"
               value={search} onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-[#161b22] border border-white/5 rounded-2xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-purple-500/50 focus:bg-white/5 focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#161b22] transition-all text-white placeholder:text-gray-600"
             />
@@ -712,7 +698,7 @@ const Reviews = () => {
                         {review.replied && <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/20">Replied</span>}
                         {review.flagged && <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/20">Flagged</span>}
                       </div>
-                      <div className="text-[11px] text-gray-500">{review.course} · {review.teacher}</div>
+                      <div className="text-[11px] text-gray-500">{review.course} Ã‚Â· {review.teacher}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
