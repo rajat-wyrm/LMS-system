@@ -1,3 +1,5 @@
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { prisma } = require('../config/db');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -260,13 +262,13 @@ exports.getDashboardStats = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: {
-        studentsCount,
+        studentsCount: totalStudents,
         studentsTrend: studentsTrend.trend,
         studentsTrendUp: studentsTrend.trendUp,
-        teachersCount,
+        teachersCount: totalInstructors,
         teachersTrend: teachersTrend.trend,
         teachersTrendUp: teachersTrend.trendUp,
-        coursesCount,
+        coursesCount: totalCourses,
         coursesTrend: coursesTrend.trend,
         coursesTrendUp: coursesTrend.trendUp,
         revenueCount: periodRevenue,
@@ -713,6 +715,63 @@ exports.getAnalytics = async (req, res, next) => {
 };
 
 // ─── Admin Users ──────────────────────────────────────────────────────────────
+// @desc    Create user/instructor/admin from admin panel
+// @route   POST /api/admin/users
+// @access  Private/Admin
+exports.createAdminUser = async (req, res, next) => {
+  try {
+    const { name, email, password, role = 'user', status = 'approved', bio, avatar } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({ success: false, error: 'Name and email are required.' });
+    }
+
+    const allowedRoles = ['user', 'instructor', 'admin'];
+    const allowedStatuses = ['pending', 'approved', 'rejected', 'suspended'];
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(400).json({ success: false, error: 'Invalid role.' });
+    }
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ success: false, error: 'Invalid status.' });
+    }
+
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return res.status(400).json({ success: false, error: 'User already exists.' });
+    }
+
+    const rawPassword = password || crypto.randomBytes(18).toString('base64url');
+    const hashed = await bcrypt.hash(rawPassword, 10);
+
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashed,
+        role,
+        status,
+        bio: bio || null,
+        avatar: avatar || null,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        bio: true,
+        avatar: true,
+        createdAt: true,
+      },
+    });
+
+    res.status(201).json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get all users (admin)
 // @route   GET /api/admin/users
 // @access  Private/Admin
@@ -818,14 +877,14 @@ exports.getAdminUser = async (req, res, next) => {
   }
 };
 
-// @desc    Update user status/role/name/email (admin)
+// @desc    Update user status/role/profile fields (admin)
 // @route   PUT /api/admin/users/:id
 // @access  Private/Admin
 exports.updateUserStatus = async (req, res, next) => {
   try {
-    const { status, role, name, email } = req.body;
+    const { status, role, name, email, bio, avatar } = req.body;
 
-    if (!status && !role && !name && !email) {
+    if (!status && !role && name === undefined && email === undefined && bio === undefined && avatar === undefined) {
       return res.status(400).json({
         success: false,
         error: 'Please provide at least one field to update.',
@@ -872,6 +931,8 @@ exports.updateUserStatus = async (req, res, next) => {
     if (role) updateData.role = role;
     if (name !== undefined) updateData.name = name;
     if (email !== undefined) updateData.email = email;
+    if (bio !== undefined) updateData.bio = bio || null;
+    if (avatar !== undefined) updateData.avatar = avatar || null;
 
     const updatedUser = await prisma.user.update({
       where: { id: req.params.id },
@@ -882,6 +943,9 @@ exports.updateUserStatus = async (req, res, next) => {
         email: true,
         role: true,
         status: true,
+        bio: true,
+        avatar: true,
+        createdAt: true,
       },
     });
 
@@ -929,6 +993,88 @@ exports.deleteAdminUser = async (req, res, next) => {
 };
 
 // ─── Admin Courses ────────────────────────────────────────────────────────────
+// @desc    Create course from admin panel
+// @route   POST /api/admin/courses
+// @access  Private/Admin
+exports.createAdminCourse = async (req, res, next) => {
+  try {
+    const {
+      title,
+      description,
+      category,
+      level = 'Beginner',
+      price,
+      thumbnail,
+      instructorId,
+      duration,
+      rating,
+      outcomes,
+      xp,
+      gradient,
+      icon,
+      status = 'pending',
+    } = req.body;
+
+    if (!title || !description || !category || !instructorId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Title, description, category, and instructor are required.',
+      });
+    }
+
+    const instructor = await prisma.user.findFirst({
+      where: { id: instructorId, role: 'instructor' },
+      select: { id: true },
+    });
+    if (!instructor) {
+      return res.status(400).json({ success: false, error: 'Selected instructor was not found.' });
+    }
+
+    const allowedStatuses = ['pending', 'approved', 'rejected'];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid status. Allowed values are: pending, approved, rejected.',
+      });
+    }
+
+    const course = await prisma.course.create({
+      data: {
+        title,
+        description,
+        category,
+        level,
+        price: price !== undefined && price !== '' ? parseFloat(price) || 0 : 0,
+        thumbnail: thumbnail || null,
+        instructorId,
+        duration: duration || null,
+        rating: rating !== undefined && rating !== '' ? parseFloat(rating) || 0 : 0,
+        outcomes: Array.isArray(outcomes) ? outcomes : [],
+        xp: xp || null,
+        gradient: gradient || null,
+        icon: icon || null,
+        status,
+      },
+      include: {
+        instructor: { select: { id: true, name: true, email: true } },
+        _count: { select: { enrollments: true, lessons: true } },
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
+        ...course,
+        students: course._count.enrollments,
+        lessons: course._count.lessons,
+        revenue: 0,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get all courses (admin, including non-approved)
 // @route   GET /api/admin/courses
 // @access  Private/Admin
@@ -987,12 +1133,27 @@ exports.getAdminCourses = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateCourseStatus = async (req, res, next) => {
   try {
-    const allowed = ['status', 'title', 'description', 'category', 'level', 'price', 'thumbnail', 'celebrityTeacher', 'gradient', 'icon', 'xp'];
+    const allowed = ['status', 'title', 'description', 'category', 'level', 'price', 'thumbnail', 'instructorId', 'duration', 'rating', 'outcomes', 'gradient', 'icon', 'xp'];
     const updateData = {};
     for (const key of allowed) {
       if (req.body[key] !== undefined) updateData[key] = req.body[key];
     }
     if (updateData.price !== undefined) updateData.price = parseFloat(updateData.price) || 0;
+    if (updateData.rating !== undefined) updateData.rating = parseFloat(updateData.rating) || 0;
+    if (updateData.thumbnail === '') updateData.thumbnail = null;
+    if (updateData.duration === '') updateData.duration = null;
+    if (updateData.xp === '') updateData.xp = null;
+    if (updateData.gradient === '') updateData.gradient = null;
+    if (updateData.icon === '') updateData.icon = null;
+    if (updateData.instructorId) {
+      const instructor = await prisma.user.findFirst({
+        where: { id: updateData.instructorId, role: 'instructor' },
+        select: { id: true },
+      });
+      if (!instructor) {
+        return res.status(400).json({ success: false, error: 'Selected instructor was not found.' });
+      }
+    }
 
     const allowedStatuses = ['pending', 'approved', 'rejected'];
     if (updateData.status && !allowedStatuses.includes(updateData.status)) {
@@ -1009,9 +1170,20 @@ exports.updateCourseStatus = async (req, res, next) => {
     const course = await prisma.course.update({
       where: { id: req.params.id },
       data: updateData,
-      include: { instructor: { select: { id: true, name: true } } }
+      include: {
+        instructor: { select: { id: true, name: true, email: true } },
+        _count: { select: { enrollments: true, lessons: true } },
+      }
     });
-    res.status(200).json({ success: true, data: course });
+    res.status(200).json({
+      success: true,
+      data: {
+        ...course,
+        students: course._count.enrollments,
+        lessons: course._count.lessons,
+        revenue: (course._count.enrollments || 0) * (course.price || 0),
+      },
+    });
   } catch (error) {
     next(error);
   }

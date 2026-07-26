@@ -22,7 +22,7 @@ export default function CoursePlayer() {
   const [mentorChangeOpen, setMentorChangeOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState("");
   const [updatingMentor, setUpdatingMentor] = useState(false);
-  const celebrities = ["Virat Kohli", "Salman Khan", "Narendra Modi", "Sachin Tendulkar", "Hardik Pandya", "Virtual Mentor"];
+  const mentorOptions = course?.instructor?.name ? [course.instructor.name] : [];
 
   const fetchEnrollment = async () => {
     try {
@@ -257,22 +257,23 @@ export default function CoursePlayer() {
         <div className="w-full lg:w-[350px] border-l border-border bg-muted/5 flex flex-col shrink-0 h-full">
           {enrollment && (
             <div className="p-5 border-b border-border shrink-0 bg-primary/5">
-              <h4 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Your Celebrity Mentor</h4>
+              <h4 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Your Course Instructor</h4>
               <div className="flex items-center gap-3">
-                <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(enrollment.mentor || "Virtual Mentor")}&background=8B5CF6&color=fff&bold=true`}
-                  alt={enrollment.mentor || "Virtual Mentor"}
-                  className="w-10 h-10 rounded-full object-cover border-2 border-secondary"
-                />
+                <div className="w-10 h-10 rounded-full border-2 border-secondary bg-muted flex items-center justify-center">
+                  <span className="text-sm font-bold text-primary">
+                    {(enrollment.mentor || course?.instructor?.name || "—").charAt(0).toUpperCase()}
+                  </span>
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate text-foreground">{enrollment.mentor || "Virtual Mentor"}</p>
+                  <p className="text-sm font-semibold truncate text-foreground">{enrollment.mentor || course?.instructor?.name || "—"}</p>
                   <p className="text-xs text-muted-foreground">Personalized Guide</p>
                 </div>
                 <button
                   onClick={() => {
-                    setSelectedMentor(enrollment.mentor || "Virtual Mentor");
+                    setSelectedMentor(enrollment.mentor || course?.instructor?.name || "");
                     setMentorChangeOpen(true);
                   }}
+                  disabled={mentorOptions.length === 0}
                   className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
                 >
                   Change
@@ -335,7 +336,7 @@ export default function CoursePlayer() {
       {mentorChangeOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
           <div className="bg-background border border-border rounded-xl shadow-2xl max-w-md w-full overflow-hidden p-6 relative">
-            <h3 className="text-lg font-bold font-display mb-2 text-foreground">Change Celebrity Mentor</h3>
+            <h3 className="text-lg font-bold font-display mb-2 text-foreground">Change Course Instructor</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Select the celebrity you want to guide you through this course.
             </p>
@@ -348,7 +349,7 @@ export default function CoursePlayer() {
                 className="w-full bg-muted/30 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-foreground"
               >
                 <option value="">Select a Mentor</option>
-                {celebrities.map((c) => (
+                {mentorOptions.map((c) => (
                   <option key={c} value={c} className="bg-background text-foreground">{c}</option>
                 ))}
               </select>

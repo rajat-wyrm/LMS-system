@@ -11,14 +11,29 @@ import TeacherPerformanceAnalytics from '../../../components/admin/teachers/Teac
 import TeacherDrawer from '../../../components/admin/teachers/TeacherDrawer';
 import TeacherProfileView from '../../../components/admin/teachers/TeacherProfileView';
 import InviteTeacherModal from '../../../components/admin/teachers/InviteTeacherModal';
-import { loadTeachers } from '../../../utils/teacherUtils';
+import { apiRequest } from '../../../utils/api';
+import { normalizeTeacher } from '../../../utils/teacherUtils';
 
 const Teachers = () => {
-  const [teachers, setTeachers] = useState(loadTeachers);
+  const [teachers, setTeachers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadTeachers = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await apiRequest('/v1/admin/instructors?limit=1000');
+      setTeachers((result.data || []).map(normalizeTeacher));
+    } catch (error) {
+      console.error('Unable to load instructors:', error);
+      setTeachers([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('lms_teachers_data', JSON.stringify(teachers));
-  }, [teachers]);
+    loadTeachers();
+  }, [loadTeachers]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('All');
@@ -41,51 +56,52 @@ const Teachers = () => {
   const activeTeachers = teachers.filter((t) => t.enabled).length;
 
   const monthlyGrowth = useMemo(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const recent = teachers.filter((t) => {
-      const d = t.joinDate || '';
-      return d.includes('2024') && (d.includes('May') || d.includes('Apr'));
+      const date = new Date(t.joinDate);
+      return !Number.isNaN(date.getTime()) && date >= monthStart;
     }).length;
     if (teachers.length === 0) return '0%';
-    const pct = Math.max(8, Math.round((recent / teachers.length) * 100) + 12);
+    const pct = Math.round((recent / teachers.length) * 100);
     return `+${pct}%`;
   }, [teachers]);
 
-  const handleAddSave = (form) => {
-    setTeachers((prev) => [
-      {
-        ...form,
-        id: Date.now(),
-        students: 0,
-        rating: 0,
-        revenue: 0,
-        courses: 1,
-        course: form.style,
-        joinDate: new Date().toLocaleDateString('en-US', {
-          month: 'short',
-          day: '2-digit',
-          year: 'numeric',
-        }),
-        photo: form.avatar || null,
-        verified: false,
-        featured: false,
-        topMentor: false,
-      },
-      ...prev,
-    ]);
+  const handleAddSave = async (form) => {
+    const result = await apiRequest('/v1/admin/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: form.name,
+        email: form.email,
+        role: 'instructor',
+        status: form.enabled ? 'approved' : 'pending',
+        bio: form.bio || form.style || '',
+        avatar: form.avatar || null,
+      }),
+    });
+    setTeachers((prev) => [normalizeTeacher(result.data), ...prev]);
   };
 
-  const handleEditSave = (form) => {
-    setTeachers((prev) =>
-      prev.map((t) =>
-        t.id === editTeacher.id ? { ...t, ...form, photo: form.avatar || t.photo } : t
-      )
-    );
+  const handleEditSave = async (form) => {
+    const result = await apiRequest(`/v1/admin/users/${editTeacher.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: form.name,
+        email: form.email,
+        status: form.enabled ? 'approved' : 'pending',
+        bio: form.bio || form.style || '',
+        avatar: form.avatar || editTeacher.avatar || null,
+      }),
+    });
+    const updated = normalizeTeacher({ ...editTeacher, ...result.data, bio: form.bio || form.style || '', avatar: form.avatar || editTeacher.avatar });
+    setTeachers((prev) => prev.map((t) => (t.id === editTeacher.id ? updated : t)));
     if (selectedTeacher && selectedTeacher.id === editTeacher.id) {
-      setSelectedTeacher((prev) => ({ ...prev, ...form, photo: form.avatar || prev.photo }));
+      setSelectedTeacher((prev) => ({ ...prev, ...updated }));
     }
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
+    await apiRequest(`/v1/admin/users/${id}`, { method: 'DELETE' });
     setTeachers((prev) => prev.filter((t) => t.id !== id));
     if (selectedTeacher?.id === id) setSelectedTeacher(null);
   };
@@ -135,7 +151,7 @@ const Teachers = () => {
   return (
     <div className="admin-page space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 -m-4 md:-m-6 border border-[var(--admin-border)] shadow-[var(--admin-shadow-card)] bg-[var(--admin-page-panel)]">
       <TeachersHero
-        totalCount={teachers.length.toLocaleString()}
+        totalCount={loading ? '—' : teachers.length.toLocaleString()}
         monthlyGrowth={monthlyGrowth}
         activeCount={activeTeachers}
         onAddTeacher={() => setIsAddOpen(true)}

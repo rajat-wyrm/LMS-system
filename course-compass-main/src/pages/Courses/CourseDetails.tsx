@@ -60,7 +60,7 @@ const CourseDetails = () => {
   // Mentor Selection State
   const [mentorSelectionOpen, setMentorSelectionOpen] = useState(false);
   const [selectedMentor, setSelectedMentor] = useState("");
-  const celebrities = ["Virat Kohli", "Salman Khan", "Narendra Modi", "Sachin Tendulkar", "Hardik Pandya", "Virtual Mentor"];
+  const mentorOptions = course?.instructor?.name ? [course.instructor.name] : [];
 
   // Wishlist state
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -107,7 +107,6 @@ const CourseDetails = () => {
                   instructors: [{
                     name: enrollment.mentor,
                     role: "Lead Instructor",
-                    avatar: "https://ui-avatars.com/api/?name=" + enrollment.mentor
                   }]
                }) : prev);
             }
@@ -160,7 +159,6 @@ const CourseDetails = () => {
             instructors: [{
               name: selectedMentor,
               role: "Lead Instructor",
-              avatar: "https://ui-avatars.com/api/?name=" + selectedMentor
             }]
         }) : prev);
       }
@@ -392,7 +390,7 @@ const CourseDetails = () => {
                             className="w-full bg-muted/30 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
                           >
                             <option value="">Select a Mentor</option>
-                            {celebrities.map((c) => <option key={c} value={c}>{c}</option>)}
+                            {mentorOptions.map((c) => <option key={c} value={c}>{c}</option>)}
                           </select>
                         </div>
                         <AlertDialogFooter>
@@ -515,13 +513,13 @@ const CourseDetails = () => {
             )}
             {tab === "Instructors" && (
               <div className="grid md:grid-cols-2 gap-4">
-                {course.instructor && (
+                {(course.celebrityTeacher || course.instructor?.name) && (
                   <div className="glass-card p-5 flex items-center gap-4">
-                    <img
-                      src={`https://ui-avatars.com/api/?name=${encodeURIComponent(course.celebrityTeacher || course.instructor?.name || 'Instructor')}&background=8B5CF6&color=fff&bold=true`}
-                      alt={course.instructor?.name}
-                      className="w-16 h-16 rounded-full object-cover border-2 border-secondary"
-                    />
+                    <div className="w-16 h-16 rounded-full border-2 border-secondary bg-muted flex items-center justify-center">
+                      <span className="text-xl font-bold text-primary">
+                        {(course.celebrityTeacher || course.instructor?.name || '—').charAt(0).toUpperCase()}
+                      </span>
+                    </div>
                     <div>
                       <h4 className="font-display font-semibold">{course.celebrityTeacher || course.instructor?.name}</h4>
                       <p className="text-xs text-muted-foreground">Lead Instructor</p>

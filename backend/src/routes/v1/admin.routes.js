@@ -5,10 +5,12 @@ const {
   getRecentActivity,
   getStudentGrowth,
   getAnalytics,
+  createAdminUser,
   getAdminUsers,
   getAdminUser,
   updateUserStatus,
   deleteAdminUser,
+  createAdminCourse,
   getAdminCourses,
   updateCourseStatus,
   deleteAdminCourse
@@ -28,11 +30,11 @@ router.route('/dashboard/recent-activity').get(getRecentActivity);
 router.route('/dashboard/student-growth').get(getStudentGrowth);
 
 // User management
-router.route('/users').get(getAdminUsers);
+router.route('/users').get(getAdminUsers).post(createAdminUser);
 router.route('/users/:id').get(getAdminUser).put(updateUserStatus).delete(deleteAdminUser);
 
 // Course management
-router.route('/courses').get(getAdminCourses);
+router.route('/courses').get(getAdminCourses).post(createAdminCourse);
 router.route('/courses/:id').put(updateCourseStatus).delete(deleteAdminCourse);
 
 // Certificate management

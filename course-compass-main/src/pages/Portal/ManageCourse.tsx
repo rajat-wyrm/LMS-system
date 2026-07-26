@@ -10,7 +10,6 @@ import { useAuth } from "@/store/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { getCourseImageUrl } from "@/utils/courseImage";
 
-const celebrities = ["Virat Kohli", "Salman Khan", "Narendra Modi", "Sachin Tendulkar", "Hardik Pandya"];
 const levels      = ["Beginner", "Intermediate", "Advanced"];
 const categories  = ["Python", "CSS", "MERN Stack", "Data Science", "AI & Machine Learning"];
 
@@ -282,15 +281,6 @@ const ManageCourse = () => {
               <select value={editForm.level} onChange={(e) => setEditForm((f) => ({ ...f, level: e.target.value }))}
                 className="w-full bg-muted/40 border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
                 {levels.map((l) => <option key={l} value={l}>{l}</option>)}
-              </select>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI Celebrity Teacher</label>
-              <select value={editForm.celebrityTeacher} onChange={(e) => setEditForm((f) => ({ ...f, celebrityTeacher: e.target.value }))}
-                className="w-full bg-muted/40 border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
-                <option value="">None</option>
-                {celebrities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 

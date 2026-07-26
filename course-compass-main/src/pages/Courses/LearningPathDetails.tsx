@@ -21,7 +21,7 @@ const LearningPathDetails = () => {
           id: c.id,
           title: c.title,
           description: c.description,
-          instructor: c.celebrityTeacher || c.instructor?.name || "Unknown",
+          instructor: c.celebrityTeacher || c.instructor?.name || "—",
           category: c.category,
           level: c.level || "Beginner",
           thumbnail: c.thumbnail || COURSE_PLACEHOLDER,

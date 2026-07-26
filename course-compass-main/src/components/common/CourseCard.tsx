@@ -75,7 +75,7 @@ export const CourseCard = ({ course, index = 0 }: { course: Course; index?: numb
 
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground -mt-1">
             <School size={14} className="text-secondary shrink-0" />
-            <span className="truncate">{typeof course.instructor === 'object' ? course.instructor?.name : (course.celebrityTeacher || course.instructor || "Expert Instructor")}</span>
+            <span className="truncate">{typeof course.instructor === 'object' ? course.instructor?.name : (course.celebrityTeacher || course.instructor || "—")}</span>
           </p>
 
           <div className="flex items-center gap-0.5">

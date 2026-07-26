@@ -298,7 +298,7 @@ const InstructorPortal = () => {
                     {c.title}
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {c.category} · {c.celebrityTeacher || c.instructor?.name || "Unknown"}
+                    {c.category} · {c.celebrityTeacher || c.instructor?.name || "—"}
                   </p>
                 </div>
 

@@ -1,6 +1,11 @@
 const bcrypt = require('bcryptjs');
 const { prisma } = require('../src/config/db');
 
+if (process.env.RUN_DEMO_SEED !== 'true') {
+  console.log('Skipping demo seed. Create instructors and courses through the admin panel.');
+  process.exit(0);
+}
+
 const img = (seed) => `https://images.unsplash.com/${seed}?auto=format&fit=crop&w=800&q=80`;
 
 const seedAdmin = {

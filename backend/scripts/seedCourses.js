@@ -2,6 +2,11 @@ const { prisma } = require('../src/config/db');
 const { generateLessonsForCourse } = require('../src/utils/aiGenerator');
 
 async function seed() {
+  if (process.env.RUN_DEMO_SEED !== 'true') {
+    console.log('Skipping demo course seed. Create courses through the admin panel.');
+    return;
+  }
+
   const admin = await prisma.user.findFirst({ where: { role: 'admin' } });
   if (!admin) {
     console.log("No admin found");

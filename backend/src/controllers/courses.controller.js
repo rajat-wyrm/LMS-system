@@ -118,13 +118,13 @@ exports.createCourse = async (req, res, next) => {
         thumbnail,
         celebrityTeacher,
         price: price ? parseFloat(price) : 0,
-        duration: duration || 'Self-paced',
-        rating: rating ? parseFloat(rating) : 4.5,
+        duration: duration || null,
+        rating: rating ? parseFloat(rating) : 0,
         outcomes: outcomes || [],
-        xp: xp || '1000 XP',
-        gradient: gradient || 'from-blue-600 via-blue-500 to-cyan-400',
-        icon: icon || '🤖',
-        status: status || 'approved',
+        xp: xp || null,
+        gradient: gradient || null,
+        icon: icon || null,
+        status: status || 'pending',
         instructorId: req.user.id
       }
     });

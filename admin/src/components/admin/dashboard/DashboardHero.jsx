@@ -75,8 +75,8 @@ const DashboardHero = () => {
             </p>
             <div className="flex flex-wrap gap-3">
               {[
-                { label: 'New Students', value: stats?.studentsCount || 0, icon: MdPersonAdd, color: '#3B82F6' },
-                { label: 'Courses added', value: stats?.coursesCount || 0, icon: MdSchool, color: '#8B5CF6' },
+                { label: 'Total Students', value: stats?.studentsCount || 0, icon: MdPersonAdd, color: '#3B82F6' },
+                { label: 'Total Courses', value: stats?.coursesCount || 0, icon: MdSchool, color: '#8B5CF6' },
                 { label: 'Active Enrolls', value: stats?.activeEnrollments || 0, icon: MdTrendingUp, color: '#10B981' },
                 { label: 'Pending Users', value: stats?.pendingUsers || 0, icon: MdOutlinePendingActions, color: '#06B6D4' },
               ].map((stat) => {

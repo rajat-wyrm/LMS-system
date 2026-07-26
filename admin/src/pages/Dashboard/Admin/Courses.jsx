@@ -8,15 +8,17 @@ import TopPerformingCourses from '../../../components/admin/courses/TopPerformin
 import CoursesFilters from '../../../components/admin/courses/CoursesFilters';
 import CourseGrid from '../../../components/admin/courses/CourseGrid';
 import {
-  loadCourses,
   normalizeCourse,
   getCategories,
   computeRevenue,
 } from '../../../utils/courseUtils';
 import { exportToCSV } from '../../../utils/export';
+import { apiRequest } from '../../../utils/api';
 
 const Courses = () => {
-  const [courses, setCourses] = useState(loadCourses);
+  const [courses, setCourses] = useState([]);
+  const [instructors, setInstructors] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [levelFilter, setLevelFilter] = useState('');
@@ -25,9 +27,27 @@ const Courses = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
 
+  const loadData = React.useCallback(async () => {
+    setLoading(true);
+    try {
+      const [courseResult, instructorResult] = await Promise.all([
+        apiRequest('/v1/admin/courses?limit=1000'),
+        apiRequest('/v1/admin/instructors?limit=1000'),
+      ]);
+      setCourses((courseResult.data || []).map(normalizeCourse));
+      setInstructors(instructorResult.data || []);
+    } catch (error) {
+      console.error('Unable to load courses:', error);
+      setCourses([]);
+      setInstructors([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    localStorage.setItem('lms_courses_data', JSON.stringify(courses));
-  }, [courses]);
+    loadData();
+  }, [loadData]);
 
   useEffect(() => {
     if (!notice) return undefined;
@@ -58,8 +78,9 @@ const Courses = () => {
 
   const showNotice = (message) => setNotice(message);
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this course?')) {
+      await apiRequest(`/v1/admin/courses/${id}`, { method: 'DELETE' });
       setCourses((prev) => prev.filter((c) => c.id !== id));
       showNotice('Course deleted.');
     }
@@ -80,37 +101,39 @@ const Courses = () => {
     setIsDrawerOpen(false);
   };
 
-  const handleSaveCourse = (savedCourse) => {
+  const handleSaveCourse = async (savedCourse) => {
+    const payload = {
+      title: savedCourse.title,
+      description: savedCourse.fullDesc || savedCourse.shortDesc,
+      category: savedCourse.category,
+      level: savedCourse.level,
+      duration: savedCourse.duration ? `${savedCourse.duration} Hrs` : null,
+      price: savedCourse.price,
+      thumbnail: savedCourse.avatar || savedCourse.thumbnail || null,
+      instructorId: savedCourse.instructorId,
+      status: savedCourse.active ? 'approved' : 'pending',
+      xp: savedCourse.xp || null,
+      gradient: savedCourse.gradient || null,
+      icon: savedCourse.icon || null,
+    };
+    const result = selectedCourse
+      ? await apiRequest(`/v1/admin/courses/${selectedCourse.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload),
+        })
+      : await apiRequest('/v1/admin/courses', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+    const normalized = normalizeCourse(result.data);
     setCourses((prev) => {
-      const normalized = normalizeCourse(
-        savedCourse,
-        prev.findIndex((c) => c.id === savedCourse.id)
-      );
-      const exists = prev.some((c) => c.id === savedCourse.id);
-      if (exists) {
-        return prev.map((c) => (c.id === savedCourse.id ? normalized : c));
-      }
-      return [normalized, ...prev];
+      const exists = prev.some((c) => c.id === normalized.id);
+      return exists ? prev.map((c) => (c.id === normalized.id ? normalized : c)) : [normalized, ...prev];
     });
     showNotice(selectedCourse ? 'Course updated.' : 'Course created.');
   };
 
-  const handleClone = (course) => {
-    const clone = normalizeCourse(
-      {
-        ...course,
-        id: Date.now(),
-        title: `${course.title} (Copy)`,
-        students: 0,
-        completion: 0,
-        active: false,
-        revenue: 0,
-      },
-      courses.length
-    );
-    setCourses((prev) => [clone, ...prev]);
-    showNotice('Course cloned as draft.');
-  };
+  const handleClone = () => showNotice('Course cloning is disabled. Create courses through the admin form.');
 
   const handleExport = () => {
     exportToCSV(
@@ -148,7 +171,7 @@ const Courses = () => {
   return (
     <div className="admin-page space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 -m-4 md:-m-6 border border-[var(--admin-border)] shadow-[var(--admin-shadow-card)] bg-[var(--admin-page-panel)]">
       <CoursesHero
-        totalCount={courses.length.toLocaleString()}
+        totalCount={loading ? '—' : courses.length.toLocaleString()}
         totalRevenue={totalRevenue}
         activeCount={activeCount}
         onCreateCourse={handleOpenAddDrawer}
@@ -187,6 +210,7 @@ const Courses = () => {
         onClose={handleCloseDrawer}
         onSave={handleSaveCourse}
         courseToEdit={selectedCourse}
+        teachers={instructors}
       />
 
       <AnimatePresence>

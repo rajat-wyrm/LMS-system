@@ -21,16 +21,7 @@ const CATEGORIES = [
 // Level Options
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
 
-// Static fallback teachers in case local storage is not populated
-const DEFAULT_TEACHERS = [
-  { id: 1, name: 'Salman Khan' },
-  { id: 2, name: 'Virat Kohli' },
-  { id: 3, name: 'Sachin Tendulkar' },
-  { id: 4, name: 'Anushka Sharma' },
-  { id: 5, name: 'Katrina Kaif' }
-];
-
-const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
+const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit, teachers = [] }) => {
   const panelRef = useFocusTrap(isOpen, onClose);
   const [form, setForm] = useState({
     title: '',
@@ -43,6 +34,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
     language: 'English',
     status: 'Published', // Draft, Published, Archived
     teacher: '',
+    instructorId: '',
     price: '',
     discountPrice: '',
     lessons: '',
@@ -54,32 +46,9 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
   });
 
   const [avatarPreview, setAvatarPreview] = useState(null);
-  const [teachers, setTeachers] = useState(DEFAULT_TEACHERS);
   const [searchTeacherQuery, setSearchTeacherQuery] = useState('');
   const [isTeacherDropdownOpen, setIsTeacherDropdownOpen] = useState(false);
   const teacherDropdownRef = useRef(null);
-
-  // Load actual teachers from local storage if available
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem('lms_teachers_data');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setTeachers(parsed);
-        }
-      }
-    } catch (e) {
-      console.error("Failed to load teachers for course dropdown:", e);
-    }
-  }, [isOpen]);
-
-  // Set default teacher if not editing
-  useEffect(() => {
-    if (teachers.length > 0 && !courseToEdit && !form.teacher) {
-      setForm(prev => ({ ...prev, teacher: teachers[0].name }));
-    }
-  }, [teachers, courseToEdit]);
 
   // Handle outside click to close searchable teacher dropdown
   useEffect(() => {
@@ -98,24 +67,25 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
       setForm({
         title: courseToEdit.title || '',
         slug: courseToEdit.slug || (courseToEdit.title ? courseToEdit.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') : ''),
-        shortDesc: courseToEdit.shortDesc || 'Learn advanced concepts and real-world techniques.',
-        fullDesc: courseToEdit.fullDesc || 'Detailed curriculum covering all fundamentals and best practices.',
+        shortDesc: courseToEdit.shortDesc || courseToEdit.description || '',
+        fullDesc: courseToEdit.fullDesc || courseToEdit.description || '',
         level: courseToEdit.level || 'Beginner',
         category: courseToEdit.category || 'Web Development',
-        duration: courseToEdit.hours || courseToEdit.duration || '30',
+        duration: courseToEdit.hours || parseInt(courseToEdit.duration, 10) || '',
         language: courseToEdit.language || 'English',
         status: courseToEdit.status || (courseToEdit.active ? 'Published' : 'Draft'),
-        teacher: courseToEdit.teacher || (courseToEdit.mentorName || 'Salman Khan'),
-        price: courseToEdit.price || '499',
-        discountPrice: courseToEdit.discountPrice || '299',
-        lessons: courseToEdit.lessons || '15',
-        projects: courseToEdit.projects || '3',
+        teacher: courseToEdit.teacher || courseToEdit.instructor?.name || '',
+        instructorId: courseToEdit.instructorId || courseToEdit.instructor?.id || '',
+        price: courseToEdit.price || '',
+        discountPrice: courseToEdit.discountPrice || '',
+        lessons: courseToEdit.lessons || '',
+        projects: courseToEdit.projects || '',
         certificate: courseToEdit.certificate !== undefined ? courseToEdit.certificate : true,
         visibility: courseToEdit.visibility || 'Public',
         featured: courseToEdit.featured !== undefined ? courseToEdit.featured : false,
-        avatar: courseToEdit.avatar || null
+        avatar: courseToEdit.avatar || courseToEdit.thumbnail || null
       });
-      setAvatarPreview(courseToEdit.avatar || null);
+      setAvatarPreview(courseToEdit.avatar || courseToEdit.thumbnail || null);
     } else {
       // Reset form
       setForm({
@@ -128,7 +98,8 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
         duration: '',
         language: 'English',
         status: 'Published',
-        teacher: teachers[0]?.name || '',
+        teacher: '',
+        instructorId: '',
         price: '',
         discountPrice: '',
         lessons: '',
@@ -140,7 +111,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
       });
       setAvatarPreview(null);
     }
-  }, [courseToEdit, isOpen, teachers]);
+  }, [courseToEdit, isOpen]);
 
   // Handle ESC key close
   useEffect(() => {
@@ -181,63 +152,40 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
   };
 
   const handleSave = (statusOverride) => {
-    if (!form.title || !form.shortDesc) {
+    if (!form.title || !form.shortDesc || !form.instructorId) {
       alert("Please fill in all required fields marked with *");
       return;
     }
 
     const submissionStatus = statusOverride || form.status;
 
-    // Create random or custom gradient if adding new
-    const gradients = [
-      'from-blue-600 via-blue-500 to-cyan-400',
-      'from-amber-500 via-orange-500 to-red-500',
-      'from-emerald-500 via-teal-500 to-green-400',
-      'from-purple-600 via-violet-500 to-pink-500',
-      'from-rose-500 via-pink-500 to-fuchsia-500',
-      'from-slate-600 via-slate-500 to-gray-400',
-      'from-cyan-500 via-sky-500 to-blue-500',
-      'from-indigo-600 via-purple-600 to-blue-500'
-    ];
-
-    const categoryIcons = {
-      'DSA': '🔢',
-      'Web Development': '⚛️',
-      'Mobile Development': '📱',
-      'AI/ML': '🧠',
-      'DevOps': '☁️',
-      'Programming Languages': '💻'
-    };
-
-    const gradient = courseToEdit?.gradient || gradients[Math.floor(Math.random() * gradients.length)];
-    const icon = courseToEdit?.icon || categoryIcons[form.category] || '📚';
-
     const savedCourse = {
       ...courseToEdit,
-      id: courseToEdit ? courseToEdit.id : Date.now(),
+      id: courseToEdit ? courseToEdit.id : undefined,
       title: form.title,
       slug: form.slug,
       shortDesc: form.shortDesc,
       fullDesc: form.fullDesc,
       level: form.level,
       category: form.category,
-      lessons: parseInt(form.lessons) || 12,
-      projects: parseInt(form.projects) || 2,
+      lessons: parseInt(form.lessons) || 0,
+      projects: parseInt(form.projects) || 0,
       certificate: form.certificate,
       visibility: form.visibility,
       featured: form.featured,
-      duration: form.duration || '30',
-      hours: parseInt(form.duration) || 30,
+      duration: form.duration || '',
+      hours: parseInt(form.duration) || 0,
       language: form.language,
       status: submissionStatus,
       active: submissionStatus === 'Published',
       teacher: form.teacher,
-      price: form.price || '499',
-      discountPrice: form.discountPrice || '299',
-      gradient,
-      icon,
+      instructorId: form.instructorId,
+      price: form.price || '',
+      discountPrice: form.discountPrice || '',
+      gradient: courseToEdit?.gradient || '',
+      icon: courseToEdit?.icon || '',
       avatar: form.avatar,
-      rating: courseToEdit?.rating || 4.8,
+      rating: courseToEdit?.rating || 0,
       students: courseToEdit?.students || 0,
       completion: courseToEdit?.completion || 0
     };
@@ -507,7 +455,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
 
                   {/* Searchable Dropdown */}
                   <div>
-                    <label className={labelCls}>Select Celebrity Teacher</label>
+                    <label className={labelCls}>Select Instructor *</label>
                     <div ref={teacherDropdownRef} className="relative">
                       <div className="relative">
                         <MdPerson className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
@@ -522,7 +470,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                             setSearchTeacherQuery(e.target.value);
                             setIsTeacherDropdownOpen(true);
                           }}
-                          placeholder="Search celebrity mentors..."
+                          placeholder="Search database instructors..."
                           className={`${inputCls} pl-11 pr-10`}
                         />
                         <button
@@ -549,13 +497,13 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                                   key={t.id}
                                   type="button"
                                   onClick={() => {
-                                    setForm(prev => ({ ...prev, teacher: t.name }));
+                                    setForm(prev => ({ ...prev, teacher: t.name, instructorId: t.id }));
                                     setIsTeacherDropdownOpen(false);
                                   }}
                                   className="w-full text-left px-4 py-3 text-xs text-white hover:bg-purple-600/20 hover:text-purple-300 transition-all border-b border-white/5 flex items-center justify-between"
                                 >
                                   <span>{t.name}</span>
-                                  {form.teacher === t.name && <MdCheckCircle size={14} className="text-purple-400" />}
+                                  {form.instructorId === t.id && <MdCheckCircle size={14} className="text-purple-400" />}
                                 </button>
                               ))
                             ) : (

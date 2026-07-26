@@ -45,7 +45,7 @@ const Dashboard = () => {
             enrollments: c._count?.enrollments || 0,
             duration: c.duration || "4h 30m",
             lessons: c.lessons?.length || 0,
-            instructor: c.celebrityTeacher || c.instructor?.name || "Virtual Mentor",
+            instructor: c.celebrityTeacher || c.instructor?.name || "",
           }));
           
         setRecommended(unEnrolled.slice(0, 6));

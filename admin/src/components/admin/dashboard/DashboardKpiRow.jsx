@@ -9,7 +9,7 @@ import { apiFetch } from '../../../api/config';
 
 const CARD_DEFS = [
   { key: 'studentsCount', label: 'Total Students', trendKey: 'studentsTrend', trendUpKey: 'studentsTrendUp', icon: MdPeople, accent: '#3B82F6', glow: 'rgba(59,130,246,0.25)', border: 'rgba(59,130,246,0.3)', gradient: 'from-blue-600/20 to-blue-500/5' },
-  { key: 'teachersCount', label: 'Active Teachers', trendKey: 'teachersTrend', trendUpKey: 'teachersTrendUp', icon: MdSchool, accent: '#8B5CF6', glow: 'rgba(139,92,246,0.25)', border: 'rgba(139,92,246,0.3)', gradient: 'from-violet-600/20 to-violet-500/5' },
+  { key: 'teachersCount', label: 'Instructors', trendKey: 'teachersTrend', trendUpKey: 'teachersTrendUp', icon: MdSchool, accent: '#8B5CF6', glow: 'rgba(139,92,246,0.25)', border: 'rgba(139,92,246,0.3)', gradient: 'from-violet-600/20 to-violet-500/5' },
   { key: 'coursesCount', label: 'Total Courses', trendKey: 'coursesTrend', trendUpKey: 'coursesTrendUp', icon: MdLibraryBooks, accent: '#10B981', glow: 'rgba(16,185,129,0.25)', border: 'rgba(16,185,129,0.3)', gradient: 'from-emerald-600/20 to-emerald-500/5' },
   { key: 'revenueCount', label: 'Period Revenue', trendKey: 'revenueTrend', trendUpKey: 'revenueTrendUp', icon: MdAttachMoney, accent: '#F59E0B', glow: 'rgba(245,158,11,0.25)', border: 'rgba(245,158,11,0.3)', gradient: 'from-amber-600/20 to-amber-500/5', isRevenue: true },
 ];
