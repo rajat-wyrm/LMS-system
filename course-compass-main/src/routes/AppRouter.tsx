@@ -18,6 +18,7 @@ import ManageCourse from "@/pages/Portal/ManageCourse";
 import Profile from "@/pages/Profile/Profile";
 import Certificate from "@/pages/Certificate/Certificate";
 import CertificatesList from "@/pages/Certificate/CertificatesList";
+import Wishlist from "@/pages/Wishlist/Wishlist";
 import { AuthProvider } from "@/store/AuthContext";
 
 export const AppRouter = () => {
@@ -43,6 +44,7 @@ export const AppRouter = () => {
             <Route path="/portal" element={<InstructorPortal />} />
             <Route path="/portal/courses/:id" element={<ManageCourse />} />
             <Route path="/certificates" element={<CertificatesList />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/certificate/:courseId" element={<Certificate />} />
           </Route>
 
