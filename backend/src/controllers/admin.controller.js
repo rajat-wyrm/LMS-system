@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const { prisma } = require('../config/db');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -76,14 +77,59 @@ const getStudentGrowthSnapshot = async (months = 6) => {
   };
 };
 
+const buildMonthlyRevenueSeries = (enrollments, monthsToInclude = 12) => {
+  const currentMonthStart = new Date();
+  currentMonthStart.setDate(1);
+  currentMonthStart.setHours(0, 0, 0, 0);
+
+  const revenueMap = new Map();
+
+  for (let i = monthsToInclude - 1; i >= 0; i--) {
+    const monthDate = new Date(
+      currentMonthStart.getFullYear(),
+      currentMonthStart.getMonth() - i,
+      1,
+    );
+    const key = `${monthDate.getFullYear()}-${monthDate.getMonth()}`;
+
+    revenueMap.set(key, {
+      name: monthDate.toLocaleString('en-US', { month: 'short' }),
+      month: monthDate.toLocaleString('en-US', { month: 'short' }),
+      year: monthDate.getFullYear(),
+      value: 0,
+      revenue: 0,
+    });
+  }
+
+  enrollments.forEach((enrollment) => {
+    if (!enrollment?.createdAt) return;
+
+    const enrollmentDate = new Date(enrollment.createdAt);
+    const key = `${enrollmentDate.getFullYear()}-${enrollmentDate.getMonth()}`;
+    const monthEntry = revenueMap.get(key);
+
+    if (!monthEntry) return;
+
+    const amount = enrollment.course?.price || 0;
+    monthEntry.value += amount;
+    monthEntry.revenue += amount;
+  });
+
+  return Array.from(revenueMap.values());
+};
+
 // @desc    Get dashboard statistics for admin
 // @route   GET /api/admin/stats
 // @access  Private/Admin
 exports.getDashboardStats = async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
+    const now = new Date();
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(now.getDate() - 7);
 
-    let currentStart, currentEnd;
+    let currentStart;
+    let currentEnd;
     let isFiltered = false;
 
     if (startDate && endDate) {
@@ -94,110 +140,123 @@ exports.getDashboardStats = async (req, res, next) => {
       }
       isFiltered = true;
     } else {
-      currentEnd = new Date();
-      currentStart = new Date(currentEnd.getTime() - 30 * 24 * 60 * 60 * 1000);
+      currentEnd = new Date(now);
+      currentStart = new Date(now);
+      currentStart.setDate(currentStart.getDate() - 30);
     }
 
     const duration = currentEnd.getTime() - currentStart.getTime();
     const prevStart = new Date(currentStart.getTime() - duration);
     const prevEnd = new Date(currentStart.getTime());
+    const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
-    const dateFilter = isFiltered ? { createdAt: { gte: currentStart, lte: currentEnd } } : {};
-    const prevDateFilter = { createdAt: { gte: prevStart, lte: prevEnd } };
+    const dateFilter = { createdAt: { gte: currentStart, lte: currentEnd } };
+    const prevDateFilter = { createdAt: { gte: prevStart, lt: prevEnd } };
 
-    // Use Promise.all to run all queries in parallel
     const [
-      studentsCount, prevStudentsCount,
-      teachersCount, prevTeachersCount,
-      coursesCount, prevCoursesCount,
-      totalUsers, totalStudents, totalInstructors, totalAdmins,
-      totalCourses, totalEnrollments, activeEnrollments,
-      pendingUsers, pendingCourses,
-     
-      periodEnrollments, allEnrollments
+      totalUsers,
+      totalStudents,
+      totalInstructors,
+      totalAdmins,
+      totalCourses,
+      totalEnrollments,
+      weeklyEnrollments,
+      completedEnrollments,
+      activeEnrollments,
+      pendingUsers,
+      pendingCourses,
+      studentsCount,
+      prevStudentsCount,
+      teachersCount,
+      prevTeachersCount,
+      coursesCount,
+      prevCoursesCount,
+      recentUsers,
+      periodEnrollments,
+      prevEnrollments,
+      allEnrollments,
+      lastTwelveMonthsEnrollments,
     ] = await Promise.all([
-      prisma.user.count({ where: { role: 'user', ...dateFilter } }),
-      prisma.user.count({ where: { role: 'user', ...prevDateFilter } }),
-      prisma.user.count({ where: { role: 'instructor', status: 'approved', ...dateFilter } }),
-      prisma.user.count({ where: { role: 'instructor', status: 'approved', ...prevDateFilter } }),
-      prisma.course.count({ where: { ...dateFilter } }),
-      prisma.course.count({ where: { ...prevDateFilter } }),
       prisma.user.count(),
       prisma.user.count({ where: { role: 'user' } }),
       prisma.user.count({ where: { role: 'instructor' } }),
       prisma.user.count({ where: { role: 'admin' } }),
       prisma.course.count(),
       prisma.enrollment.count(),
+      prisma.enrollment.count({
+        where: { createdAt: { gte: sevenDaysAgo } },
+      }),
+      prisma.enrollment.count({ where: { status: 'completed' } }),
       prisma.enrollment.count({ where: { status: 'active' } }),
       prisma.user.count({ where: { status: 'pending' } }),
       prisma.course.count({ where: { status: 'pending' } }),
+      prisma.user.count({ where: { role: 'user', ...dateFilter } }),
+      prisma.user.count({ where: { role: 'user', ...prevDateFilter } }),
+      prisma.user.count({
+        where: { role: 'instructor', status: 'approved', ...dateFilter },
+      }),
+      prisma.user.count({
+        where: { role: 'instructor', status: 'approved', ...prevDateFilter },
+      }),
+      prisma.course.count({ where: dateFilter }),
+      prisma.course.count({ where: prevDateFilter }),
       prisma.user.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
-        select: { id: true, name: true, email: true, role: true, status: true, createdAt: true }
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          status: true,
+          createdAt: true,
+        },
       }),
       prisma.enrollment.findMany({
-        where: { ...dateFilter },
-        include: { course: { select: { price: true } } }
+        where: dateFilter,
+        include: { course: { select: { price: true } } },
       }),
       prisma.enrollment.findMany({
-        include: { course: { select: { price: true } } }
-      })
+        where: prevDateFilter,
+        include: { course: { select: { price: true } } },
+      }),
+      prisma.enrollment.findMany({
+        include: { course: { select: { price: true } } },
+      }),
+      prisma.enrollment.findMany({
+        where: { createdAt: { gte: twelveMonthsAgo } },
+        include: { course: { select: { price: true } } },
+      }),
     ]);
 
-// Calculate revenue metrics (Kept from their incoming updates)
-    const periodRevenue = periodEnrollments.reduce((s, e) => s + (e.course?.price || 0), 0);
-    const totalRevenue = allEnrollments.reduce((s, e) => s + (e.course?.price || 0), 0);
+    const completionRate =
+      totalEnrollments > 0
+        ? Number(((completedEnrollments / totalEnrollments) * 100).toFixed(2))
+        : 0;
 
-    // For previous period revenue, query separately (Kept from their incoming updates)
-    const prevEnrollments = await prisma.enrollment.findMany({
-      where: { ...prevDateFilter },
-      include: { course: { select: { price: true } } }
-    });
-//revenue trend
-    const revenueMap = {};
-    for (let i = 11; i >= 0; i--) {
-      const date = new Date();
-      date.setMonth(date.getMonth() - i);
-      const key = `${date.getFullYear()}-${date.getMonth()}`;
+    const periodRevenue = periodEnrollments.reduce(
+      (sum, enrollment) => sum + (enrollment.course?.price || 0),
+      0,
+    );
+    const prevRevenue = prevEnrollments.reduce(
+      (sum, enrollment) => sum + (enrollment.course?.price || 0),
+      0,
+    );
+    const totalRevenue = allEnrollments.reduce(
+      (sum, enrollment) => sum + (enrollment.course?.price || 0),
+      0,
+    );
 
-      revenueMap[key] = {
-        month: date.toLocaleString("default", { month: "short" }),
-        revenue: 0,
-      };
-    }
-
-    allEnrollments.forEach((enrollment) => {
-      if (!enrollment.createdAt) return;
-      const date = new Date(enrollment.createdAt);
-      const key = `${date.getFullYear()}-${date.getMonth()}`;
-
-      if (revenueMap[key]) {
-        revenueMap[key].revenue += enrollment.course?.price || 0;
-      }
-    });
-
-    // const revenueTrend = Object.values(revenueMap);
-
-    // Get recent 5 users for activity feed.
-    const recentUsers = await prisma.user.findMany({
-      take: 5,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        status: true,
-        createdAt: true,
-      },
-    });
-    const prevRevenue = prevEnrollments.reduce((s, e) => s + (e.course?.price || 0), 0);
+    const monthlyRevenueTrend = buildMonthlyRevenueSeries(
+      lastTwelveMonthsEnrollments,
+      12,
+    );
 
     const studentsTrend = getTrend(studentsCount, prevStudentsCount);
     const teachersTrend = getTrend(teachersCount, prevTeachersCount);
     const coursesTrend = getTrend(coursesCount, prevCoursesCount);
     const revenueTrendSummary = getTrend(periodRevenue, prevRevenue);
+    const studentGrowth = await getStudentGrowthSnapshot(6);
 
     res.status(200).json({
       success: true,
@@ -220,12 +279,19 @@ exports.getDashboardStats = async (req, res, next) => {
         totalAdmins,
         totalCourses,
         totalEnrollments,
+        weeklyEnrollments,
+        completedEnrollments,
+        completionRate,
         activeEnrollments,
         totalRevenue,
+        revenueChart: monthlyRevenueTrend,
+        monthlyRevenueTrend,
+        studentGrowth,
+        isFiltered,
         pendingUsers,
         pendingCourses,
-        recentUsers
-      }
+        recentUsers,
+      },
     });
   } catch (error) {
     next(error);
@@ -867,6 +933,236 @@ exports.deleteAdminUser = async (req, res, next) => {
 // @desc    Get all courses (admin, including non-approved)
 // @route   GET /api/admin/courses
 // @access  Private/Admin
+exports.createAdminCourse = async (req, res, next) => {
+  try {
+    const { title, description, category, level = 'Beginner', price, thumbnail, instructorId, duration, status = 'pending', xp, gradient, icon } = req.body;
+    if (!title || !description || !category || !instructorId) return res.status(400).json({ success: false, error: 'Title, description, category, and instructor are required.' });
+    const [instructor, categoryRecord] = await Promise.all([
+      prisma.user.findFirst({ where: { id: instructorId, role: 'instructor', status: 'approved' }, select: { id: true } }),
+      prisma.category.findUnique({ where: { name: category } }),
+    ]);
+    if (!instructor) return res.status(400).json({ success: false, error: 'Selected instructor was not found.' });
+    if (!categoryRecord) return res.status(400).json({ success: false, error: 'Selected category was not found.' });
+    if (!['pending', 'approved', 'rejected'].includes(status)) return res.status(400).json({ success: false, error: 'Invalid course status.' });
+    const course = await prisma.course.create({
+      data: { title, description, category, categoryId: categoryRecord.id, level, price: Number(price) || 0, thumbnail: thumbnail || null, instructorId, duration: duration || null, status, xp: xp || null, gradient: gradient || null, icon: icon || null },
+      include: { instructor: { select: { id: true, name: true, email: true } }, _count: { select: { enrollments: true, lessons: true } } },
+    });
+    res.status(201).json({ success: true, data: { ...course, students: course._count.enrollments, lessons: course._count.lessons, revenue: 0 } });
+  } catch (error) { next(error); }
+};
+
+// @desc    Create instructor
+// @route   POST /api/admin/instructors
+// @access  Private/Admin
+exports.createInstructor = async (req, res, next) => {
+  try {
+    const { name, email, password, bio, avatar, status = 'approved' } = req.body;
+
+    if (!name?.trim() || !email?.trim() || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Name, email, and password are required.',
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be at least 8 characters long.',
+      });
+    }
+
+    if (!['pending', 'approved', 'rejected', 'suspended'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid instructor status.',
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const existingUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+      select: { id: true },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        error: 'A user with this email already exists.',
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const instructor = await prisma.user.create({
+      data: {
+        name: name.trim(),
+        email: normalizedEmail,
+        password: hashedPassword,
+        role: 'instructor',
+        status,
+        bio: bio?.trim() || null,
+        avatar: avatar || null,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        bio: true,
+        avatar: true,
+        createdAt: true,
+      },
+    });
+
+    res.status(201).json({ success: true, data: instructor });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update instructor
+// @route   PUT /api/admin/instructors/:id
+// @access  Private/Admin
+exports.updateInstructor = async (req, res, next) => {
+  try {
+    const { name, email, password, bio, avatar, status } = req.body;
+
+    const existingInstructor = await prisma.user.findFirst({
+      where: { id: req.params.id, role: 'instructor' },
+      select: { id: true },
+    });
+
+    if (!existingInstructor) {
+      return res.status(404).json({
+        success: false,
+        error: 'Instructor not found.',
+      });
+    }
+
+    const updateData = {};
+
+    if (name !== undefined) updateData.name = name.trim();
+    if (bio !== undefined) updateData.bio = bio?.trim() || null;
+    if (avatar !== undefined) updateData.avatar = avatar || null;
+
+    if (status !== undefined) {
+      if (!['pending', 'approved', 'rejected', 'suspended'].includes(status)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid instructor status.',
+        });
+      }
+
+      updateData.status = status;
+    }
+
+    if (email !== undefined) {
+      const normalizedEmail = email.trim().toLowerCase();
+      const conflict = await prisma.user.findFirst({
+        where: {
+          email: normalizedEmail,
+          NOT: { id: req.params.id },
+        },
+        select: { id: true },
+      });
+
+      if (conflict) {
+        return res.status(409).json({
+          success: false,
+          error: 'A user with this email already exists.',
+        });
+      }
+
+      updateData.email = normalizedEmail;
+    }
+
+    if (password) {
+      if (password.length < 8) {
+        return res.status(400).json({
+          success: false,
+          error: 'Password must be at least 8 characters long.',
+        });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(password, salt);
+    }
+
+    const instructor = await prisma.user.update({
+      where: { id: req.params.id },
+      data: updateData,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        status: true,
+        bio: true,
+        avatar: true,
+        createdAt: true,
+      },
+    });
+
+    res.status(200).json({ success: true, data: instructor });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete instructor
+// @route   DELETE /api/admin/instructors/:id
+// @access  Private/Admin
+exports.deleteInstructor = async (req, res, next) => {
+  try {
+    const existingInstructor = await prisma.user.findFirst({
+      where: { id: req.params.id, role: 'instructor' },
+      select: { id: true },
+    });
+
+    if (!existingInstructor) {
+      return res.status(404).json({
+        success: false,
+        error: 'Instructor not found.',
+      });
+    }
+
+    await prisma.user.delete({ where: { id: req.params.id } });
+
+    res.status(200).json({
+      success: true,
+      message: 'Instructor deleted successfully.',
+      data: {},
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Build dashboard notifications from current database state
+// @route   GET /api/admin/dashboard/notifications
+// @access  Private/Admin
+exports.getDashboardNotifications = async (req, res, next) => {
+  try {
+    const [pendingUsers, pendingCourses, recentEnrollments, pendingCertificates] = await Promise.all([
+      prisma.user.findMany({ where: { status: 'pending' }, orderBy: { createdAt: 'desc' }, take: 5, select: { id: true, name: true, role: true, createdAt: true } }),
+      prisma.course.findMany({ where: { status: 'pending' }, orderBy: { createdAt: 'desc' }, take: 5, select: { id: true, title: true, createdAt: true } }),
+      prisma.enrollment.findMany({ orderBy: { createdAt: 'desc' }, take: 5, include: { user: { select: { name: true } }, course: { select: { title: true } } } }),
+      prisma.enrollment.findMany({ where: { progress: 100, certificateApproved: false }, orderBy: { updatedAt: 'desc' }, take: 5, include: { user: { select: { name: true } }, course: { select: { title: true } } } }),
+    ]);
+    const notifications = [
+      ...pendingUsers.map((user) => ({ id: `user-${user.id}`, title: `${user.name} awaits approval`, desc: `New ${user.role === 'instructor' ? 'instructor' : 'learner'} registration`, createdAt: user.createdAt, category: 'enrollment', priority: true, type: 'user_approval', link: '/dashboard/admin/users' })),
+      ...pendingCourses.map((course) => ({ id: `course-${course.id}`, title: `${course.title} awaits publication`, desc: 'Course is pending administrator approval', createdAt: course.createdAt, category: 'courseUpdate', priority: true, type: 'course_approval', link: '/dashboard/admin/courses' })),
+      ...recentEnrollments.map((enrollment) => ({ id: `enrollment-${enrollment.id}`, title: `${enrollment.user.name} enrolled`, desc: `Enrolled in ${enrollment.course.title}`, createdAt: enrollment.createdAt, category: 'enrollment', priority: false, type: 'enrollment', link: `/courses/${enrollment.courseId}` })),
+      ...pendingCertificates.map((enrollment) => ({ id: `certificate-${enrollment.id}`, title: `Certificate ready for ${enrollment.user.name}`, desc: `${enrollment.course.title} has been completed`, createdAt: enrollment.updatedAt, category: 'completion', priority: false, type: 'certificate', link: '/dashboard/admin/certificates' })),
+    ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+    res.status(200).json({ success: true, data: notifications });
+  } catch (error) { next(error); }
+};
+
 exports.getAdminCourses = async (req, res, next) => {
   try {
     const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', search, status, category, level } = req.query;
@@ -882,7 +1178,7 @@ exports.getAdminCourses = async (req, res, next) => {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
-        { celebrityTeacher: { contains: search, mode: 'insensitive' } }
+        { instructor: { name: { contains: search, mode: 'insensitive' } } }
       ];
     }
 
@@ -922,10 +1218,15 @@ exports.getAdminCourses = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateCourseStatus = async (req, res, next) => {
   try {
-    const allowed = ['status', 'title', 'description', 'category', 'level', 'price', 'thumbnail', 'celebrityTeacher', 'gradient', 'icon', 'xp'];
+    const allowed = ['status', 'title', 'description', 'category', 'level', 'price', 'thumbnail', 'gradient', 'icon', 'xp'];
     const updateData = {};
     for (const key of allowed) {
       if (req.body[key] !== undefined) updateData[key] = req.body[key];
+    }
+    if (updateData.category !== undefined) {
+      const categoryRecord = await prisma.category.findUnique({ where: { name: updateData.category } });
+      if (!categoryRecord) return res.status(400).json({ success: false, error: 'Selected category was not found.' });
+      updateData.categoryId = categoryRecord.id;
     }
     if (updateData.price !== undefined) updateData.price = parseFloat(updateData.price) || 0;
 

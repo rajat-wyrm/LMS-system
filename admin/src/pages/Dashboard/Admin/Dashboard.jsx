@@ -9,13 +9,13 @@ import DashboardTopPerformers from '../../../components/admin/dashboard/Dashboar
 import DashboardStudentGrowthChart from '../../../components/admin/dashboard/DashboardStudentGrowthChart';
 
 const AdminDashboard = () => (
-  <div className="admin-page flex flex-col gap-6 animate-fade-in relative z-10 pb-8 rounded-2xl p-4 md:p-6 -m-4 md:-m-6 border border-[var(--admin-border)] shadow-[var(--admin-shadow-card)] bg-[var(--admin-page-panel)]">
+  <div className="flex flex-col gap-6 animate-fade-in relative z-10 pb-8 rounded-2xl p-4 md:p-6 border border-border shadow-sm bg-card/60 backdrop-blur-xl font-body">
     <DashboardHero />
     <DashboardKpiRow />
     <DashboardQuickActions />
 
     <section className="space-y-3">
-      <h2 className="text-base font-bold admin-text-primary">Platform Highlights</h2>
+      <h2 className="text-lg font-bold font-display text-foreground tracking-tight">Platform Highlights</h2>
       <DashboardPlatformHighlights />
     </section>
 

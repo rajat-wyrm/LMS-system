@@ -19,7 +19,6 @@ interface CourseItem {
   level: string;
   thumbnail?: string;
   instructor?: { id: string; name: string };
-  celebrityTeacher?: string;
   _count?: { enrollments: number };
   lessons?: any[];
 }
@@ -302,7 +301,7 @@ const InstructorPortal = () => {
                     {c.title}
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {c.category} · {c.celebrityTeacher || c.instructor?.name || "Unknown"}
+                    {c.category} · {c.instructor?.name || "Instructor unavailable"}
                   </p>
                 </div>
 

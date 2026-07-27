@@ -10,12 +10,15 @@ export function useGlobalSearch() {
   const sourcesRef = useRef(null);
   const timerRef = useRef(null);
 
-  const refreshSources = useCallback(() => {
-    sourcesRef.current = loadSearchSources();
+  const refreshSources = useCallback(async () => {
+    sourcesRef.current = await loadSearchSources();
+    return sourcesRef.current;
   }, []);
 
   useEffect(() => {
-    refreshSources();
+    refreshSources().catch(() => {
+      sourcesRef.current = { students: [], teachers: [], courses: [] };
+    });
   }, [refreshSources]);
 
   useEffect(() => {
@@ -29,11 +32,16 @@ export function useGlobalSearch() {
     }
 
     setLoading(true);
-    timerRef.current = setTimeout(() => {
-      if (!sourcesRef.current) refreshSources();
-      const found = searchGlobal(trimmed, sourcesRef.current);
-      setResults(found);
-      setLoading(false);
+    timerRef.current = setTimeout(async () => {
+      try {
+        const sources = sourcesRef.current || await refreshSources();
+        const found = searchGlobal(trimmed, sources);
+        setResults(found);
+      } catch {
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
     }, DEBOUNCE_MS);
 
     return () => {

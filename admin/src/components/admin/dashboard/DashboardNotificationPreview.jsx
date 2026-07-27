@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useCallback, useEffect, useState } from 'react';
 import {
   MdPersonAdd,
   MdCheckCircle,
@@ -7,6 +8,7 @@ import {
   MdUpdate,
   MdError,
 } from 'react-icons/md';
+import { apiFetch } from '../../../api/config';
 
 const CATEGORY_ICONS = {
   enrollment: MdPersonAdd,
@@ -16,37 +18,28 @@ const CATEGORY_ICONS = {
   critical: MdError,
 };
 
-const notificationPreview = [
-  {
-    id: 1,
-    title: 'Admin dashboard metrics are live',
-    desc: 'Cards are now reading values from the backend API.',
-    time: 'Just now',
-    category: 'completion',
-    accent: '#10B981',
-    priority: false,
-  },
-  {
-    id: 2,
-    title: 'Pending users require review',
-    desc: 'Check new instructor and learner signups awaiting approval.',
-    time: 'Today',
-    category: 'enrollment',
-    accent: '#3B82F6',
-    priority: false,
-  },
-  {
-    id: 3,
-    title: 'Analytics endpoint connected',
-    desc: 'Overview charts now have a valid backend route.',
-    time: 'Today',
-    category: 'courseUpdate',
-    accent: '#8B5CF6',
-    priority: false,
-  },
-];
+const ACCENTS = { enrollment: '#3B82F6', completion: '#10B981', revenue: '#F59E0B', courseUpdate: '#8B5CF6', critical: '#EF4444' };
+const relativeTime = (value) => {
+  const minutes = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 60000));
+  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1440) return `${Math.floor(minutes / 60)}h ago`;
+  return `${Math.floor(minutes / 1440)}d ago`;
+};
 
-const DashboardNotificationPreview = () => (
+const DashboardNotificationPreview = () => {
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const loadNotifications = useCallback(async () => {
+    try {
+      const { data } = await apiFetch('/admin/dashboard/notifications');
+      setNotifications(data || []);
+    } catch (error) {
+      console.error('Dashboard notifications fetch failed:', error);
+      setNotifications([]);
+    } finally { setLoading(false); }
+  }, []);
+  useEffect(() => { loadNotifications(); }, [loadNotifications]);
+  return (
   <motion.aside
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
@@ -57,13 +50,14 @@ const DashboardNotificationPreview = () => (
     <div className="flex items-center justify-between mb-2.5">
       <h2 className="text-base font-bold admin-text-primary">Notifications</h2>
       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full admin-text-secondary bg-[var(--admin-surface-raised)]">
-        {notificationPreview.length} new
+        {notifications.length} new
       </span>
     </div>
 
     <ul className="flex flex-col gap-2 m-0 p-0 list-none">
-      {notificationPreview.slice(0, 5).map((item, index) => {
+      {loading ? <li className="text-sm admin-text-muted py-4">Loading notifications…</li> : notifications.length === 0 ? <li className="text-sm admin-text-muted py-4">No notifications.</li> : notifications.map((item, index) => {
         const Icon = CATEGORY_ICONS[item.category];
+        const accent = ACCENTS[item.category] || ACCENTS.critical;
         return (
           <motion.li
             key={item.id}
@@ -72,13 +66,13 @@ const DashboardNotificationPreview = () => (
             transition={{ delay: 0.18 + index * 0.04 }}
             className="flex gap-2.5 p-2.5 rounded-xl border transition-colors hover:bg-[var(--admin-surface-hover)]"
             style={{
-              borderColor: item.priority ? `${item.accent}50` : 'var(--admin-border-subtle)',
+              borderColor: item.priority ? `${accent}50` : 'var(--admin-border-subtle)',
               background: 'var(--admin-surface-raised)',
             }}
           >
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm"
-              style={{ background: item.accent }}
+              style={{ background: accent }}
             >
               <Icon size={16} className="text-white" />
             </div>
@@ -90,13 +84,13 @@ const DashboardNotificationPreview = () => (
                 {item.priority && (
                   <span
                     className="shrink-0 w-1.5 h-1.5 rounded-full mt-1.5"
-                    style={{ background: item.accent, boxShadow: `0 0 6px ${item.accent}` }}
+                    style={{ background: accent, boxShadow: `0 0 6px ${accent}` }}
                     title="High priority"
                   />
                 )}
               </div>
               <p className="text-[11px] admin-text-muted line-clamp-1 mt-0.5">{item.desc}</p>
-              <p className="text-[10px] admin-text-secondary mt-1">{item.time}</p>
+              <p className="text-[10px] admin-text-secondary mt-1">{relativeTime(item.createdAt)}</p>
             </div>
           </motion.li>
         );
@@ -111,6 +105,7 @@ const DashboardNotificationPreview = () => (
       View All Notifications →
     </Link>
   </motion.aside>
-);
+  );
+};
 
 export default DashboardNotificationPreview;
