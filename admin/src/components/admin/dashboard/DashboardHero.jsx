@@ -108,16 +108,6 @@ const DashboardHero = () => {
             type="button"
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/dashboard/admin/students')}
-            className="btn-outline-teal text-sm font-semibold !py-3 !px-5"
-          >
-            <MdPersonAdd size={20} />
-            Add Student
-          </motion.button>
-          <motion.button
-            type="button"
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.98 }}
             onClick={() => navigate('/dashboard/admin/analytics')}
             className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-semibold text-foreground border border-border bg-muted/50 hover:bg-muted transition-all text-sm"
           >

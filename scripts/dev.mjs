@@ -13,17 +13,20 @@ let shuttingDown = false;
 const apps = [
   {
     name: "backend",
-    command: "node server.js",
+    command: "node",
+    args: ["server.js"],
     cwd: path.join(rootDir, "backend"),
   },
   {
     name: "learner",
-    command: `${npmCmd} run dev -- --host 0.0.0.0 --port 3000`,
+    command: npmCmd,
+    args: ["run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"],
     cwd: path.join(rootDir, "course-compass-main"),
   },
   {
     name: "admin",
-    command: `${npmCmd} run dev -- --host 0.0.0.0 --port 3001`,
+    command: npmCmd,
+    args: ["run", "dev", "--", "--host", "0.0.0.0", "--port", "3001"],
     cwd: path.join(rootDir, "admin"),
   },
 ];
@@ -72,7 +75,7 @@ function stopAll(exitCode = 0) {
 }
 
 function startProcess(app) {
-  const child = spawn(app.command, [], {
+  const child = spawn(app.command, app.args ?? [], {
     cwd: app.cwd,
     env: process.env,
     shell: true,

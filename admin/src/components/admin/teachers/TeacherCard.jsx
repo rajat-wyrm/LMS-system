@@ -44,10 +44,10 @@ const TeacherCard = ({ teacher, onView, onEdit, onDelete }) => {
       role="group"
       aria-label={`${teacher.name} teacher card. Press Enter to open actions menu.`}
       onKeyDown={handleCardKeyDown}
-      className="rounded-2xl overflow-hidden cursor-pointer group border shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface-raised)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
+      className="relative z-0 rounded-2xl overflow-visible cursor-pointer group border shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface-raised)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2 group-hover:z-20 focus-within:z-20"
       style={{ borderColor: 'var(--admin-border)' }}
     >
-      <div className={`relative h-32 bg-gradient-to-r ${teacher.color} overflow-hidden`}>
+      <div className={`relative h-32 bg-gradient-to-r ${teacher.color} overflow-visible`}>
         <div
           className="absolute inset-0"
           style={{

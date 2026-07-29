@@ -74,10 +74,10 @@ const CourseCard = ({
       role="group"
       aria-label={`${course.title} course card. Press Enter to open actions menu.`}
       onKeyDown={handleCardKeyDown}
-      className="group relative flex flex-col rounded-2xl overflow-hidden border cursor-pointer shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface-raised)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
+      className="group relative z-0 flex flex-col rounded-2xl overflow-visible border cursor-pointer shadow-[var(--admin-shadow-card)] bg-[var(--admin-surface-raised)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2 group-hover:z-20 focus-within:z-20"
       style={{ borderColor: 'var(--admin-border)' }}
     >
-      <div className={`relative h-40 bg-gradient-to-br ${course.gradient} overflow-hidden shrink-0`}>
+      <div className={`relative h-40 bg-gradient-to-br ${course.gradient} overflow-visible shrink-0`}>
         {course.thumbnail ? (
           <img
             src={course.thumbnail}
