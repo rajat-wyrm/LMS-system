@@ -12,13 +12,6 @@ import {
 
 const ACTIONS = [
   {
-    label: 'Add Student',
-    path: '/dashboard/admin/students',
-    icon: MdPersonAdd,
-    bg: 'linear-gradient(135deg, #3B82F6 0%, #06B6D4 100%)',
-    glow: 'rgba(59,130,246,0.35)',
-  },
-  {
     label: 'Create Course',
     path: '/dashboard/admin/courses',
     icon: MdAddCircle,
