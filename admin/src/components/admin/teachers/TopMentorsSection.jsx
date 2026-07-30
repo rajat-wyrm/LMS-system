@@ -11,10 +11,7 @@ const RANK_STYLES = [
 
 const TopMentorsSection = ({ teachers, onViewProfile }) => {
   const topThree = useMemo(
-    () =>
-      [...teachers]
-        .sort((a, b) => (b.students || 0) - (a.students || 0))
-        .slice(0, 3),
+    () => [...teachers].sort((a, b) => (b.students || 0) - (a.students || 0)).slice(0, 3),
     [teachers]
   );
 
@@ -43,7 +40,7 @@ const TopMentorsSection = ({ teachers, onViewProfile }) => {
             <MdEmojiEvents size={26} className="text-white" />
           </div>
           <div>
-            <h2 className="text-xl font-bold admin-text-primary">Top Mentors</h2>
+            <h2 className="text-xl font-bold admin-text-primary">Top Instructors</h2>
             <p className="text-xs admin-text-secondary">Spotlight on your highest-impact instructors</p>
           </div>
         </div>
@@ -52,6 +49,7 @@ const TopMentorsSection = ({ teachers, onViewProfile }) => {
       <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-5">
         {topThree.map((mentor, index) => {
           const style = RANK_STYLES[index];
+
           return (
             <motion.button
               key={mentor.id}
@@ -82,15 +80,9 @@ const TopMentorsSection = ({ teachers, onViewProfile }) => {
               </div>
 
               <div className="flex flex-col items-center text-center gap-3">
-                <div
-                  className={`w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden ring-4 ${style.ring} shadow-lg`}
-                >
+                <div className={`w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden ring-4 ${style.ring} shadow-lg`}>
                   {mentor.photo ? (
-                    <img
-                      src={mentor.photo}
-                      alt={mentor.name}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={mentor.photo} alt={mentor.name} className="w-full h-full object-cover" />
                   ) : (
                     <div
                       className={`w-full h-full bg-gradient-to-br ${mentor.color} flex items-center justify-center text-2xl font-bold text-white`}
@@ -102,7 +94,7 @@ const TopMentorsSection = ({ teachers, onViewProfile }) => {
                 <div>
                   <h3 className="text-lg font-bold admin-text-primary">{mentor.name}</h3>
                   <p className="text-xs admin-text-secondary truncate max-w-[200px]">
-                    {mentor.style}
+                    {mentor.bio || 'Instructor profile'}
                   </p>
                 </div>
               </div>

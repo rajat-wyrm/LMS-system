@@ -3,21 +3,20 @@ import { useParams, Link, Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, BookOpen, Film, Loader2, PlusCircle, Trash2,
   Save, Edit2, AlertTriangle, CheckCircle2, GraduationCap,
-  Users, BarChart3, X, Sparkles
+  Users, BarChart3, X, Sparkles, History
 } from "lucide-react";
 import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { getCourseImageUrl } from "@/utils/courseImage";
 
-const celebrities = ["Virat Kohli", "Salman Khan", "Narendra Modi", "Sachin Tendulkar", "Hardik Pandya"];
 const levels      = ["Beginner", "Intermediate", "Advanced"];
 const categories  = ["Python", "CSS", "MERN Stack", "Data Science", "AI & Machine Learning"];
 
 interface Lesson { id: string; title: string; content: string; videoUrl?: string; order: number; }
 interface CourseDetail {
   id: string; title: string; description: string; category: string; level: string;
-  thumbnail?: string; celebrityTeacher?: string;
+  thumbnail?: string;
   instructor?: { id: string; name: string };
   lessons: Lesson[];
   _count?: { enrollments: number };
@@ -53,7 +52,7 @@ const ConfirmModal = ({ label, onConfirm, onCancel, loading }: {
 );
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-type PageTab = "details" | "lessons";
+type PageTab = "details" | "lessons" | "timeline";
 
 const ManageCourse = () => {
   const { id } = useParams<{ id: string }>();
@@ -68,7 +67,7 @@ const ManageCourse = () => {
 
   // ── Edit form ──────────────────────────────────────────────────────────────
   const [editForm, setEditForm] = useState({
-    title: "", description: "", category: "", level: "", thumbnail: "", celebrityTeacher: "",
+    title: "", description: "", category: "", level: "", thumbnail: "",
   });
   const [saveLoading, setSaveLoading] = useState(false);
   const [thumbError, setThumbError] = useState(false);
@@ -81,6 +80,26 @@ const ManageCourse = () => {
   const [deleteLesson, setDeleteLesson] = useState<Lesson | null>(null);
   const [deleteLessonLoading, setDeleteLessonLoading] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
+
+  // ── Timeline ──────────────────────────────────────────────────────────────
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [timelineLoading, setTimelineLoading] = useState(false);
+
+  useEffect(() => {
+    if (tab === "timeline" && id) {
+      setTimelineLoading(true);
+      courseApi.getCourseTimeline(id)
+        .then((res) => {
+          setTimeline(res.data.data || []);
+        })
+        .catch(() => {
+          toast({ title: "Failed to load timeline", description: "Error fetching activity log.", variant: "destructive" });
+        })
+        .finally(() => {
+          setTimelineLoading(false);
+        });
+    }
+  }, [tab, id]);
 
   // ── Guard ──────────────────────────────────────────────────────────────────
   if (user?.role !== "admin") return <Navigate to="/" replace />;
@@ -95,7 +114,7 @@ const ManageCourse = () => {
       setCourse(c);
       setEditForm({
         title: c.title, description: c.description, category: c.category,
-        level: c.level, thumbnail: c.thumbnail ?? "", celebrityTeacher: c.celebrityTeacher ?? "",
+        level: c.level, thumbnail: c.thumbnail ?? "",
       });
       setLessonForm((f) => ({ ...f, order: (c.lessons?.length ?? 0) + 1 }));
     } catch {
@@ -241,6 +260,7 @@ const ManageCourse = () => {
         {([
           { key: "details", icon: Edit2,    label: "Edit Details"    },
           { key: "lessons", icon: BookOpen, label: `Lessons (${sortedLessons.length})` },
+          { key: "timeline", icon: History, label: "Activity Timeline" },
         ] as const).map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
@@ -282,15 +302,6 @@ const ManageCourse = () => {
               <select value={editForm.level} onChange={(e) => setEditForm((f) => ({ ...f, level: e.target.value }))}
                 className="w-full bg-muted/40 border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
                 {levels.map((l) => <option key={l} value={l}>{l}</option>)}
-              </select>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">AI Celebrity Teacher</label>
-              <select value={editForm.celebrityTeacher} onChange={(e) => setEditForm((f) => ({ ...f, celebrityTeacher: e.target.value }))}
-                className="w-full bg-muted/40 border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all">
-                <option value="">None</option>
-                {celebrities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 
@@ -454,6 +465,69 @@ const ManageCourse = () => {
       {showCourseDeleteModal && (
         <ConfirmModal label={course.title} onConfirm={handleDeleteCourse}
           onCancel={() => setShowCourseDeleteModal(false)} loading={deleteCourseLoading} />
+      )}
+
+      {/* ── Activity Timeline Tab ── */}
+      {tab === "timeline" && (
+        <div className="glass-card p-8 border border-border/50 space-y-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="font-semibold text-lg">Activity Timeline</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Audit log of course creations, edits, status updates, and instructor changes.</p>
+            </div>
+            <History className="w-5 h-5 text-muted-foreground opacity-60" />
+          </div>
+
+          {timelineLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : timeline.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground text-sm flex flex-col items-center gap-2">
+              <History className="w-8 h-8 opacity-30" />
+              No activity logs recorded for this course yet.
+            </div>
+          ) : (
+            <div className="relative border-l border-border pl-6 ml-3 space-y-8 py-2">
+              {timeline.map((act) => {
+                let iconColor = "text-secondary bg-secondary/10 border-secondary/20";
+                
+                if (act.action === "created") {
+                  iconColor = "text-blue-400 bg-blue-400/10 border-blue-400/20";
+                } else if (act.action === "published") {
+                  iconColor = "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
+                } else if (act.action === "instructor_changed") {
+                  iconColor = "text-amber-400 bg-amber-400/10 border-amber-400/20";
+                }
+
+                return (
+                  <div key={act.id} className="relative group">
+                    {/* Timeline dot/icon */}
+                    <span className={`absolute -left-[38px] top-0 w-6 h-6 rounded-full border flex items-center justify-center ${iconColor}`}>
+                      <History className="w-3 h-3" />
+                    </span>
+                    
+                    {/* Content */}
+                    <div className="glass-card p-5 transition-all duration-300 group-hover:border-primary/20 bg-muted/10">
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-secondary/10 border border-secondary/20 text-secondary uppercase tracking-wider font-semibold">
+                          {act.action.replace("_", " ")}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono">
+                          {new Date(act.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <h4 className="font-semibold text-sm mb-1">{act.details}</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Performed by <span className="text-foreground font-medium">{act.userName}</span> (ID: {act.userId})
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

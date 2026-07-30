@@ -12,11 +12,6 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "uptoskills-theme";
 
-const getSystemTheme = (): Theme => {
-  if (typeof window === "undefined") return "light";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-};
-
 const getStoredTheme = (): Theme | null => {
   if (typeof window === "undefined") return null;
   const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -24,7 +19,9 @@ const getStoredTheme = (): Theme | null => {
 };
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setThemeState] = useState<Theme>(() => getStoredTheme() ?? getSystemTheme());
+  // Keep the learner experience aligned with the admin app and the shared
+  // design system: dark is the product default, light is an explicit choice.
+  const [theme, setThemeState] = useState<Theme>(() => getStoredTheme() ?? "dark");
 
   useEffect(() => {
     const root = document.documentElement;
@@ -34,19 +31,6 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     root.style.colorScheme = resolvedTheme;
     window.localStorage.setItem(STORAGE_KEY, resolvedTheme);
   }, [theme]);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = () => {
-      const storedTheme = getStoredTheme();
-      if (!storedTheme) {
-        setThemeState(getSystemTheme());
-      }
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
 
   const setTheme = (nextTheme: Theme) => setThemeState(nextTheme);
   const toggleTheme = () => setThemeState((current) => (current === "dark" ? "light" : "dark"));

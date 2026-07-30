@@ -7,7 +7,6 @@ import {
   MdReplay,
   MdInsights,
 } from 'react-icons/md';
-import { engagementOverviewMetrics } from './analyticsData';
 
 const ICON_MAP = {
   session: MdTimer,
@@ -16,7 +15,7 @@ const ICON_MAP = {
   return: MdReplay,
 };
 
-const EngagementOverview = () => (
+const EngagementOverview = ({ metrics = [], loading = false }) => (
   <motion.section
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
@@ -39,8 +38,8 @@ const EngagementOverview = () => (
       </div>
     </div>
 
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {engagementOverviewMetrics.map((metric, index) => {
+    {loading ? <p className="admin-text-secondary text-sm py-8">Loading engagement metrics…</p> : !metrics.length ? <p className="admin-text-secondary text-sm py-8">No engagement data has been recorded yet.</p> : <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {metrics.map((metric, index) => {
         const Icon = ICON_MAP[metric.icon] || MdInsights;
         return (
           <motion.div
@@ -71,7 +70,7 @@ const EngagementOverview = () => (
           </motion.div>
         );
       })}
-    </div>
+    </div>}
   </motion.section>
 );
 

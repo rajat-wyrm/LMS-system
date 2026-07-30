@@ -15,18 +15,9 @@ const ICONS = {
   certificate: MdWorkspacePremium,
 };
 
-const FALLBACK_ITEMS = [
-  {
-    label: 'Platform Status',
-    value: 'Live data enabled',
-    sub: 'Dashboard cards now use backend metrics',
-    iconKey: 'certificate',
-    accent: '#F59E0B',
-  },
-];
-
 const DashboardPlatformHighlights = () => {
-  const [items, setItems] = useState(FALLBACK_ITEMS);
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchHighlights = useCallback(async () => {
     try {
@@ -63,9 +54,12 @@ const DashboardPlatformHighlights = () => {
         });
       }
 
-      setItems(nextItems.length > 0 ? nextItems : FALLBACK_ITEMS);
+      setItems(nextItems);
     } catch (error) {
       console.error('Platform highlights fetch failed:', error);
+      setItems([]);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -75,7 +69,7 @@ const DashboardPlatformHighlights = () => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-      {items.map((item, index) => {
+      {isLoading ? <p className="text-sm admin-text-secondary py-3">Loading highlights…</p> : items.length === 0 ? <p className="text-sm admin-text-secondary py-3">No platform records yet.</p> : items.map((item, index) => {
         const Icon = ICONS[item.iconKey];
         return (
           <motion.div

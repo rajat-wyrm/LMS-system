@@ -30,6 +30,7 @@ exports.getCourses = async (req, res, next) => {
         { title: { contains: search, mode: "insensitive" } },
         { description: { contains: search, mode: "insensitive" } },
         { celebrityTeacher: { contains: search, mode: "insensitive" } },
+        { instructor: { name: { contains: search, mode: "insensitive" } } },
       ];
     }
 
@@ -87,7 +88,6 @@ exports.getCourse = async (req, res, next) => {
         .status(404)
         .json({ success: false, error: "Course not found" });
     }
-    // Only admins and the course instructor can view non-approved courses
     if (course.status !== "approved") {
       const isOwner = req.user && course.instructorId === req.user.id;
       const isAdmin = req.user && req.user.role === "admin";
@@ -114,6 +114,7 @@ exports.createCourse = async (req, res, next) => {
         error: "Only admins can create and generate courses",
       });
     }
+
     const {
       title,
       description,
@@ -132,18 +133,30 @@ exports.createCourse = async (req, res, next) => {
       generateAI,
     } = req.body;
 
-    const allowedStatuses = ['pending', 'approved', 'rejected'];
+    const categoryRecord = category
+      ? await prisma.category.findUnique({ where: { name: category } })
+      : null;
+    if (category && !categoryRecord) {
+      return res.status(400).json({
+        success: false,
+        error: "Select a category created through the admin panel.",
+      });
+    }
+
+    const allowedStatuses = ["pending", "approved", "rejected"];
     if (status && !allowedStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid status. Allowed values are: pending, approved, rejected.',
+        error: "Invalid status. Allowed values are: pending, approved, rejected.",
       });
     }
+
     const course = await prisma.course.create({
       data: {
         title,
         description,
         category,
+        categoryId: categoryRecord?.id || null,
         level,
         thumbnail,
         celebrityTeacher,
@@ -159,13 +172,19 @@ exports.createCourse = async (req, res, next) => {
       },
     });
 
+    await prisma.courseActivity.create({
+      data: {
+        courseId: course.id,
+        action: "created",
+        details: "Course created and initialized.",
+        userId: req.user.id,
+        userName: req.user.name,
+      },
+    });
+
     if (generateAI) {
       const { generateLessonsForCourse } = require("../utils/aiGenerator");
-      const lessonsData = await generateLessonsForCourse(
-        title,
-        category,
-        level,
-      );
+      const lessonsData = await generateLessonsForCourse(title, category, level);
       for (const l of lessonsData) {
         await prisma.lesson.create({
           data: {
@@ -177,7 +196,6 @@ exports.createCourse = async (req, res, next) => {
           },
         });
       }
-      // Update course duration count (assume lessonsData length * 20 Mins)
       await prisma.course.update({
         where: { id: course.id },
         data: {
@@ -186,7 +204,6 @@ exports.createCourse = async (req, res, next) => {
       });
     }
 
-    // Invalidate course cache
     await clearCache("cache:/api/courses");
     res.status(201).json({ success: true, data: course });
   } catch (error) {
@@ -199,13 +216,9 @@ exports.createCourse = async (req, res, next) => {
 // @access  Private (Admin/Instructor)
 exports.updateCourse = async (req, res, next) => {
   try {
-    const course = await prisma.course.findUnique({
-      where: { id: req.params.id },
-    });
+    const course = await prisma.course.findUnique({ where: { id: req.params.id } });
     if (!course) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Course not found" });
+      return res.status(404).json({ success: false, error: "Course not found" });
     }
 
     if (req.user.role !== "admin") {
@@ -216,6 +229,13 @@ exports.updateCourse = async (req, res, next) => {
     }
 
     const dataToUpdate = { ...req.body };
+    if (dataToUpdate.category !== undefined) {
+      const categoryRecord = await prisma.category.findUnique({ where: { name: dataToUpdate.category } });
+      if (!categoryRecord) {
+        return res.status(400).json({ success: false, error: "Selected category was not found." });
+      }
+      dataToUpdate.categoryId = categoryRecord.id;
+    }
     if (dataToUpdate.price !== undefined) {
       dataToUpdate.price = parseFloat(dataToUpdate.price) || 0;
     }
@@ -227,7 +247,40 @@ exports.updateCourse = async (req, res, next) => {
       where: { id: req.params.id },
       data: dataToUpdate,
     });
-    // Invalidate course cache
+
+    const changedFields = [];
+    if (dataToUpdate.title !== undefined && dataToUpdate.title !== course.title) changedFields.push("title");
+    if (dataToUpdate.description !== undefined && dataToUpdate.description !== course.description) changedFields.push("description");
+    if (dataToUpdate.category !== undefined && dataToUpdate.category !== course.category) changedFields.push("category");
+    if (dataToUpdate.level !== undefined && dataToUpdate.level !== course.level) changedFields.push("level");
+    if (dataToUpdate.price !== undefined && dataToUpdate.price !== course.price) changedFields.push("price");
+    if (dataToUpdate.celebrityTeacher !== undefined && dataToUpdate.celebrityTeacher !== course.celebrityTeacher) changedFields.push("instructor");
+    if (dataToUpdate.instructorId !== undefined && dataToUpdate.instructorId !== course.instructorId) changedFields.push("instructorId");
+    if (dataToUpdate.status !== undefined && dataToUpdate.status !== course.status) changedFields.push("status");
+
+    if (changedFields.length > 0) {
+      let action = "edited";
+      let details = `Updated course details: ${changedFields.join(", ")}.`;
+
+      if (changedFields.includes("status") && updated.status === "approved") {
+        action = "published";
+        details = "Course approved and published.";
+      } else if (changedFields.includes("instructor") || changedFields.includes("instructorId")) {
+        action = "instructor_changed";
+        details = `Lead instructor changed to ${updated.celebrityTeacher || "none"}.`;
+      }
+
+      await prisma.courseActivity.create({
+        data: {
+          courseId: course.id,
+          action,
+          details,
+          userId: req.user.id,
+          userName: req.user.name,
+        },
+      });
+    }
+
     await clearCache("cache:/api/courses");
     await clearCache(`cache:/api/courses/${req.params.id}`);
     res.status(200).json({ success: true, data: updated });
@@ -241,16 +294,12 @@ exports.updateCourse = async (req, res, next) => {
 // @access  Private (Admin/Instructor)
 exports.deleteCourse = async (req, res, next) => {
   try {
-    const course = await prisma.course.findUnique({
-      where: { id: req.params.id },
-    });
+    const course = await prisma.course.findUnique({ where: { id: req.params.id } });
     if (!course) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Course not found" });
+      return res.status(404).json({ success: false, error: "Course not found" });
     }
 
-    if(req.user.role !=="admin") {
+    if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
         error: "Not authorized to delete this course. Admin only.",
@@ -258,7 +307,6 @@ exports.deleteCourse = async (req, res, next) => {
     }
 
     await prisma.course.delete({ where: { id: req.params.id } });
-    // Invalidate course cache
     await clearCache("cache:/api/courses");
     await clearCache(`cache:/api/courses/${req.params.id}`);
     res.status(200).json({ success: true, data: {} });
@@ -272,13 +320,9 @@ exports.deleteCourse = async (req, res, next) => {
 // @access  Private (Admin/Instructor)
 exports.addLesson = async (req, res, next) => {
   try {
-    const course = await prisma.course.findUnique({
-      where: { id: req.params.courseId },
-    });
+    const course = await prisma.course.findUnique({ where: { id: req.params.courseId } });
     if (!course) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Course not found" });
+      return res.status(404).json({ success: false, error: "Course not found" });
     }
 
     if (req.user.role !== "admin") {
@@ -298,7 +342,7 @@ exports.addLesson = async (req, res, next) => {
         courseId: req.params.courseId,
       },
     });
-    // Invalidate course cache
+
     await clearCache("cache:/api/courses");
     res.status(201).json({ success: true, data: lesson });
   } catch (error) {
@@ -311,13 +355,9 @@ exports.addLesson = async (req, res, next) => {
 // @access  Private (Admin/Instructor)
 exports.deleteLesson = async (req, res, next) => {
   try {
-    const course = await prisma.course.findUnique({
-      where: { id: req.params.courseId },
-    });
+    const course = await prisma.course.findUnique({ where: { id: req.params.courseId } });
     if (!course) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Course not found" });
+      return res.status(404).json({ success: false, error: "Course not found" });
     }
 
     if (req.user.role !== "admin") {
@@ -327,17 +367,12 @@ exports.deleteLesson = async (req, res, next) => {
       });
     }
 
-    const lesson = await prisma.lesson.findUnique({
-      where: { id: req.params.lessonId },
-    });
+    const lesson = await prisma.lesson.findUnique({ where: { id: req.params.lessonId } });
     if (!lesson || lesson.courseId !== req.params.courseId) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Lesson not found" });
+      return res.status(404).json({ success: false, error: "Lesson not found" });
     }
 
     await prisma.lesson.delete({ where: { id: req.params.lessonId } });
-    // Invalidate course cache
     await clearCache("cache:/api/courses");
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
@@ -352,7 +387,6 @@ exports.getInstructorStats = async (req, res, next) => {
   try {
     const instructorId = req.user.id;
 
-    // Get all courses by this instructor
     const courses = await prisma.course.findMany({
       where: { instructorId },
       select: { id: true, price: true },
@@ -360,7 +394,6 @@ exports.getInstructorStats = async (req, res, next) => {
 
     const courseIds = courses.map((c) => c.id);
 
-    // Get all enrollments for these courses
     const enrollments = await prisma.enrollment.findMany({
       where: { courseId: { in: courseIds } },
       include: { course: { select: { price: true } } },
@@ -416,9 +449,7 @@ exports.generateLessonsAI = async (req, res, next) => {
     });
 
     if (!course) {
-      return res
-        .status(404)
-        .json({ success: false, error: "Course not found" });
+      return res.status(404).json({ success: false, error: "Course not found" });
     }
 
     if (req.user.role !== "admin") {
@@ -429,7 +460,6 @@ exports.generateLessonsAI = async (req, res, next) => {
       });
     }
 
-    // Delete existing lessons to give a fresh AI syllabus
     await prisma.lesson.deleteMany({
       where: { courseId },
     });
@@ -441,7 +471,6 @@ exports.generateLessonsAI = async (req, res, next) => {
       course.level,
     );
 
-    // Create the lessons
     const createdLessons = [];
     for (const l of lessonsData) {
       const created = await prisma.lesson.create({
@@ -456,7 +485,6 @@ exports.generateLessonsAI = async (req, res, next) => {
       createdLessons.push(created);
     }
 
-    // Update course duration count
     await prisma.course.update({
       where: { id: courseId },
       data: {
@@ -464,10 +492,31 @@ exports.generateLessonsAI = async (req, res, next) => {
       },
     });
 
-    // Invalidate course cache
     await clearCache("cache:/api/courses");
-
     res.status(200).json({ success: true, data: createdLessons });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get course activity timeline
+// @route   GET /api/courses/:id/timeline
+// @access  Private
+exports.getCourseTimeline = async (req, res, next) => {
+  try {
+    const courseId = req.params.id;
+
+    const course = await prisma.course.findUnique({ where: { id: courseId } });
+    if (!course) {
+      return res.status(404).json({ success: false, error: "Course not found" });
+    }
+
+    const activities = await prisma.courseActivity.findMany({
+      where: { courseId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.status(200).json({ success: true, data: activities });
   } catch (error) {
     next(error);
   }

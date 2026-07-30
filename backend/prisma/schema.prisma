@@ -52,6 +52,7 @@ model Course {
   title            String
   description      String
   category         String
+  categoryId       String?
   level            String          @default("Beginner")
   price            Float           @default(0)
   thumbnail        String?
@@ -65,12 +66,23 @@ model Course {
   icon             String?
   status           CourseStatus    @default(pending)
   instructor       User            @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+  categoryRecord   Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
 
   lessons          Lesson[]
   enrollments      Enrollment[]
   learningPaths    LearningPath[]  @relation("LearningPathCourses")
+  activities       CourseActivity[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  courses     Course[]
 }
 
 model LearningPath {
@@ -117,3 +129,16 @@ model Enrollment {
   @@unique([userId, courseId])
   @@index([createdAt])
 }
+
+model CourseActivity {
+  id        String   @id @default(cuid())
+  courseId  String
+  action    String   // "created" | "edited" | "published" | "instructor_changed"
+  details   String?
+  userId    String
+  userName  String
+  createdAt DateTime @default(now())
+
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
