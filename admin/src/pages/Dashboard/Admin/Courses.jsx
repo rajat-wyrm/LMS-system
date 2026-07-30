@@ -94,23 +94,32 @@ const Courses = () => {
     });
     showNotice(selectedCourse ? 'Course updated.' : 'Course created.');
   };
+const handleClone = (course) => {
+  const copyTitle = `${course.title} (Copy)`;
 
-  const handleClone = (course) => {
-    const clone = normalizeCourse(
-      {
-        ...course,
-        id: Date.now(),
-        title: `${course.title} (Copy)`,
-        students: 0,
-        completion: 0,
-        active: false,
-        revenue: 0,
-      },
-      courses.length
-    );
-    setCourses((prev) => [clone, ...prev]);
-    showNotice('Course cloned as draft.');
-  };
+  const generatedSlug = copyTitle
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-');
+
+  const clone = normalizeCourse(
+    {
+      ...course,
+      id: Date.now(),
+      title: copyTitle,
+      slug: generatedSlug,
+      students: 0,
+      completion: 0,
+      active: false,
+      revenue: 0,
+    },
+    courses.length
+  );
+
+  setCourses((prev) => [clone, ...prev]);
+  showNotice('Course cloned as draft.');
+};
 
   const handleExport = () => {
     exportToCSV(
