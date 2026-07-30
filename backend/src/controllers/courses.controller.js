@@ -132,11 +132,12 @@ exports.createCourse = async (req, res, next) => {
       generateAI,
     } = req.body;
 
-    const allowedStatuses = ['pending', 'approved', 'rejected'];
+    const allowedStatuses = ["pending", "approved", "rejected"];
     if (status && !allowedStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid status. Allowed values are: pending, approved, rejected.',
+        error:
+          "Invalid status. Allowed values are: pending, approved, rejected.",
       });
     }
     const course = await prisma.course.create({
@@ -250,7 +251,7 @@ exports.deleteCourse = async (req, res, next) => {
         .json({ success: false, error: "Course not found" });
     }
 
-    if(req.user.role !=="admin") {
+    if (req.user.role !== "admin") {
       return res.status(403).json({
         success: false,
         error: "Not authorized to delete this course. Admin only.",
@@ -468,6 +469,55 @@ exports.generateLessonsAI = async (req, res, next) => {
     await clearCache("cache:/api/courses");
 
     res.status(200).json({ success: true, data: createdLessons });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Mark a lesson as completed
+// @route   POST /api/courses/:courseId/lessons/:lessonId/complete
+// @access  Private (Student)
+exports.completeLesson = async (req, res, next) => {
+  try {
+    // Read from params or body depending on where data comes from
+    const courseId = req.params.courseId || req.body.courseId;
+    const lessonId = req.params.lessonId || req.body.lessonId;
+    const userId = req.user.id;
+
+    // 1. Enrollment check
+    const enrollment = await prisma.enrollment.findFirst({
+      where: { userId, courseId },
+    });
+    if (!enrollment) {
+      return res
+        .status(403)
+        .json({ success: false, error: "Not enrolled in this course." });
+    }
+
+    // 2. Fetch the lesson
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: lessonId },
+    });
+    if (!lesson) {
+      return res.status(404).json({ success: false, error: "Lesson not found." });
+    }
+
+    // 3. MAIN CHECK: Match lesson's courseId with requested courseId
+    if (lesson.courseId !== courseId) {
+      return res.status(400).json({
+        success: false,
+        error: "This lesson does not belong to the enrolled course!",
+      });
+    }
+
+    // 4. Save progress
+    const progress = await prisma.lessonProgress.upsert({
+      where: { userId_lessonId: { userId, lessonId } },
+      update: { completed: true },
+      create: { userId, lessonId, courseId, completed: true },
+    });
+
+    return res.status(200).json({ success: true, data: progress });
   } catch (error) {
     next(error);
   }
