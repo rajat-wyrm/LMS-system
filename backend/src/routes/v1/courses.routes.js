@@ -26,12 +26,7 @@ const router = express.Router();
 router
   .route("/")
   .get(cacheMiddleware(300), getCourses)
-  .post(
-    protect,
-    authorize("admin"),
-    validate(courseSchema),
-    createCourse,
-  );
+  .post(protect, authorize("admin"), validate(courseSchema), createCourse);
 
 router.route("/learning-paths").get(getLearningPaths);
 
@@ -57,8 +52,8 @@ router
   .route("/:courseId/lessons/:lessonId")
   .delete(protect, authorize("admin"), deleteLesson);
 
-  router
-   .route("/:courseId/lessons/:lessonId/complete")
-   .post(protect, completeLesson);
+router
+  .route("/:courseId/lessons/:lessonId/complete")
+  .post(protect, completeLesson);
 
 module.exports = router;

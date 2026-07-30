@@ -2,6 +2,12 @@ CREATE TYPE "UserStatus" AS ENUM ('pending', 'approved', 'rejected', 'suspended'
 
 CREATE TYPE "CourseStatus" AS ENUM ('pending', 'approved', 'rejected');
 
+ALTER TABLE "User"
+ADD COLUMN IF NOT EXISTS "status" "UserStatus" NOT NULL DEFAULT 'pending';
+
+ALTER TABLE "Course"
+ADD COLUMN IF NOT EXISTS "status" "CourseStatus" NOT NULL DEFAULT 'pending';
+
 UPDATE "User"
 SET "status" = 'pending'
 WHERE "status" IS NULL

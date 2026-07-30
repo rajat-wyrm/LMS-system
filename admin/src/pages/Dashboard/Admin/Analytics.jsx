@@ -10,7 +10,6 @@ import FunnelAnalytics from '../../../components/admin/analytics/FunnelAnalytics
 import CohortRetention from '../../../components/admin/analytics/CohortRetention';
 import EngagementOverview from '../../../components/admin/analytics/EngagementOverview';
 import LearnerSatisfactionTrendsCard from '../../../components/admin/analytics/LearnerSatisfactionTrendsCard';
-import { satisfactionData } from '../../../components/admin/analytics/analyticsData';
 import { apiFetch } from '../../../api/config';
 
 const Analytics = () => {
@@ -62,7 +61,7 @@ const Analytics = () => {
   };
 
   return (
-    <div className="admin-page space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 -m-4 md:-m-6 border border-[var(--admin-border)] shadow-[var(--admin-shadow-card)] bg-[var(--admin-page-panel)]">
+    <div className="space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 border border-border shadow-sm bg-card/60 backdrop-blur-xl font-body">
       <AnalyticsHero
         revenueGrowth={heroStats.revenueGrowth}
         studentGrowth={heroStats.studentGrowth}
@@ -83,13 +82,13 @@ const Analytics = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <FunnelAnalytics data={analyticsData?.funnelStages} loading={loading} />
-        <CohortRetention loading={loading} />
+        <CohortRetention data={analyticsData?.cohortRetention} loading={loading} />
       </div>
 
-      <EngagementOverview loading={loading} />
+      <EngagementOverview metrics={analyticsData?.engagementOverview} loading={loading} />
 
       <div className="grid grid-cols-1">
-        <LearnerSatisfactionTrendsCard satisfactionData={analyticsData?.satisfactionData ?? satisfactionData} isLoading={loading} />
+        <LearnerSatisfactionTrendsCard satisfactionData={analyticsData?.satisfactionData} isLoading={loading} />
       </div>
     </div>
   );

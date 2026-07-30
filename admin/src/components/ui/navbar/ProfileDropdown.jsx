@@ -19,6 +19,7 @@ import { useMenuFocusTrap } from '../../../hooks/useFocusTrap';
 import { clearAdminAuth } from '../../../utils/api';
 
 const PANEL_WIDTH = 320;
+const PANEL_GUTTER = 12;
 
 const QUICK_ACTIONS = [
   {
@@ -119,9 +120,11 @@ const ProfileDropdown = ({ onToast }) => {
     const el = triggerRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
+    const availableWidth = window.innerWidth - PANEL_GUTTER * 2;
     setPanelPos({
       top: rect.bottom + 8,
       right: Math.max(12, window.innerWidth - rect.right),
+      width: Math.min(PANEL_WIDTH, availableWidth),
     });
   }, []);
 
@@ -193,9 +196,9 @@ const ProfileDropdown = ({ onToast }) => {
                   position: 'fixed',
                   top: panelPos.top,
                   right: panelPos.right,
-                  width: PANEL_WIDTH,
+                  width: panelPos.width || PANEL_WIDTH,
                   zIndex: 9999,
-                  maxHeight: `min(calc(100vh - ${panelPos.top}px - 16px), 640px)`,
+                  maxHeight: `min(calc(100vh - ${panelPos.top}px - ${PANEL_GUTTER}px), 560px)`,
                   overflowY: 'auto',
                 }}
               >

@@ -27,7 +27,7 @@ export const CourseCard = ({ course, index = 0 }: { course: Course; index?: numb
 
   const fullStars = Math.floor(course.rating || 0);
   const showProgress = course.progress !== undefined;
-  const progressVal = course.progress || 94; // fallback fake completion rate for UI
+  const progressVal = Number(course.progress ?? 0);
 
   return (
     <Link
@@ -75,7 +75,9 @@ export const CourseCard = ({ course, index = 0 }: { course: Course; index?: numb
 
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground -mt-1">
             <School size={14} className="text-secondary shrink-0" />
-            <span className="truncate">{typeof course.instructor === 'object' ? course.instructor?.name : (course.celebrityTeacher || course.instructor || "Expert Instructor")}</span>
+            <span className="truncate">
+              {typeof course.instructor === 'object' ? course.instructor?.name : (course.instructor || "Instructor unavailable")}
+            </span>
           </p>
 
           <div className="flex items-center gap-0.5">
@@ -93,12 +95,12 @@ export const CourseCard = ({ course, index = 0 }: { course: Course; index?: numb
           </div>
 
           <div className="grid grid-cols-2 gap-2 mt-auto pt-2">
-            <Stat
+            {showProgress && <Stat
               icon={Users}
               label="Enrolled"
               value={course._count?.enrollments ?? course.enrollments ?? 0}
               accent="#8B5CF6"
-            />
+            />}
             <Stat
               icon={TrendingUp}
               label="Completion"
@@ -107,7 +109,7 @@ export const CourseCard = ({ course, index = 0 }: { course: Course; index?: numb
             />
           </div>
 
-          <div className="mt-1">
+          {showProgress && <div className="mt-1">
              <div className="w-full h-1.5 rounded-full bg-muted/50 overflow-hidden shadow-inner">
                <div
                  className="h-full rounded-full transition-all duration-1000 ease-out"
@@ -117,7 +119,7 @@ export const CourseCard = ({ course, index = 0 }: { course: Course; index?: numb
                  }}
                />
              </div>
-          </div>
+          </div>}
         </div>
       </article>
     </Link>

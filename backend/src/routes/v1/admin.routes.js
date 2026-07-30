@@ -3,15 +3,21 @@ const {
   getDashboardStats,
   getTopPerformers,
   getRecentActivity,
+  getDashboardNotifications,
   getStudentGrowth,
   getAnalytics,
+  getInstructors,
+  createInstructor,
+  updateInstructor,
+  deleteInstructor,
   getAdminUsers,
   getAdminUser,
   updateUserStatus,
   deleteAdminUser,
   getAdminCourses,
   updateCourseStatus,
-  deleteAdminCourse
+  deleteAdminCourse,
+  createAdminCourse
 } = require('../../controllers/admin.controller');
 const { protect, authorize } = require('../../middlewares/auth.middleware');
 
@@ -25,14 +31,17 @@ router.route('/stats').get(getDashboardStats);
 router.route('/analytics').get(getAnalytics);
 router.route('/dashboard/top-performers').get(getTopPerformers);
 router.route('/dashboard/recent-activity').get(getRecentActivity);
+router.route('/dashboard/notifications').get(getDashboardNotifications);
 router.route('/dashboard/student-growth').get(getStudentGrowth);
 
 // User management
 router.route('/users').get(getAdminUsers);
 router.route('/users/:id').get(getAdminUser).put(updateUserStatus).delete(deleteAdminUser);
+router.route('/instructors').get(getInstructors).post(createInstructor);
+router.route('/instructors/:id').put(updateInstructor).delete(deleteInstructor);
 
 // Course management
-router.route('/courses').get(getAdminCourses);
+router.route('/courses').get(getAdminCourses).post(createAdminCourse);
 router.route('/courses/:id').put(updateCourseStatus).delete(deleteAdminCourse);
 
 // Certificate management
