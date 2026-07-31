@@ -18,6 +18,10 @@ import ManageCourse from "@/pages/Portal/ManageCourse";
 import Profile from "@/pages/Profile/Profile";
 import Certificate from "@/pages/Certificate/Certificate";
 import CertificatesList from "@/pages/Certificate/CertificatesList";
+import About from "@/pages/Info/About";
+import Bootcamps from "@/pages/Info/Bootcamps";
+import Careers from "@/pages/Info/Careers";
+import Contact from "@/pages/Info/Contact";
 import { AuthProvider } from "@/store/AuthContext";
 
 export const AppRouter = () => {
@@ -36,6 +40,7 @@ export const AppRouter = () => {
             <Route path="/courses/new" element={<CreateCourse />} />
             <Route path="/courses/:id" element={<CourseDetails />} />
             <Route path="/learn/:id" element={<CoursePlayer />} />
+            <Route path="/bootcamps" element={<Bootcamps />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/learning-paths" element={<LearningPaths />} />
@@ -44,6 +49,9 @@ export const AppRouter = () => {
             <Route path="/portal/courses/:id" element={<ManageCourse />} />
             <Route path="/certificates" element={<CertificatesList />} />
             <Route path="/certificate/:courseId" element={<Certificate />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/careers" element={<Careers />} />
+            <Route path="/contact" element={<Contact />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />
