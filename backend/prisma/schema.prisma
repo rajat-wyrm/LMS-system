@@ -65,10 +65,16 @@ model Course {
   gradient         String?
   icon             String?
   status           CourseStatus    @default(pending)
+
   instructor       User            @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
   categoryRecord   Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
+
+  // Soft Delete Fields
+  isDeleted        Boolean         @default(false)
+  deletedAt        DateTime?
 
   lessons          Lesson[]
   enrollments      Enrollment[]
