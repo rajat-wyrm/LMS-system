@@ -4,6 +4,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import logo from '../../assets/logo.svg';
 import { useAdminSidebar } from '../../context/AdminSidebarContext';
+import { clearAdminAuth } from '../../utils/api';
 import {
   LuLayoutDashboard,
   LuUsers,
@@ -98,18 +99,16 @@ const AdminSidebar = ({ mobileOpen }) =>  {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem('role');
+    clearAdminAuth();
     navigate('/admin-login');
   };
 
   return (
     <aside
-  className={`admin-sidebar h-screen border-r flex flex-col fixed left-0 top-0 z-50 transition-all duration-300 ease-in-out ${
-    collapsed ? 'w-[84px]' : 'w-[280px]'
-  } ${
-    mobileOpen ? 'translate-x-0' : '-translate-x-full'
-  } md:translate-x-0`}
->
+      className={`admin-sidebar h-screen border-r border-border flex flex-col fixed left-0 top-0 z-50 transition-[width,transform] duration-[250ms] ease-in-out bg-card/80 backdrop-blur-xl ${
+        collapsed ? 'w-[84px]' : 'w-[280px]'
+      } ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+    >
       {/* ── Logo ── */}
       <div
         className={`flex items-center border-b border-[var(--admin-nav-border)] transition-[padding] duration-[250ms] ease-in-out ${
@@ -125,7 +124,7 @@ const AdminSidebar = ({ mobileOpen }) =>  {
           <img
             src={logo}
             alt="UpToSkills Logo"
-            className={`object-contain drop-shadow-[0_0_10px_rgba(124,58,237,0.5)] transition-all duration-300 ease-out group-hover:scale-105 group-hover:brightness-110 group-hover:drop-shadow-[0_0_18px_rgba(124,58,237,0.65)] ${
+            className={`object-contain transition-all duration-300 ease-out group-hover:scale-105 group-hover:brightness-110 ${
               collapsed ? 'h-8 w-8' : 'h-10'
             }`}
           />
@@ -195,12 +194,10 @@ const AdminSidebar = ({ mobileOpen }) =>  {
                 return {};
               }}
               onClick={() => {
-  console.log("Clicked:", link.name);
-
-  if (window.innerWidth < 768) {
-    closeMobileSidebar();
-  }
-}}
+                if (window.innerWidth < 768) {
+                  closeMobileSidebar();
+                }
+              }}
             >
               {({ isActive }) => {
                 const active =
