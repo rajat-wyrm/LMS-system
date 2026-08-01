@@ -93,6 +93,24 @@ exports.getUser = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateUser = async (req, res, next) => {
   try {
+    const { status, role } = req.body;
+
+    const allowedStatuses = ['pending', 'approved', 'rejected', 'suspended'];
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid status. Allowed values are: pending, approved, rejected, suspended.',
+      });
+    }
+
+    const allowedRoles = ['user', 'instructor', 'admin'];
+    if (role && !allowedRoles.includes(role)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid role. Allowed values are: user, instructor, admin.',
+      });
+    }
+
     const user = await prisma.user.findUnique({ where: { id: req.params.id } });
 
     if (!user) {
@@ -106,7 +124,8 @@ exports.updateUser = async (req, res, next) => {
         id: true,
         name: true,
         email: true,
-        role: true
+        role: true,
+        status: true
       }
     });
 
