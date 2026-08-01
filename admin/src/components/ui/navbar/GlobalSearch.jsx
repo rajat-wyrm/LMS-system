@@ -103,7 +103,7 @@ const GlobalSearch = () => {
     <div ref={containerRef} className="relative w-80 group">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <MdSearch
-          className="text-[var(--admin-text-muted)] group-focus-within:text-[#7C3AED] transition-colors"
+          className="text-muted-foreground group-focus-within:text-primary transition-colors"
           size={18}
         />
       </div>
@@ -118,7 +118,7 @@ const GlobalSearch = () => {
         aria-activedescendant={
           activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
         }
-        className="block w-full pl-9 pr-16 py-2 border rounded-lg text-sm transition-all bg-[var(--admin-input-bg)] border-[var(--admin-input-border)] text-[var(--admin-text-primary)] placeholder-[var(--admin-text-muted)] focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
+        className="block w-full pl-9 pr-16 py-2 border rounded-xl text-sm transition-all bg-input border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent font-body"
         placeholder="Search for students, courses, teachers..."
         value={query}
         onChange={(e) => {
@@ -130,7 +130,7 @@ const GlobalSearch = () => {
         onKeyDown={handleKeyDown}
       />
       <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-        <span className="text-[10px] text-[var(--admin-text-muted)] border border-[var(--admin-input-border)] rounded px-1.5 py-0.5 font-mono">
+        <span className="text-[10px] text-muted-foreground border border-border rounded px-1.5 py-0.5 font-mono">
           ⌘K
         </span>
       </div>
@@ -140,16 +140,16 @@ const GlobalSearch = () => {
           id={listboxId}
           role="listbox"
           aria-label="Search results"
-          className="absolute left-0 right-0 top-full mt-2 max-h-[min(24rem,70vh)] overflow-y-auto rounded-xl border shadow-2xl z-50 bg-[var(--admin-surface-raised)] border-[var(--admin-border)] backdrop-blur-xl"
+          className="absolute left-0 right-0 top-full mt-2 max-h-[min(24rem,70vh)] overflow-y-auto rounded-2xl border border-border shadow-2xl z-50 bg-popover text-popover-foreground backdrop-blur-xl"
         >
           {loading && (
-            <p className="px-4 py-3 text-xs text-[var(--admin-text-muted)]" role="status">
+            <p className="px-4 py-3 text-xs text-muted-foreground" role="status">
               Searching…
             </p>
           )}
 
           {!loading && results.length === 0 && (
-            <p className="px-4 py-6 text-sm text-center text-[var(--admin-text-muted)]">
+            <p className="px-4 py-6 text-sm text-center text-muted-foreground">
               No results for &ldquo;{query}&rdquo;
             </p>
           )}
@@ -162,7 +162,7 @@ const GlobalSearch = () => {
               const CatIcon = CATEGORY_ICONS[category];
               return (
                 <div key={category} role="group" aria-label={category}>
-                  <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-[var(--admin-text-muted)] flex items-center gap-1.5 border-b border-[var(--admin-border-subtle)]">
+                  <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 border-b border-border/50">
                     <CatIcon size={12} />
                     {category}
                   </div>
@@ -180,24 +180,24 @@ const GlobalSearch = () => {
                         aria-selected={selected}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors ${
                           selected
-                            ? 'bg-[var(--admin-surface-hover)] text-[var(--admin-text-primary)]'
-                            : 'text-[var(--admin-text-secondary)] hover:bg-[var(--admin-surface-hover)] hover:text-[var(--admin-text-primary)]'
+                            ? 'bg-muted text-foreground'
+                            : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                         }`}
                         onMouseEnter={() => setActiveIndex(idx)}
                         onClick={() => selectResult(item)}
                       >
-                        <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-[#7C3AED]/15 text-[#7C3AED]">
+                        <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 text-primary border border-primary/20">
                           <Icon size={16} />
                         </span>
                         <span className="flex-1 min-w-0">
                           <span className="block font-medium truncate">{item.title}</span>
                           {item.subtitle && (
-                            <span className="block text-[11px] text-[var(--admin-text-muted)] truncate">
+                            <span className="block text-[11px] text-muted-foreground truncate">
                               {item.subtitle}
                             </span>
                           )}
                         </span>
-                        <span className="text-[10px] text-[var(--admin-text-muted)] shrink-0">
+                        <span className="text-[10px] text-muted-foreground shrink-0">
                           {category}
                         </span>
                       </button>

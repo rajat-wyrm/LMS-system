@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Sparkles, ArrowRight, Play, TrendingUp, Award, Users } from "lucide-react";
+import { Search, Sparkles, ArrowRight, TrendingUp, Award, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { CourseCard } from "@/components/common/CourseCard";
 import { courseApi } from "@/api/course.api";
@@ -12,12 +12,19 @@ const Home = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    courseApi.getAllCourses()
-      .then(res => {
-        setFeatured(res.data.data.slice(0, 3));
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    const loadCourses = async () => {
+      try {
+        const res = await courseApi.getAllCourses();
+        setFeatured((res.data.data || []).slice(0, 3));
+      } catch (error) {
+        console.error(error);
+        setFeatured([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCourses();
   }, []);
 
   const onSearch = (e: React.FormEvent) => {

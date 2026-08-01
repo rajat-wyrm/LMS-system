@@ -18,12 +18,6 @@ export default function CoursePlayer() {
   // To check if they are actually enrolled
   const [isEnrolled, setIsEnrolled] = useState(false);
 
-  // Mentor Selection State
-  const [mentorChangeOpen, setMentorChangeOpen] = useState(false);
-  const [selectedMentor, setSelectedMentor] = useState("");
-  const [updatingMentor, setUpdatingMentor] = useState(false);
-  const celebrities = ["Virat Kohli", "Salman Khan", "Narendra Modi", "Sachin Tendulkar", "Hardik Pandya", "Virtual Mentor"];
-
   const fetchEnrollment = async () => {
     try {
       const res = await courseApi.getEnrollmentByCourse(id!);
@@ -80,21 +74,6 @@ export default function CoursePlayer() {
       toast.error(err.response?.data?.error || "Failed to mark lesson as complete");
     } finally {
       setIsMarkingComplete(false);
-    }
-  };
-
-  const handleMentorChange = async () => {
-    if (!selectedMentor) return;
-    try {
-      setUpdatingMentor(true);
-      await courseApi.updateEnrollmentMentor(id!, selectedMentor);
-      setEnrollment((prev: any) => prev ? { ...prev, mentor: selectedMentor } : prev);
-      toast.success(`Mentor changed to ${selectedMentor}!`);
-      setMentorChangeOpen(false);
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to change mentor");
-    } finally {
-      setUpdatingMentor(false);
     }
   };
 
@@ -255,31 +234,22 @@ export default function CoursePlayer() {
 
         {/* Right: Sidebar Syllabus */}
         <div className="w-full lg:w-[350px] border-l border-border bg-muted/5 flex flex-col shrink-0 h-full">
-          {enrollment && (
+          {course?.instructor?.name ? (
             <div className="p-5 border-b border-border shrink-0 bg-primary/5">
-              <h4 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Your Celebrity Mentor</h4>
+              <h4 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Course Instructor</h4>
               <div className="flex items-center gap-3">
                 <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(enrollment.mentor || "Virtual Mentor")}&background=8B5CF6&color=fff&bold=true`}
-                  alt={enrollment.mentor || "Virtual Mentor"}
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor.name)}&background=8B5CF6&color=fff&bold=true`}
+                  alt={course.instructor.name}
                   className="w-10 h-10 rounded-full object-cover border-2 border-secondary"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate text-foreground">{enrollment.mentor || "Virtual Mentor"}</p>
-                  <p className="text-xs text-muted-foreground">Personalized Guide</p>
+                  <p className="text-sm font-semibold truncate text-foreground">{course.instructor.name}</p>
+                  <p className="text-xs text-muted-foreground">Assigned from the database</p>
                 </div>
-                <button
-                  onClick={() => {
-                    setSelectedMentor(enrollment.mentor || "Virtual Mentor");
-                    setMentorChangeOpen(true);
-                  }}
-                  className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  Change
-                </button>
               </div>
             </div>
-          )}
+          ) : null}
 
           <div className="p-5 border-b border-border shrink-0">
             <h3 className="font-display font-bold text-lg mb-1">Course Content</h3>
@@ -330,50 +300,6 @@ export default function CoursePlayer() {
           </div>
         </div>
       </div>
-      
-      {/* Mentor Change Modal */}
-      {mentorChangeOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-background border border-border rounded-xl shadow-2xl max-w-md w-full overflow-hidden p-6 relative">
-            <h3 className="text-lg font-bold font-display mb-2 text-foreground">Change Celebrity Mentor</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Select the celebrity you want to guide you through this course.
-            </p>
-            
-            <div className="py-4">
-              <label className="text-sm font-medium text-foreground/80 mb-2 block">Choose Mentor</label>
-              <select
-                value={selectedMentor}
-                onChange={(e) => setSelectedMentor(e.target.value)}
-                className="w-full bg-muted/30 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-foreground"
-              >
-                <option value="">Select a Mentor</option>
-                {celebrities.map((c) => (
-                  <option key={c} value={c} className="bg-background text-foreground">{c}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setMentorChangeOpen(false)}
-                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 rounded-lg transition-colors"
-                disabled={updatingMentor}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleMentorChange}
-                disabled={!selectedMentor || updatingMentor}
-                className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/95 disabled:opacity-50 rounded-lg transition-colors flex items-center gap-2"
-              >
-                {updatingMentor && <Loader2 className="w-4 h-4 animate-spin" />}
-                Confirm Change
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
