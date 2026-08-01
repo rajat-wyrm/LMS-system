@@ -143,7 +143,6 @@ const ProfileDropdown = ({ onToast }) => {
     };
     document.addEventListener('mousedown', onPointerDown);
     return () => document.removeEventListener('mousedown', onPointerDown);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- panelRef is a stable ref object returned by useMenuFocusTrap
   }, [close]);
 
   const handleNav = (item) => {
