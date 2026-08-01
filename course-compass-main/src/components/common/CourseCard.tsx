@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Star, Users, School, TrendingUp, Clock, BookOpen } from "lucide-react";
 import { useState } from "react";
+import type { CourseData } from "@/api/course.api";
 import { getCourseImageUrl } from "@/utils/courseImage";
 
 const levelStyles: Record<string, { bg: string; border: string; color: string }> = {
@@ -20,7 +21,7 @@ const Stat = ({ icon: Icon, label, value, accent }: any) => (
   </div>
 );
 
-export const CourseCard = ({ course, index = 0 }: { course: Course; index?: number }) => {
+export const CourseCard = ({ course, index = 0 }: { course: CourseData; index?: number }) => {
   const [imgError, setImgError] = useState(false);
   const lvl = levelStyles[course.level] || levelStyles.Beginner;
   const thumbnail = !imgError ? getCourseImageUrl(course.thumbnail) : getCourseImageUrl(undefined);
