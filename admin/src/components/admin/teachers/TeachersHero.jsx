@@ -1,21 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import {
-  MdAdd,
-  MdFileDownload,
-  MdMailOutline,
-  MdStar,
-  MdTrendingUp,
-} from 'react-icons/md';
+import { MdAdd, MdFileDownload, MdStar, MdTrendingUp } from 'react-icons/md';
 
-const TeachersHero = ({
-  totalCount,
-  monthlyGrowth,
-  activeCount,
-  onAddTeacher,
-  onInviteTeacher,
-  onExport,
-}) => {
+const TeachersHero = ({ totalCount, monthlyGrowth, activeCount, onAddTeacher, onExport }) => {
   return (
     <motion.section
       initial={{ opacity: 0, y: 16 }}
@@ -33,7 +20,6 @@ const TeachersHero = ({
       />
       <div className="absolute -top-24 -right-16 w-72 h-72 rounded-full bg-[#8B5CF6]/25 blur-[90px] pointer-events-none" />
       <div className="absolute -bottom-20 -left-10 w-64 h-64 rounded-full bg-[#06B6D4]/20 blur-[80px] pointer-events-none" />
-      <div className="absolute top-1/2 right-[22%] w-48 h-48 rounded-full bg-[#3B82F6]/15 blur-[70px] pointer-events-none" />
 
       <div className="relative z-10 p-6 md:p-8 lg:p-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
         <div className="flex flex-col sm:flex-row gap-6 sm:items-start flex-1 min-w-0">
@@ -57,15 +43,15 @@ const TeachersHero = ({
                 }}
               >
                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#10B981] mr-1.5 align-middle animate-pulse" />
-                {activeCount} Active Mentors
+                {activeCount} Active Instructors
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight admin-text-primary mb-2">
-              Celebrity Teachers
+              Instructor Management
             </h1>
             <p className="admin-text-secondary text-sm md:text-base max-w-xl mb-6">
-              Mentor ecosystem overview — manage celebrity instructors, spotlight top performers,
-              and grow your MasterClass-style academy.
+              Manage live instructor accounts created through the admin panel and keep their
+              course assignment data synced with the database.
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -84,7 +70,7 @@ const TeachersHero = ({
               >
                 <p className="text-[10px] font-semibold uppercase tracking-wider admin-text-secondary mb-1 flex items-center gap-1">
                   <MdTrendingUp size={14} className="text-[#06B6D4]" />
-                  Monthly Growth
+                  Added This Month
                 </p>
                 <p className="text-2xl font-extrabold text-[#06B6D4]">{monthlyGrowth}</p>
               </div>
@@ -104,17 +90,7 @@ const TeachersHero = ({
             }}
           >
             <MdAdd size={22} />
-            Add Teacher
-          </motion.button>
-          <motion.button
-            type="button"
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onInviteTeacher}
-            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold admin-text-primary border border-[var(--admin-border)] transition-all hover:border-[#06B6D4]/50 bg-[var(--admin-surface-raised)]"
-          >
-            <MdMailOutline size={20} className="text-[#06B6D4]" />
-            Invite Teacher
+            Add Instructor
           </motion.button>
           <motion.button
             type="button"

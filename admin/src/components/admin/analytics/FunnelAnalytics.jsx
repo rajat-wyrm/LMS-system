@@ -1,9 +1,7 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { MdFilterAlt } from 'react-icons/md';
-import { funnelStages } from './analyticsData';
 
-const FunnelAnalytics = () => (
+const FunnelAnalytics = ({ data = [], loading = false }) => (
   <motion.section
     initial={{ opacity: 0, y: 12 }}
     animate={{ opacity: 1, y: 0 }}
@@ -22,13 +20,15 @@ const FunnelAnalytics = () => (
       <div>
         <h3 className="text-base font-bold admin-text-primary">Funnel Analytics</h3>
         <p className="text-[11px] admin-text-secondary mt-0.5">
-          Visit → Signup → Enroll → Complete
+          Signup to enrollment to completion
         </p>
       </div>
     </div>
 
     <div className="space-y-3">
-      {funnelStages.map((stage, index) => {
+      {loading ? (
+        <div className="h-32 rounded-xl animate-pulse bg-[var(--admin-surface-raised)]" />
+      ) : data.map((stage, index) => {
         const widthPct = 100 - index * 14;
         return (
           <div key={stage.stage}>

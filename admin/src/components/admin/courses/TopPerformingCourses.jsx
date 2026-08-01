@@ -103,7 +103,7 @@ const TopPerformingCourses = ({ courses, onEdit }) => {
                 {course.title}
               </h3>
               <p className="text-[10px] admin-text-secondary truncate mb-3">
-                {course.teacher || 'Unassigned'}
+                {course.teacher || '—'}
               </p>
 
               <div className="grid grid-cols-2 gap-2">
