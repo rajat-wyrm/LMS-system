@@ -48,4 +48,7 @@ export const courseApi = {
 
   // Stats
   getInstructorStats: () => API.get("/courses/instructor/stats"),
+
+  // Timeline
+  getCourseTimeline: (id: string) => API.get(`/courses/${id}/timeline`),
 };
