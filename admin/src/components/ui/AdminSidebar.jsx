@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import logo from '../../assets/logo.webp';
+import logo from '../../assets/logo.svg';
 import { useAdminSidebar } from '../../context/AdminSidebarContext';
 import {
   LuLayoutDashboard,

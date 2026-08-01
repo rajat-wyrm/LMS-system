@@ -1,0 +1,12 @@
+<svg width="160" height="48" viewBox="0 0 160 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brandGradient" x1="8" y1="8" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7C3AED" />
+      <stop offset="1" stop-color="#4F46E5" />
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="12" fill="#0F172A" stroke="url(#brandGradient)" stroke-width="2"/>
+  <path d="M14 31L24 13L34 31H14Z" fill="url(#brandGradient)"/>
+  <path d="M18 27H30" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="56" y="30" fill="white" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">UptoSkills</text>
+</svg>
