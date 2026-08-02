@@ -43,8 +43,11 @@ model User {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  courses     Course[]     @relation("InstructorCourses")
-  enrollments Enrollment[]
+  courses      Course[]     @relation("InstructorCourses")
+  enrollments  Enrollment[]
+
+  // Audit Logs
+  auditLogs    AuditLog[]
 }
 
 model Course {
@@ -142,3 +145,17 @@ model CourseActivity {
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  resource   String
+  resourceId String?
+  details    String?
+  createdAt  DateTime @default(now())
+
+  admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([createdAt])
+}
