@@ -12,16 +12,25 @@ const protect = async (req, res, next) => {
   ) {
     try {
       token = req.headers.authorization.split(' ')[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      req.user = await prisma.user.findUnique({
-        where: { id: decoded.id },
-        select: { id: true, name: true, email: true, role: true }
-      });
+const decoded = jwt.verify(token, process.env.JWT_SECRET);
+console.log("Decoded Token:", decoded);
 
-      if (!req.user) {
-        return next(new AppError('Not authorized, user not found', 401, 'AUTHENTICATION_ERROR'));
-      }
+req.user = await prisma.user.findUnique({
+  where: { id: decoded.id },
+  select: {
+    id: true,
+    name: true,
+    email: true,
+    role: true
+  }
+});
+
+console.log("User Found:", req.user);
+
+if (!req.user) {
+  return next(new AppError('Not authorized, user not found', 401, 'AUTHENTICATION_ERROR'));
+}
 
       return next();
     } catch (error) {

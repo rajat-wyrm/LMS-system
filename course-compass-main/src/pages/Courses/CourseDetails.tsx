@@ -2,7 +2,7 @@ import { useParams, Link, Navigate, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import {
   ArrowLeft, Star, Clock, BookOpen, Users, Award, CheckCircle2, PlayCircle,
-  Heart, HeartOff, Loader2, CreditCard
+  Heart, HeartOff, Loader2, CreditCard, PlusCircle, Edit3, Globe, History
 } from "lucide-react";
 import {
   AlertDialog,
@@ -19,7 +19,7 @@ import { useAuth } from "@/store/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { getCourseImageUrl } from "@/utils/courseImage";
 
-const tabs = ["About", "Outcomes", "Curriculum", "Instructors"] as const;
+const tabs = ["About", "Outcomes", "Curriculum", "Instructors", "Timeline"] as const;
 type Tab = typeof tabs[number];
 
 // ---------------------------------------------------------------------------
@@ -60,6 +60,32 @@ const CourseDetails = () => {
   // Wishlist state
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  // Timeline state
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [timelineLoading, setTimelineLoading] = useState(false);
+
+  // Fetch timeline when Timeline tab is open
+  useEffect(() => {
+    if (tab === "Timeline" && id && isAuthenticated) {
+      setTimelineLoading(true);
+      courseApi
+        .getCourseTimeline(id)
+        .then((res) => {
+          setTimeline(res.data.data || []);
+        })
+        .catch(() => {
+          toast({
+            title: "Failed to load timeline",
+            description: "Could not retrieve activity history for this course.",
+            variant: "destructive",
+          });
+        })
+        .finally(() => {
+          setTimelineLoading(false);
+        });
+    }
+  }, [tab, id, isAuthenticated]);
 
   // -------------------------------------------------------------------------
   // Fetch course
@@ -396,7 +422,7 @@ const CourseDetails = () => {
       <div className="container py-10">
         <div className="lg:max-w-3xl">
           <div className="flex gap-1 border-b border-border mb-8 overflow-x-auto">
-            {tabs.filter(t => isEnrolled || t !== "Instructors").map((t) => (
+            {tabs.filter(t => (isEnrolled || t !== "Instructors") && (isAuthenticated || t !== "Timeline")).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
@@ -463,6 +489,63 @@ const CourseDetails = () => {
                       <h4 className="font-display font-semibold">{course.instructor?.name || 'Instructor unavailable'}</h4>
                       <p className="text-xs text-muted-foreground">Lead Instructor</p>
                     </div>
+                  </div>
+                )}
+              </div>
+            )}
+            {tab === "Timeline" && (
+              <div className="space-y-6">
+                {timelineLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  </div>
+                ) : timeline.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm flex flex-col items-center gap-2">
+                    <History className="w-8 h-8 opacity-40" />
+                    No activity recorded for this course yet.
+                  </div>
+                ) : (
+                  <div className="relative border-l border-border ml-3 pl-6 space-y-8">
+                    {timeline.map((act) => {
+                      let Icon = Edit3;
+                      let colorClass = "text-secondary bg-secondary/10 border-secondary/20";
+                      
+                      if (act.action === "created") {
+                        Icon = PlusCircle;
+                        colorClass = "text-blue-400 bg-blue-400/10 border-blue-400/20";
+                      } else if (act.action === "published") {
+                        Icon = Globe;
+                        colorClass = "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
+                      } else if (act.action === "instructor_changed") {
+                        Icon = Users;
+                        colorClass = "text-amber-400 bg-amber-400/10 border-amber-400/20";
+                      }
+
+                      return (
+                        <div key={act.id} className="relative group">
+                          {/* Marker */}
+                          <div className={`absolute -left-[38px] top-0 w-6 h-6 rounded-full border flex items-center justify-center ${colorClass}`}>
+                            <Icon className="w-3 h-3" />
+                          </div>
+                          
+                          {/* Content */}
+                          <div className="glass-card p-5 transition-all duration-300 group-hover:border-primary/20">
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-secondary/10 border border-secondary/20 text-secondary uppercase tracking-wider font-semibold">
+                                {act.action.replace("_", " ")}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground font-mono">
+                                {new Date(act.createdAt).toLocaleString()}
+                              </span>
+                            </div>
+                            <h4 className="font-semibold text-sm mb-1">{act.details}</h4>
+                            <p className="text-xs text-muted-foreground">
+                              Performed by <span className="text-foreground font-medium">{act.userName}</span>
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

@@ -6,8 +6,13 @@ export interface CourseData {
   description: string;
   category: string;
   level: string;
+  duration?: string;
   price?: number;
   thumbnail?: string;
+  rating?: number;
+  progress?: number;
+  lessons?: Array<{ id?: string }> | number;
+  enrollments?: number;
   instructor?: {
     id: string;
     name: string;
@@ -43,4 +48,7 @@ export const courseApi = {
 
   // Stats
   getInstructorStats: () => API.get("/courses/instructor/stats"),
+
+  // Timeline
+  getCourseTimeline: (id: string) => API.get(`/courses/${id}/timeline`),
 };

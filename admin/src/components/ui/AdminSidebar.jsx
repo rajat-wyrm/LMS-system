@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-const logo = '/logo.webp';
 import { useAdminSidebar } from '../../context/AdminSidebarContext';
 import { clearAdminAuth } from '../../utils/api';
 import {
@@ -20,16 +19,17 @@ import {
   LuChevronLeft,
 } from 'react-icons/lu';
 
-// ── Per-item accent color config ─────────────────────────────────────────────
+const logo = '/logo.webp';
+
 const ACCENT = {
-  Dashboard:          { color: 'hsl(var(--primary))',   rgb: '6,182,212'   },
-  Students:           { color: 'hsl(var(--primary))',   rgb: '6,182,212'   },
-  Instructors:        { color: 'hsl(var(--secondary))', rgb: '139,92,246' },
-  Courses:            { color: 'hsl(var(--orange))',    rgb: '255,102,51'  },
-  Analytics:          { color: 'hsl(175 100% 35%)',     rgb: '0,178,149'   },
-  'Reviews & Ratings':{ color: 'hsl(var(--secondary))', rgb: '139,92,246' },
-  Notifications:      { color: 'hsl(var(--teal))',      rgb: '0,178,149'   },
-  Settings:           { color: 'hsl(var(--accent))',    rgb: '59,130,246'  },
+  Dashboard: { color: 'hsl(var(--primary))', rgb: '6,182,212' },
+  Students: { color: 'hsl(var(--primary))', rgb: '6,182,212' },
+  Instructors: { color: 'hsl(var(--secondary))', rgb: '139,92,246' },
+  Courses: { color: 'hsl(var(--orange))', rgb: '255,102,51' },
+  Analytics: { color: 'hsl(175 100% 35%)', rgb: '0,178,149' },
+  'Reviews & Ratings': { color: 'hsl(var(--secondary))', rgb: '139,92,246' },
+  Notifications: { color: 'hsl(var(--teal))', rgb: '0,178,149' },
+  Settings: { color: 'hsl(var(--accent))', rgb: '59,130,246' },
 };
 
 function SidebarTooltip({ label, children, enabled }) {
@@ -72,7 +72,7 @@ function SidebarTooltip({ label, children, enabled }) {
         createPortal(
           <div
             role="tooltip"
-            className="fixed z-[200] pointer-events-none px-3 py-1.5 text-xs font-medium text-foreground bg-popover border border-border rounded-md shadow-lg whitespace-nowrap -translate-y-1/2"
+            className="fixed z-[200] pointer-events-none px-2.5 py-1.5 text-xs font-medium text-foreground bg-popover border border-border rounded-md shadow-lg whitespace-nowrap -translate-y-1/2"
             style={{ top: position.top, left: position.left }}
           >
             {label}
@@ -83,21 +83,21 @@ function SidebarTooltip({ label, children, enabled }) {
   );
 }
 
-const AdminSidebar = () => {
+const AdminSidebar = ({ mobileOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { collapsed, toggleCollapsed } = useAdminSidebar();
+  const { collapsed, toggleCollapsed, closeMobileSidebar } = useAdminSidebar();
 
   const links = [
-    { name: 'Dashboard',           path: '/dashboard/admin',              icon: LuLayoutDashboard, end: true },
-    { name: 'Users',               path: '/dashboard/admin/users',        icon: LuShield },
-    { name: 'Students',            path: '/dashboard/admin/students',     icon: LuUsers },
-    { name: 'Instructors',         path: '/dashboard/admin/teachers',     icon: LuStar },
-    { name: 'Courses',             path: '/dashboard/admin/courses',      icon: LuBookOpen },
-    { name: 'Analytics',           path: '/dashboard/admin/analytics',    icon: LuChartBar },
-    { name: 'Reviews & Ratings',   path: '/dashboard/admin/reviews',      icon: LuMessageSquare },
-    { name: 'Notifications',       path: '/dashboard/admin/notifications', icon: LuBell },
-    { name: 'Settings',            path: '/dashboard/admin/settings',     icon: LuSettings2 },
+    { name: 'Dashboard', path: '/dashboard/admin', icon: LuLayoutDashboard, end: true },
+    { name: 'Users', path: '/dashboard/admin/users', icon: LuShield },
+    { name: 'Students', path: '/dashboard/admin/students', icon: LuUsers },
+    { name: 'Instructors', path: '/dashboard/admin/teachers', icon: LuStar },
+    { name: 'Courses', path: '/dashboard/admin/courses', icon: LuBookOpen },
+    { name: 'Analytics', path: '/dashboard/admin/analytics', icon: LuChartBar },
+    { name: 'Reviews & Ratings', path: '/dashboard/admin/reviews', icon: LuMessageSquare },
+    { name: 'Notifications', path: '/dashboard/admin/notifications', icon: LuBell },
+    { name: 'Settings', path: '/dashboard/admin/settings', icon: LuSettings2 },
   ];
 
   const handleLogout = () => {
@@ -107,11 +107,10 @@ const AdminSidebar = () => {
 
   return (
     <aside
-      className={`admin-sidebar h-screen border-r border-border flex flex-col fixed left-0 top-0 z-50 transition-[width] duration-[250ms] ease-in-out bg-card/80 backdrop-blur-xl ${
+      className={`admin-sidebar h-screen border-r border-border flex flex-col fixed left-0 top-0 z-50 transition-[width,transform] duration-[250ms] ease-in-out bg-card/80 backdrop-blur-xl ${
         collapsed ? 'w-[84px]' : 'w-[280px]'
-      }`}
+      } ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
     >
-      {/* ── Logo ── */}
       <div
         className={`flex items-center border-b border-border transition-[padding] duration-[250ms] ease-in-out ${
           collapsed ? 'justify-center px-2 py-5' : 'px-5 py-5'
@@ -124,7 +123,7 @@ const AdminSidebar = () => {
           className="group rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <img
-            src="/favicon.svg"
+            src={logo}
             alt="UpToSkills Logo"
             className={`object-contain transition-all duration-300 ease-out group-hover:scale-105 ${
               collapsed ? 'h-8 w-8' : 'h-10'
@@ -133,14 +132,12 @@ const AdminSidebar = () => {
         </button>
       </div>
 
-      {/* ── Nav ── */}
       <nav
         className={`flex-1 overflow-y-auto py-4 space-y-1 custom-scrollbar transition-[padding] duration-[250ms] ease-in-out ${
           collapsed ? 'px-2' : 'px-3'
         }`}
       >
-        {/* Collapse / expand control */}
-        <div className={collapsed ? 'flex justify-center mb-3' : 'mb-3'}>
+        <div className={collapsed ? 'flex justify-center mb-2' : 'mb-2'}>
           <button
             type="button"
             onClick={toggleCollapsed}
@@ -171,9 +168,7 @@ const AdminSidebar = () => {
               to={link.path}
               end={link.end}
               className={({ isActive }) => {
-                const active =
-                  isActive ||
-                  (isStudentsLink && location.pathname.includes('/students'));
+                const active = isActive || (isStudentsLink && location.pathname.includes('/students'));
                 return [
                   'flex items-center rounded-xl transition-all duration-300 relative group font-display focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                   collapsed ? 'justify-center px-0 py-2.5' : 'justify-between px-3 py-2.5',
@@ -182,11 +177,25 @@ const AdminSidebar = () => {
                     : `text-muted-foreground hover:text-foreground hover:bg-muted/30 ${collapsed ? '' : 'hover:translate-x-1'}`,
                 ].join(' ');
               }}
+              style={({ isActive }) => {
+                const active = isActive || (isStudentsLink && location.pathname.includes('/students'));
+                if (active) {
+                  return {
+                    background: `linear-gradient(135deg, rgba(${accent.rgb},0.22), rgba(${accent.rgb},0.10))`,
+                    border: `1px solid rgba(${accent.rgb},0.30)`,
+                    boxShadow: `0 0 18px rgba(${accent.rgb},0.15)`,
+                  };
+                }
+                return {};
+              }}
+              onClick={() => {
+                if (window.innerWidth < 768) {
+                  closeMobileSidebar();
+                }
+              }}
             >
               {({ isActive }) => {
-                const active =
-                  isActive ||
-                  (isStudentsLink && location.pathname.includes('/students'));
+                const active = isActive || (isStudentsLink && location.pathname.includes('/students'));
                 return (
                   <>
                     {active && !collapsed && (
@@ -210,17 +219,12 @@ const AdminSidebar = () => {
                             : 'bg-muted/50 text-muted-foreground group-hover:text-foreground group-hover:bg-muted'
                         }`}
                       >
-                        <IconComponent
-                          size={16}
-                          className="transition-all duration-300 group-hover:scale-110"
-                        />
+                        <IconComponent size={16} className="transition-all duration-300 group-hover:scale-110" />
                       </div>
 
                       <span
                         className={`text-sm tracking-wide truncate transition-all duration-[250ms] ease-in-out ${
-                          collapsed
-                            ? 'max-w-0 opacity-0 -translate-x-2 overflow-hidden'
-                            : 'max-w-[180px] opacity-100 translate-x-0'
+                          collapsed ? 'max-w-0 opacity-0 -translate-x-2 overflow-hidden' : 'max-w-[180px] opacity-100 translate-x-0'
                         }`}
                       >
                         {link.name}
@@ -242,7 +246,6 @@ const AdminSidebar = () => {
         })}
       </nav>
 
-      {/* ── Logout ── */}
       <div
         className={`border-t border-border pt-3 transition-[padding] duration-[250ms] ease-in-out ${
           collapsed ? 'px-2 pb-4' : 'px-3 pb-4'
@@ -260,9 +263,7 @@ const AdminSidebar = () => {
             </div>
             <span
               className={`transition-all duration-[250ms] ease-in-out ${
-                collapsed
-                  ? 'max-w-0 opacity-0 overflow-hidden'
-                  : 'max-w-[120px] opacity-100'
+                collapsed ? 'max-w-0 opacity-0 overflow-hidden' : 'max-w-[120px] opacity-100'
               }`}
             >
               Logout

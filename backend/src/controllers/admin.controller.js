@@ -1247,6 +1247,36 @@ exports.updateCourseStatus = async (req, res, next) => {
       data: updateData,
       include: { instructor: { select: { id: true, name: true } } }
     });
+
+    // Log the change
+    const changedFields = [];
+    for (const key of Object.keys(updateData)) {
+      if (updateData[key] !== existingCourse[key]) changedFields.push(key);
+    }
+
+    if (changedFields.length > 0) {
+      let action = 'edited';
+      let details = `Updated course details: ${changedFields.join(', ')}.`;
+
+      if (changedFields.includes('status') && course.status === 'approved') {
+        action = 'published';
+        details = 'Course approved and published.';
+      } else if (changedFields.includes('instructorId')) {
+        action = 'instructor_changed';
+        details = `Lead instructor changed to ${course.celebrityTeacher || course.instructor?.name || 'none'}.`;
+      }
+
+      await prisma.courseActivity.create({
+        data: {
+          courseId: course.id,
+          action,
+          details,
+          userId: req.user.id,
+          userName: req.user.name,
+        }
+      });
+    }
+
     res.status(200).json({ success: true, data: course });
   } catch (error) {
     next(error);

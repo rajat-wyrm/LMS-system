@@ -11,6 +11,7 @@ const {
   getLearningPaths,
   generateLessonsAI,
   completeLesson,
+  getCourseTimeline,
 } = require("../../controllers/courses.controller");
 
 const { protect, authorize } = require("../../middlewares/auth.middleware");
@@ -39,6 +40,8 @@ router
   .get(getCourse)
   .put(protect, authorize("admin"), updateCourse)
   .delete(protect, authorize("admin"), deleteCourse);
+
+router.route("/:id/timeline").get(protect, getCourseTimeline);
 
 router
   .route("/:courseId/lessons")
