@@ -2,7 +2,6 @@ import React, { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import logo from '../../assets/logo.webp';
 import { useAdminSidebar } from '../../context/AdminSidebarContext';
 import {
   LuLayoutDashboard,
@@ -121,7 +120,7 @@ const AdminSidebar = () => {
           className="group rounded-lg focus:outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FF6B35] focus-visible:outline-offset-2"
         >
           <img
-            src={logo}
+            src="/logo.webp"
             alt="UpToSkills Logo"
             className={`object-contain drop-shadow-[0_0_10px_rgba(124,58,237,0.5)] transition-all duration-300 ease-out group-hover:scale-105 group-hover:brightness-110 group-hover:drop-shadow-[0_0_18px_rgba(124,58,237,0.65)] ${
               collapsed ? 'h-8 w-8' : 'h-10'

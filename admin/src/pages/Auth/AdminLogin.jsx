@@ -4,7 +4,6 @@ import { MdArrowBack, MdEmail, MdVisibilityOff, MdVisibility, MdClose } from 're
 import { FcGoogle } from 'react-icons/fc';
 import { FaJava, FaGitAlt, FaGithub, FaDocker, FaPython, FaReact, FaJs, FaNodeJs, FaHtml5, FaCss3Alt } from 'react-icons/fa';
 import { SiCplusplus, SiTypescript } from 'react-icons/si';
-import logo from '../../assets/logo.webp';
 import { auth, googleProvider } from '../../firebase-config';
 import { signInWithPopup, signInWithEmailAndPassword } from 'firebase/auth';
 
@@ -121,7 +120,7 @@ const AdminLogin = () => {
           <MdClose size={20} />
         </button>
         <div className="text-center mb-6">
-          <img src={logo} alt="UptoSkills Logo" className="mx-auto h-12 mb-4" />
+          <img src="/logo.webp" alt="UptoSkills Logo" className="mx-auto h-12 mb-4" />
           <h2 className="text-3xl font-bold text-[#f8fafc] mb-2 tracking-tight">Admin Sign In</h2>
           <p className="text-[#cbd5e1] text-sm mb-4">Enter your credentials to access the dashboard</p>
           <div className="bg-blue-500/10 border border-blue-500/30 p-2.5 rounded-lg text-xs text-blue-200 flex flex-col gap-1 items-center justify-center">

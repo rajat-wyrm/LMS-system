@@ -1,6 +1,15 @@
-var markdownpdf = require("markdown-pdf")
-  , fs = require("fs")
+const { mdToPdf } = require("md-to-pdf");
 
-markdownpdf().from("Phase_2_Report.md").to("Phase_2_Report.pdf", function () {
-  console.log("PDF generated successfully.")
-})
+(async () => {
+  try {
+    await mdToPdf({
+      path: "Phase_2_Report.md",
+      dest: "Phase_2_Report.pdf",
+    });
+    console.log("PDF generated successfully.");
+  } catch (error) {
+    console.error("Failed to generate PDF.");
+    console.error(error);
+    process.exitCode = 1;
+  }
+})();

@@ -6,8 +6,13 @@ export interface CourseData {
   description: string;
   category: string;
   level: string;
+  duration?: string;
   price?: number;
   thumbnail?: string;
+  rating?: number;
+  progress?: number;
+  lessons?: Array<{ id?: string }> | number;
+  enrollments?: number;
   celebrityTeacher?: string;
   instructor?: {
     id: string;
@@ -19,10 +24,9 @@ export interface CourseData {
   generateAI?: boolean;
 }
 
-
 export const courseApi = {
-  getAllCourses: () => API.get("/courses"),
-  getTrendingCourses: () => API.get("/courses/trending"), // Added this line to fetch trending courses
+  getAllCourses: (config?: object) => API.get("/courses", config),
+  getTrendingCourses: () => API.get("/courses/trending"),
   getLearningPaths: () => API.get("/courses/learning-paths"),
   getCourseById: (id: string) => API.get(`/courses/${id}`),
   createCourse: (data: CourseData) => API.post("/courses", data),
