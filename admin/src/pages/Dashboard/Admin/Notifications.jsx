@@ -202,7 +202,7 @@ const Notifications = () => {
   );
 
   return (
-    <div className="admin-page space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 -m-4 md:-m-6 border border-[var(--admin-border)] shadow-[var(--admin-shadow-card)] bg-[var(--admin-page-panel)]">
+    <div className="space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 border border-border shadow-sm bg-card/60 backdrop-blur-xl font-body">
       <NotificationsHero
         unreadCount={stats.unread}
         activitySummary={activitySummary}
@@ -249,20 +249,17 @@ const Notifications = () => {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_auto]">
         <div className="min-w-0 space-y-3">
           {filtered.length === 0 ? (
-            <div
-              className="rounded-2xl border border-dashed py-16 text-center"
-              style={{ borderColor: 'var(--admin-border)' }}
-            >
-              <MdNotificationsOff size={40} className="mx-auto mb-3 admin-text-muted" />
-              <p className="text-sm admin-text-muted">No notifications match your filters.</p>
+            <div className="rounded-2xl border border-dashed border-border py-16 text-center">
+              <MdNotificationsOff size={40} className="mx-auto mb-3 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">No notifications match your filters.</p>
             </div>
           ) : viewMode === 'inbox' ? (
             <>
               {pinnedList.length > 0 && (
                 <section>
                   <div className="mb-2 flex items-center gap-2">
-                    <MdFiberManualRecord className="text-amber-500" size={8} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest admin-text-muted">
+                    <MdFiberManualRecord className="text-orange-500" size={8} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground font-display">
                       Pinned
                     </span>
                   </div>
@@ -272,8 +269,8 @@ const Notifications = () => {
               <section>
                 {pinnedList.length > 0 && (
                   <div className="mb-2 flex items-center gap-2">
-                    <MdFiberManualRecord className="admin-text-muted" size={8} />
-                    <span className="text-[10px] font-bold uppercase tracking-widest admin-text-muted">
+                    <MdFiberManualRecord className="text-muted-foreground" size={8} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground font-display">
                       Inbox
                     </span>
                   </div>
@@ -282,29 +279,20 @@ const Notifications = () => {
               </section>
             </>
           ) : (
-            <div className="relative space-y-8 pl-4 before:absolute before:bottom-2 before:left-[7px] before:top-2 before:w-px before:bg-gradient-to-b before:from-[#F97316]/50 before:via-[var(--admin-border-subtle)] before:to-transparent">
+            <div className="relative space-y-8 pl-4 before:absolute before:bottom-2 before:left-[7px] before:top-2 before:w-px before:bg-gradient-to-b before:from-orange/50 before:via-border before:to-transparent">
               {TIMELINE_ORDER.map((group) => {
                 const items = timelineGroups[group];
                 if (!items?.length) return null;
                 return (
                   <section key={group} className="relative">
                     <div className="mb-3 flex items-center gap-3">
-                      <span
-                        className="relative z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2"
-                        style={{
-                          borderColor: '#F97316',
-                          background: 'var(--admin-surface-raised)',
-                        }}
-                      >
-                        <span className="h-1.5 w-1.5 rounded-full bg-[#EF4444]" />
+                      <span className="relative z-10 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 border-primary bg-card">
+                        <span className="h-1.5 w-1.5 rounded-full bg-destructive" />
                       </span>
-                      <h3 className="text-xs font-bold uppercase tracking-widest admin-text-secondary">
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-foreground font-display">
                         {group}
                       </h3>
-                      <span
-                        className="rounded-full px-2 py-0.5 text-[10px] font-semibold admin-text-muted"
-                        style={{ background: 'var(--admin-stat-pill-bg)' }}
-                      >
+                      <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold text-muted-foreground bg-muted">
                         {items.length}
                       </span>
                     </div>
@@ -330,18 +318,12 @@ const Notifications = () => {
         </AnimatePresence>
       </div>
 
-      <div
-        className="flex flex-wrap items-center gap-4 rounded-xl border px-4 py-3"
-        style={{
-          borderColor: 'var(--admin-border-subtle)',
-          background: 'var(--admin-surface)',
-        }}
-      >
-        <span className="text-[10px] font-bold uppercase tracking-wider admin-text-muted">
+      <div className="flex flex-wrap items-center gap-4 rounded-xl border border-border px-4 py-3 bg-card/70">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground font-display">
           Priority indicators
         </span>
         {PRIORITIES.map((p) => (
-          <span key={p} className="inline-flex items-center gap-1.5 text-[11px] admin-text-muted">
+          <span key={p} className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <span
               className="h-2 w-2 rounded-full"
               style={{ background: PRIORITY_META[p].iconBg }}

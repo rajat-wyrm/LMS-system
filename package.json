@@ -9,6 +9,7 @@
     "install:all": "npm install && cd backend && npm install && cd ../course-compass-main && npm install && cd ../admin && npm install"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.14"
   }
 }

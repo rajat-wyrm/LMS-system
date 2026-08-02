@@ -27,6 +27,7 @@ export interface CourseData {
 export const courseApi = {
   getAllCourses: (config?: object) => API.get("/courses", config),
   getTrendingCourses: () => API.get("/courses/trending"),
+  getCategories: () => API.get("/categories"),
   getLearningPaths: () => API.get("/courses/learning-paths"),
   getCourseById: (id: string) => API.get(`/courses/${id}`),
   createCourse: (data: CourseData) => API.post("/courses", data),
@@ -48,4 +49,7 @@ export const courseApi = {
 
   // Stats
   getInstructorStats: () => API.get("/courses/instructor/stats"),
+
+  // Timeline
+  getCourseTimeline: (id: string) => API.get(`/courses/${id}/timeline`),
 };

@@ -8,6 +8,7 @@ import {
 import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { getCourseImageUrl } from "@/utils/courseImage";
 
 type Tab = "courses" | "curriculum";
 
@@ -18,7 +19,6 @@ interface CourseItem {
   level: string;
   thumbnail?: string;
   instructor?: { id: string; name: string };
-  celebrityTeacher?: string;
   _count?: { enrollments: number };
   lessons?: any[];
 }
@@ -101,7 +101,11 @@ const InstructorPortal = () => {
     setIsLoading(true);
     try {
       const res = await courseApi.getAllCourses();
-      const all: CourseItem[] = res.data.data;
+      const all: CourseItem[] = (res.data.data || []).map((course: any) => ({
+        ...course,
+        lessons: course.lessons || [],
+        _count: course._count || { enrollments: 0 },
+      }));
       // Instructors see only their own; admins see all
       const filtered =
         user.role === "admin"
@@ -145,7 +149,7 @@ const InstructorPortal = () => {
     try {
       await courseApi.deleteCourse(deleteTarget.id);
       toast({ title: "Course deleted", description: `"${deleteTarget.title}" was removed.` });
-      setCourses((prev) => prev.filter((c) => c.id !== deleteTarget.id));
+      await fetchCourses();
       setDeleteTarget(null);
     } catch (err: any) {
       toast({ title: "Delete failed", description: err?.response?.data?.error || "Something went wrong.", variant: "destructive" });
@@ -283,7 +287,7 @@ const InstructorPortal = () => {
                 {/* Thumbnail */}
                 <div className="w-14 h-14 rounded-lg overflow-hidden bg-muted shrink-0">
                   {c.thumbnail ? (
-                    <img src={c.thumbnail} alt={c.title} className="w-full h-full object-cover" />
+                    <img src={getCourseImageUrl(c.thumbnail)} alt={c.title} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-primary/10">
                       <BookOpen className="w-5 h-5 text-primary" />
@@ -297,7 +301,7 @@ const InstructorPortal = () => {
                     {c.title}
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {c.category} · {c.celebrityTeacher || c.instructor?.name || "Unknown"}
+                    {c.category} · {c.instructor?.name || "Instructor unavailable"}
                   </p>
                 </div>
 
