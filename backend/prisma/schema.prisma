@@ -75,6 +75,7 @@ model Course {
   enrollments      Enrollment[]
   learningPaths    LearningPath[]  @relation("LearningPathCourses")
   wishlistedBy     User[]          @relation("UserWishlist")
+  activities       CourseActivity[]
 }
 
 model Category {
@@ -130,3 +131,16 @@ model Enrollment {
   @@unique([userId, courseId])
   @@index([createdAt])
 }
+
+model CourseActivity {
+  id        String   @id @default(cuid())
+  courseId  String
+  action    String   // "created" | "edited" | "published" | "instructor_changed"
+  details   String?
+  userId    String
+  userName  String
+  createdAt DateTime @default(now())
+
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+

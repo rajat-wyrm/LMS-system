@@ -4,7 +4,7 @@ import { profileApi } from "@/api/profile.api";
 import { User, Lock, Save, Mail, Edit3, Camera, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
-const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://localhost:5001/api").replace(/\/api$/, "");
+const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api$/, "");
 
 const Profile = () => {
   const { user, updateUser } = useAuth();

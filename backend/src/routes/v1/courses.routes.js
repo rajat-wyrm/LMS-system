@@ -1,6 +1,7 @@
 const express = require('express');
 const {
   getCourses,
+  getTrendingCourses,
   getCourse,
   createCourse,
   updateCourse,
@@ -9,7 +10,8 @@ const {
   deleteLesson,
   getInstructorStats,
   getLearningPaths,
-  generateLessonsAI
+  generateLessonsAI,
+  getCourseTimeline,
 } = require('../../controllers/courses.controller');
 
 const { protect, authorize } = require('../../middlewares/auth.middleware');
@@ -23,16 +25,23 @@ router.route('/')
   .get(cacheMiddleware(300), getCourses)
   .post(protect, authorize('admin'), validate(courseSchema), createCourse);
 
+  //route trending courses
+router.route('/trending')
+  .get(getTrendingCourses);
+
 router.route('/learning-paths')
   .get(getLearningPaths);
 
 router.route('/instructor/stats')
-  .get(protect, authorize('instructor', 'admin'), getInstructorStats);
+  .get(protect, authorize('admin'), getInstructorStats);
 
 router.route('/:id')
   .get(getCourse)
   .put(protect, authorize('admin'), updateCourse)
   .delete(protect, authorize('admin'), deleteCourse);
+
+router.route('/:id/timeline')
+  .get(protect, getCourseTimeline);
 
 router.route('/:courseId/lessons')
   .post(protect, authorize('admin'), validate(lessonSchema), addLesson);

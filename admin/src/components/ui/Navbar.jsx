@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from 'react';
 import { MdWbSunny, MdNightsStay } from 'react-icons/md';
+import { LuMenu } from 'react-icons/lu';
 import { useTheme } from '../../context/ThemeProvider';
 import GlobalSearch from './navbar/GlobalSearch';
 import DateRangePicker from './navbar/DateRangePicker';
 import ProfileDropdown from './navbar/ProfileDropdown';
 
-const Navbar = () => {
+const Navbar = ({ onMenuClick }) => {
   const { resolvedTheme, toggleTheme } = useTheme();
   const isLight = resolvedTheme === 'light';
   const [toast, setToast] = useState(null);
@@ -18,7 +19,18 @@ const Navbar = () => {
   return (
     <>
       <header className="admin-navbar h-16 border-b border-border flex items-center justify-between px-6 sticky top-0 z-40 bg-background/80 backdrop-blur-xl">
-        <GlobalSearch />
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onMenuClick}
+            className="md:hidden w-11 h-11 flex items-center justify-center rounded-lg hover:bg-muted"
+            aria-label="Open menu"
+          >
+            <LuMenu size={22} />
+          </button>
+
+          <GlobalSearch />
+        </div>
 
         <div className="flex items-center gap-3">
           <button

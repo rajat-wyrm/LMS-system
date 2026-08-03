@@ -256,7 +256,7 @@ exports.getDashboardStats = async (req, res, next) => {
     const teachersTrend = getTrend(teachersCount, prevTeachersCount);
     const coursesTrend = getTrend(coursesCount, prevCoursesCount);
     const revenueTrendSummary = getTrend(periodRevenue, prevRevenue);
-    const studentGrowth = await getStudentGrowthSnapshot(6);
+    const studentGrowth = await getStudentGrowthSnapshot(12);
 
     res.status(200).json({
       success: true,
@@ -598,7 +598,7 @@ exports.getRecentActivity = async (req, res, next) => {
 // @access  Private/Admin
 exports.getStudentGrowth = async (req, res, next) => {
   try {
-    const growthSnapshot = await getStudentGrowthSnapshot(6);
+    const growthSnapshot = await getStudentGrowthSnapshot(12);
 
     res.status(200).json({
       success: true,
@@ -1197,10 +1197,10 @@ exports.getAdminCourses = async (req, res, next) => {
     ]);
 
     // Compute revenue per course
-    const enriched = await Promise.all(courses.map(async (c) => {
+    const enriched = courses.map((c) => {
       const revenue = (c._count.enrollments || 0) * (c.price || 0);
       return { ...c, revenue, students: c._count.enrollments, lessons: c._count.lessons };
-    }));
+    });
 
     res.status(200).json({
       success: true,
@@ -1247,6 +1247,36 @@ exports.updateCourseStatus = async (req, res, next) => {
       data: updateData,
       include: { instructor: { select: { id: true, name: true } } }
     });
+
+    // Log the change
+    const changedFields = [];
+    for (const key of Object.keys(updateData)) {
+      if (updateData[key] !== existingCourse[key]) changedFields.push(key);
+    }
+
+    if (changedFields.length > 0) {
+      let action = 'edited';
+      let details = `Updated course details: ${changedFields.join(', ')}.`;
+
+      if (changedFields.includes('status') && course.status === 'approved') {
+        action = 'published';
+        details = 'Course approved and published.';
+      } else if (changedFields.includes('instructorId')) {
+        action = 'instructor_changed';
+        details = `Lead instructor changed to ${course.celebrityTeacher || course.instructor?.name || 'none'}.`;
+      }
+
+      await prisma.courseActivity.create({
+        data: {
+          courseId: course.id,
+          action,
+          details,
+          userId: req.user.id,
+          userName: req.user.name,
+        }
+      });
+    }
+
     res.status(200).json({ success: true, data: course });
   } catch (error) {
     next(error);

@@ -1,7 +1,7 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
-const port = process.env.PORT || 5001;
+const port = process.env.PORT || 5000;
 const apiBaseUrl = process.env.API_BASE_URL || `http://localhost:${port}`;
 
 const options = {
