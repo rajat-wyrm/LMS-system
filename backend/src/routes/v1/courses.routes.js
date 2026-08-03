@@ -23,7 +23,7 @@ const router = express.Router();
 
 router.route('/')
   .get(cacheMiddleware(300), getCourses)
-  .post(protect, authorize('admin'), validate(courseSchema), createCourse);
+  .post(protect, authorize('admin', 'instructor'), validate(courseSchema), createCourse);
 
   //route trending courses
 router.route('/trending')
@@ -33,23 +33,23 @@ router.route('/learning-paths')
   .get(getLearningPaths);
 
 router.route('/instructor/stats')
-  .get(protect, authorize('admin'), getInstructorStats);
+  .get(protect, authorize('admin', 'instructor'), getInstructorStats);
 
 router.route('/:id')
   .get(getCourse)
-  .put(protect, authorize('admin'), updateCourse)
-  .delete(protect, authorize('admin'), deleteCourse);
+  .put(protect, authorize('admin', 'instructor'), updateCourse)
+  .delete(protect, authorize('admin', 'instructor'), deleteCourse);
 
 router.route('/:id/timeline')
   .get(protect, getCourseTimeline);
 
 router.route('/:courseId/lessons')
-  .post(protect, authorize('admin'), validate(lessonSchema), addLesson);
+  .post(protect, authorize('admin', 'instructor'), validate(lessonSchema), addLesson);
 
 router.route('/:courseId/generate-lessons')
-  .post(protect, authorize('admin'), generateLessonsAI);
+  .post(protect, authorize('admin', 'instructor'), generateLessonsAI);
 
 router.route('/:courseId/lessons/:lessonId')
-  .delete(protect, authorize('admin'), deleteLesson);
+  .delete(protect, authorize('admin', 'instructor'), deleteLesson);
 
 module.exports = router;
