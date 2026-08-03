@@ -116,3 +116,4 @@ export const initialNotifications = [
     read: true,
   },
 ];
+export const initialNotifications = [];
