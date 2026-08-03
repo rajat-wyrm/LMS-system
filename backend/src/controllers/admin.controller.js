@@ -1390,6 +1390,13 @@ exports.updateInstructor = async (req, res, next) => {
         createdAt: true,
       },
     });
+    await logAdminAction({
+      adminId: req.user.id,
+      action: "UPDATE",
+      resource: "INSTRUCTOR",
+      resourceId: instructor.id,
+      details: `Updated instructor "${instructor.name}"`,
+    });
 
     res.status(200).json({ success: true, data: instructor });
   } catch (error) {
