@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const { prisma } = require('../config/db');
+const { clearCache } = require('../middlewares/cache.middleware');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const getTrend = (curr, prev) => {
@@ -948,6 +949,7 @@ exports.createAdminCourse = async (req, res, next) => {
       data: { title, description, category, categoryId: categoryRecord.id, level, price: Number(price) || 0, thumbnail: thumbnail || null, instructorId, duration: duration || null, status, xp: xp || null, gradient: gradient || null, icon: icon || null },
       include: { instructor: { select: { id: true, name: true, email: true } }, _count: { select: { enrollments: true, lessons: true } } },
     });
+    await clearCache("cache:/api/courses");
     res.status(201).json({ success: true, data: { ...course, students: course._count.enrollments, lessons: course._count.lessons, revenue: 0 } });
   } catch (error) { next(error); }
 };
@@ -1277,6 +1279,9 @@ exports.updateCourseStatus = async (req, res, next) => {
       });
     }
 
+    await clearCache("cache:/api/courses");
+    await clearCache(`cache:/api/courses/${req.params.id}`);
+
     res.status(200).json({ success: true, data: course });
   } catch (error) {
     next(error);
@@ -1293,6 +1298,9 @@ exports.deleteAdminCourse = async (req, res, next) => {
       return res.status(404).json({ success: false, error: 'Course not found' });
     }
     await prisma.course.delete({ where: { id: req.params.id } });
+    await clearCache("cache:/api/courses");
+    await clearCache(`cache:/api/courses/${req.params.id}`);
+
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
     next(error);

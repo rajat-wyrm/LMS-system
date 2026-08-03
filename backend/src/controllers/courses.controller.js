@@ -147,10 +147,10 @@ exports.getCourse = async (req, res, next) => {
 // @access  Private (Admin/Instructor)
 exports.createCourse = async (req, res, next) => {
   try {
-    if (req.user.role !== "admin") {
+    if (req.user.role !== "admin" && req.user.role !== "instructor") {
       return res.status(403).json({
         success: false,
-        error: "Only admins can create and generate courses",
+        error: "Only admins and instructors can create courses",
       });
     }
 
@@ -206,7 +206,7 @@ exports.createCourse = async (req, res, next) => {
         xp: xp || "1000 XP",
         gradient: gradient || "from-blue-600 via-blue-500 to-cyan-400",
         icon: icon || "🤖",
-        status: status || "approved",
+        status: req.user.role === 'admin' ? (status || "approved") : "pending",
         instructorId: req.user.id,
       },
     });
@@ -260,14 +260,17 @@ exports.updateCourse = async (req, res, next) => {
       return res.status(404).json({ success: false, error: "Course not found" });
     }
 
-    if (req.user.role !== "admin") {
+    if (req.user.role !== "admin" && (req.user.role !== "instructor" || course.instructorId !== req.user.id)) {
       return res.status(403).json({
         success: false,
-        error: "Not authorized to update this course. Admin only.",
+        error: "Not authorized to update this course.",
       });
     }
 
     const dataToUpdate = { ...req.body };
+    if (req.user.role !== "admin") {
+      delete dataToUpdate.status;
+    }
     if (dataToUpdate.category !== undefined) {
       const categoryRecord = await prisma.category.findUnique({ where: { name: dataToUpdate.category } });
       if (!categoryRecord) {
@@ -338,10 +341,10 @@ exports.deleteCourse = async (req, res, next) => {
       return res.status(404).json({ success: false, error: "Course not found" });
     }
 
-    if (req.user.role !== "admin") {
+    if (req.user.role !== "admin" && (req.user.role !== "instructor" || course.instructorId !== req.user.id)) {
       return res.status(403).json({
         success: false,
-        error: "Not authorized to delete this course. Admin only.",
+        error: "Not authorized to delete this course.",
       });
     }
 
@@ -364,10 +367,10 @@ exports.addLesson = async (req, res, next) => {
       return res.status(404).json({ success: false, error: "Course not found" });
     }
 
-    if (req.user.role !== "admin") {
+    if (req.user.role !== "admin" && (req.user.role !== "instructor" || course.instructorId !== req.user.id)) {
       return res.status(403).json({
         success: false,
-        error: "Not authorized to add lessons to this course. Admin only.",
+        error: "Not authorized to add lessons to this course.",
       });
     }
 
@@ -399,10 +402,10 @@ exports.deleteLesson = async (req, res, next) => {
       return res.status(404).json({ success: false, error: "Course not found" });
     }
 
-    if (req.user.role !== "admin") {
+    if (req.user.role !== "admin" && (req.user.role !== "instructor" || course.instructorId !== req.user.id)) {
       return res.status(403).json({
         success: false,
-        error: "Not authorized to delete lessons from this course. Admin only.",
+        error: "Not authorized to delete lessons from this course.",
       });
     }
 
@@ -491,11 +494,10 @@ exports.generateLessonsAI = async (req, res, next) => {
       return res.status(404).json({ success: false, error: "Course not found" });
     }
 
-    if (req.user.role !== "admin") {
+    if (req.user.role !== "admin" && (req.user.role !== "instructor" || course.instructorId !== req.user.id)) {
       return res.status(403).json({
         success: false,
-        error:
-          "Not authorized to generate lessons for this course. Admin only.",
+        error: "Not authorized to generate lessons for this course.",
       });
     }
 
