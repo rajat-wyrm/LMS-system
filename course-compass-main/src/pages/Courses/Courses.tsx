@@ -43,7 +43,7 @@ const Courses = () => {
 
   const filtered = useMemo(() => {
     const result = dbCourses.filter((c) => {
-      const instructorName = typeof c.instructor === 'object' ? c.instructor?.name : (c.celebrityTeacher || c.instructor || '');
+      const instructorName = typeof c.instructor === 'object' ? c.instructor?.name : (c.instructor || '');
       if (query && !`${c.title} ${instructorName} ${c.category}`.toLowerCase().includes(query.toLowerCase())) return false;
       if (selLevels.length && !selLevels.includes(c.level as any)) return false;
       if (selTopics.length && !selTopics.includes(c.category)) return false;

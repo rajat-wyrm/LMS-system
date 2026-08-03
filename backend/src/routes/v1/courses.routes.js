@@ -1,6 +1,20 @@
 const express = require('express');
 const {
+   getCourses,
+   getCourse,
+   createCourse,
+   updateCourse,
+   deleteCourse,
+   addLesson,
+   deleteLesson,
+   getInstructorStats,
+  getInstructorCourseAnalytics,
+   getLearningPaths,
+   generateLessonsAI,
+   getCourseTimeline,
+ } = require('../../controllers/courses.controller');
   getCourses,
+  getTrendingCourses,
   getCourse,
   createCourse,
   updateCourse,
@@ -9,7 +23,8 @@ const {
   deleteLesson,
   getInstructorStats,
   getLearningPaths,
-  generateLessonsAI
+  generateLessonsAI,
+  getCourseTimeline,
 } = require('../../controllers/courses.controller');
 
 const { protect, authorize } = require('../../middlewares/auth.middleware');
@@ -21,26 +36,37 @@ const router = express.Router();
 
 router.route('/')
   .get(cacheMiddleware(300), getCourses)
-  .post(protect, authorize('instructor', 'admin'), validate(courseSchema), createCourse);
+  .post(protect, authorize('admin'), validate(courseSchema), createCourse);
+
+  //route trending courses
+router.route('/trending')
+  .get(getTrendingCourses);
 
 router.route('/learning-paths')
   .get(getLearningPaths);
 
-router.route('/instructor/stats')
-  .get(protect, authorize('instructor', 'admin'), getInstructorStats);
+  router.route('/instructor/stats')
+   .get(protect, authorize('admin'), getInstructorStats);
+
+router.route('/instructor/course-analytics')
+  .get(protect, authorize('admin'), getInstructorCourseAnalytics);
+
 
 router.route('/:id')
   .get(getCourse)
-  .put(protect, authorize('instructor', 'admin'), updateCourse)
-  .delete(protect, authorize('instructor', 'admin'), deleteCourse);
+  .put(protect, authorize('admin'), updateCourse)
+  .delete(protect, authorize('admin'), deleteCourse);
+
+router.route('/:id/timeline')
+  .get(protect, getCourseTimeline);
 
 router.route('/:courseId/lessons')
-  .post(protect, authorize('instructor', 'admin'), validate(lessonSchema), addLesson);
+  .post(protect, authorize('admin'), validate(lessonSchema), addLesson);
 
 router.route('/:courseId/generate-lessons')
-  .post(protect, authorize('instructor', 'admin'), generateLessonsAI);
+  .post(protect, authorize('admin'), generateLessonsAI);
 
 router.route('/:courseId/lessons/:lessonId')
-  .delete(protect, authorize('instructor', 'admin'), deleteLesson);
+  .delete(protect, authorize('admin'), deleteLesson);
 
 module.exports = router;

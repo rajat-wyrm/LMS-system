@@ -9,16 +9,6 @@ import {
 } from 'react-icons/md';
 import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
-// Category Options
-const CATEGORIES = [
-  'DSA',
-  'Web Development',
-  'Mobile Development',
-  'AI/ML',
-  'DevOps',
-  'Programming Languages'
-];
-
 // Level Options
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
 
@@ -32,6 +22,7 @@ const DEFAULT_TEACHERS = [
 ];
 
 const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
+const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit, teachers = [], categories = [] }) => {
   const panelRef = useFocusTrap(isOpen, onClose);
   const [form, setForm] = useState({
     title: '',
@@ -55,7 +46,6 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
   });
 
   const [avatarPreview, setAvatarPreview] = useState(null);
-  const [teachers, setTeachers] = useState(DEFAULT_TEACHERS);
   const [searchTeacherQuery, setSearchTeacherQuery] = useState('');
   const [isTeacherDropdownOpen, setIsTeacherDropdownOpen] = useState(false);
   const teacherDropdownRef = useRef(null);
@@ -88,6 +78,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
     }
   }, [teachers, courseToEdit]);
 
+  // Handle outside click to close searchable teacher dropdown
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (teacherDropdownRef.current && !teacherDropdownRef.current.contains(e.target)) {
@@ -103,17 +94,18 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
       setForm({
         title: courseToEdit.title || '',
         slug: courseToEdit.slug || (courseToEdit.title ? courseToEdit.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') : ''),
-        shortDesc: courseToEdit.shortDesc || 'Learn advanced concepts and real-world techniques.',
-        fullDesc: courseToEdit.fullDesc || 'Detailed curriculum covering all fundamentals and best practices.',
+        shortDesc: courseToEdit.shortDesc || courseToEdit.description || '',
+        fullDesc: courseToEdit.fullDesc || courseToEdit.description || '',
         level: courseToEdit.level || 'Beginner',
-        category: courseToEdit.category || 'Web Development',
-        duration: courseToEdit.hours || courseToEdit.duration || '30',
+        category: courseToEdit.category || '',
+        duration: courseToEdit.hours || courseToEdit.duration || '',
         language: courseToEdit.language || 'English',
-        status: courseToEdit.status || (courseToEdit.active ? 'Published' : 'Draft'),
-        teacher: courseToEdit.teacher || (courseToEdit.mentorName || 'Salman Khan'),
-        price: courseToEdit.price || '499',
-        discountPrice: courseToEdit.discountPrice || '299',
-        lessons: courseToEdit.lessons || '15',
+        status: courseToEdit.status === 'approved' || courseToEdit.active ? 'Published' : 'Draft',
+        teacher: courseToEdit.teacher || courseToEdit.instructor?.name || '',
+        instructorId: courseToEdit.instructorId || courseToEdit.instructor?.id || '',
+        price: courseToEdit.price || '',
+        discountPrice: courseToEdit.discountPrice || '',
+        lessons: courseToEdit.lessons || '',
         projects: courseToEdit.projects || '3',
         certificate: courseToEdit.certificate !== undefined ? courseToEdit.certificate : true,
         visibility: courseToEdit.visibility || 'Public',
@@ -128,11 +120,12 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
         shortDesc: '',
         fullDesc: '',
         level: 'Beginner',
-        category: 'Web Development',
+        category: '',
         duration: '',
         language: 'English',
         status: 'Published',
-        teacher: teachers[0]?.name || '',
+        teacher: '',
+        instructorId: '',
         price: '',
         discountPrice: '',
         lessons: '',
@@ -250,6 +243,17 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
       'from-emerald-500 via-teal-500 to-green-400',
       'from-purple-600 via-violet-500 to-pink-500'
     ];
+    const categoryIcons = {
+      'DSA': '🔢',
+      'Web Development': '⚛️',
+      'Mobile Development': '📱',
+      'AI/ML': '🧠',
+      'DevOps': '☁️',
+      'Programming Languages': '💻'
+    };
+
+    const gradient = courseToEdit?.gradient || null;
+    const icon = courseToEdit?.icon || null;
 
     const savedCourse = {
       ...courseToEdit,
@@ -260,13 +264,13 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
       fullDesc: form.fullDesc,
       level: form.level,
       category: form.category,
-      lessons: parseInt(form.lessons) || 12,
-      projects: parseInt(form.projects) || 2,
+      lessons: parseInt(form.lessons, 10) || 0,
+      projects: parseInt(form.projects, 10) || 0,
       certificate: form.certificate,
       visibility: form.visibility,
       featured: form.featured,
-      duration: form.duration || '30',
-      hours: parseInt(form.duration) || 30,
+      duration: form.duration || null,
+      hours: parseInt(form.duration, 10) || 0,
       language: form.language,
       status: submissionStatus,
       active: submissionStatus === 'Published',
@@ -275,8 +279,12 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
       discountPrice: form.discountPrice || '299',
       gradient: courseToEdit?.gradient || gradients[0],
       icon: courseToEdit?.icon || '📚',
+      price: form.price || 0,
+      discountPrice: form.discountPrice || 0,
+      gradient,
+      icon,
       avatar: form.avatar,
-      rating: courseToEdit?.rating || 4.8,
+      rating: courseToEdit?.rating || 0,
       students: courseToEdit?.students || 0,
       completion: courseToEdit?.completion || 0
     };
@@ -360,6 +368,150 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                         <div 
                           className="bg-gradient-to-r from-purple-500 to-blue-500 h-2.5 rounded-full transition-all duration-200" 
                           style={{ width: `${uploadProgress}%` }}
+                    )}
+                    <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                  </label>
+                </motion.div>
+
+                {/* ── SECTION 2: BASIC INFORMATION ── */}
+                <motion.div 
+                  variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+                  className="space-y-5"
+                >
+                  <h4 className="text-xs font-extrabold text-purple-400 uppercase tracking-widest border-b border-white/5 pb-2">
+                    1. Basic Information
+                  </h4>
+
+                  {/* Course Name */}
+                  <div>
+                    <label className={labelCls}>Course Name *</label>
+                    <div className="relative">
+                      <MdTitle className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                      <input
+                        type="text"
+                        required
+                        value={form.title}
+                        onChange={handleTitleChange}
+                        placeholder="e.g. Master Next.js and Server Actions"
+                        className={`${inputCls} pl-11`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Course Slug */}
+                  <div>
+                    <label className={labelCls}>Course Slug (Auto-Generated)</label>
+                    <div className="relative">
+                      <MdAssignment className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                      <input
+                        type="text"
+                        readOnly
+                        value={form.slug}
+                        placeholder="e.g. master-nextjs-and-server-actions"
+                        className="w-full bg-white/5 border border-white/5 text-gray-500 rounded-xl px-4 py-3 pl-11 text-sm focus:outline-none cursor-not-allowed select-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Short Description */}
+                  <div>
+                    <label className={labelCls}>Short Description *</label>
+                    <div className="relative">
+                      <MdDescription className="absolute left-3.5 top-5 text-gray-500" size={18} />
+                      <textarea
+                        required
+                        value={form.shortDesc}
+                        onChange={set('shortDesc')}
+                        placeholder="Brief overview summarizing the syllabus and core learning target (max 150 chars)."
+                        maxLength={150}
+                        className={`${textareaCls} pl-11 pt-4 h-20`}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Full Description */}
+                  <div>
+                    <label className={labelCls}>Full Description</label>
+                    <textarea
+                      value={form.fullDesc}
+                      onChange={set('fullDesc')}
+                      placeholder="Comprehensive curriculum breakdown, pre-requisites, outcomes, and deep explanation of lessons."
+                      className={textareaCls}
+                    />
+                  </div>
+                </motion.div>
+
+                {/* ── SECTION 3: COURSE DETAILS ── */}
+                <motion.div 
+                  variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+                  className="space-y-5"
+                >
+                  <h4 className="text-xs font-extrabold text-purple-400 uppercase tracking-widest border-b border-white/5 pb-2">
+                    2. Course Details
+                  </h4>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Level */}
+                    <div>
+                      <label className={labelCls}>Level *</label>
+                      <div className="relative">
+                        <MdLayers className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                        <select
+                          value={form.level}
+                          onChange={set('level')}
+                          className="w-full bg-[#111827] border border-white/10 rounded-xl py-3 pl-11 pr-10 text-sm text-white focus:outline-none focus:border-purple-500 focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#070b16] transition-all cursor-pointer appearance-none"
+                        >
+                          {LEVELS.map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+                        </select>
+                        <MdOutlineFiberManualRecord className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={10} />
+                      </div>
+                    </div>
+
+                    {/* Category */}
+                    <div>
+                      <label className={labelCls}>Category *</label>
+                      <div className="relative">
+                        <MdCategory className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                        <select
+                          value={form.category}
+                          onChange={set('category')}
+                          className="w-full bg-[#111827] border border-white/10 rounded-xl py-3 pl-11 pr-10 text-sm text-white focus:outline-none focus:border-purple-500 focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#070b16] transition-all cursor-pointer appearance-none"
+                        >
+                          <option value="">Select a category</option>
+                          {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                        </select>
+                        <MdOutlineFiberManualRecord className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" size={10} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Duration */}
+                    <div>
+                      <label className={labelCls}>Duration (Hours)</label>
+                      <div className="relative">
+                        <MdTimer className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                        <input
+                          type="number"
+                          value={form.duration}
+                          onChange={set('duration')}
+                          placeholder="e.g. 32"
+                          className={`${inputCls} pl-11`}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Language */}
+                    <div>
+                      <label className={labelCls}>Language</label>
+                      <div className="relative">
+                        <MdLanguage className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                        <input
+                          type="text"
+                          value={form.language}
+                          onChange={set('language')}
+                          placeholder="e.g. English"
+                          className={`${inputCls} pl-11`}
                         />
                       </div>
                       <span className="text-[11px] text-gray-400 mt-2">Uploading file... please wait.</span>
@@ -376,6 +528,79 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
                       >
                         <MdRefresh size={16} /> Retry Upload
                       </button>
+                  </div>
+                </motion.div>
+
+                {/* ── SECTION 4: TEACHER ASSIGNMENT ── */}
+                <motion.div 
+                  variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
+                  className="space-y-4"
+                >
+                  <h4 className="text-xs font-extrabold text-purple-400 uppercase tracking-widest border-b border-white/5 pb-2">
+                    3. Teacher Assignment
+                  </h4>
+
+                  {/* Searchable Dropdown */}
+                  <div>
+                    <label className={labelCls}>Select Celebrity Teacher</label>
+                    <div ref={teacherDropdownRef} className="relative">
+                      <div className="relative">
+                        <MdPerson className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                        <input
+                          type="text"
+                          value={isTeacherDropdownOpen ? searchTeacherQuery : form.teacher}
+                          onFocus={() => {
+                            setSearchTeacherQuery('');
+                            setIsTeacherDropdownOpen(true);
+                          }}
+                          onChange={(e) => {
+                            setSearchTeacherQuery(e.target.value);
+                            setIsTeacherDropdownOpen(true);
+                          }}
+                          placeholder="Search instructors..."
+                          className={`${inputCls} pl-11 pr-10`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setIsTeacherDropdownOpen(!isTeacherDropdownOpen)}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+                        >
+                          <MdSearch size={18} />
+                        </button>
+                      </div>
+
+                      {/* Dropdown Options */}
+                      <AnimatePresence>
+                        {isTeacherDropdownOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 5 }}
+                            className="absolute z-50 left-0 right-0 mt-1 bg-[#101726] border border-white/10 rounded-xl overflow-hidden shadow-2xl max-h-48 overflow-y-auto custom-scrollbar"
+                          >
+                            {filteredTeachers.length > 0 ? (
+                              filteredTeachers.map((t) => (
+                                <button
+                                  key={t.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setForm(prev => ({ ...prev, teacher: t.name, instructorId: t.id }));
+                                    setIsTeacherDropdownOpen(false);
+                                  }}
+                                  className="w-full text-left px-4 py-3 text-xs text-white hover:bg-purple-600/20 hover:text-purple-300 transition-all border-b border-white/5 flex items-center justify-between"
+                                >
+                                  <span>{t.name}</span>
+                                  {form.teacher === t.name && <MdCheckCircle size={14} className="text-purple-400" />}
+                                </button>
+                              ))
+                            ) : (
+                              <div className="px-4 py-3 text-xs text-gray-500 text-center">
+                                No mentors match "{searchTeacherQuery}"
+                              </div>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   ) : avatarPreview ? (
                     /* Uploaded Image Preview */

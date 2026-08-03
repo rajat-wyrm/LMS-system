@@ -1,7 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, LogIn, Sparkles, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, LogIn, Sparkles, Mail, Lock, RefreshCw } from "lucide-react";
 import { useAuth } from "@/store/AuthContext";
+
+const createCaptcha = () => {
+  const first = Math.floor(Math.random() * 10) + 1;
+  const second = Math.floor(Math.random() * 10) + 1;
+  return {
+    question: `${first} + ${second} = ?`,
+    answer: String(first + second),
+  };
+};
 
 const Login = () => {
   const { login } = useAuth();
@@ -11,6 +20,13 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [captcha, setCaptcha] = useState(() => createCaptcha());
+  const [captchaValue, setCaptchaValue] = useState("");
+
+  useEffect(() => {
+    setCaptcha(createCaptcha());
+    setCaptchaValue("");
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -21,6 +37,12 @@ const Login = () => {
     e.preventDefault();
     if (!form.email || !form.password) {
       setError("Please fill in all fields.");
+      return;
+    }
+    if (captchaValue.trim() !== captcha.answer) {
+      setError("Please solve the captcha correctly.");
+      setCaptcha(createCaptcha());
+      setCaptchaValue("");
       return;
     }
     setIsLoading(true);
@@ -118,6 +140,39 @@ const Login = () => {
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5 rounded-xl border border-border/70 bg-muted/30 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <label htmlFor="login-captcha" className="text-sm font-medium text-foreground/80">
+                  Security Check
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCaptcha(createCaptcha());
+                    setCaptchaValue("");
+                  }}
+                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" /> New
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="rounded-lg border border-border bg-background/80 px-3 py-2 text-sm font-semibold text-foreground">
+                  {captcha.question}
+                </div>
+                <input
+                  id="login-captcha"
+                  name="captcha"
+                  type="text"
+                  inputMode="numeric"
+                  value={captchaValue}
+                  onChange={(e) => setCaptchaValue(e.target.value)}
+                  placeholder="Answer"
+                  className="w-full bg-background/70 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                />
               </div>
             </div>
 
