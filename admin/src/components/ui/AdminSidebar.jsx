@@ -123,7 +123,7 @@ const AdminSidebar = ({ mobileOpen }) => {
           className="group rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
           <img
-            src={logo}
+            src="/logo.webp"
             alt="UpToSkills Logo"
             className={`object-contain transition-all duration-300 ease-out group-hover:scale-105 ${
               collapsed ? 'h-8 w-8' : 'h-10'

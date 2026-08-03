@@ -13,6 +13,7 @@ export interface CourseData {
   progress?: number;
   lessons?: Array<{ id?: string }> | number;
   enrollments?: number;
+  celebrityTeacher?: string;
   instructor?: {
     id: string;
     name: string;
@@ -23,9 +24,9 @@ export interface CourseData {
   generateAI?: boolean;
 }
 
-
 export const courseApi = {
   getAllCourses: (config?: object) => API.get("/courses", config),
+  getTrendingCourses: () => API.get("/courses/trending"),
   getCategories: () => API.get("/categories"),
   getLearningPaths: () => API.get("/courses/learning-paths"),
   getCourseById: (id: string) => API.get(`/courses/${id}`),
@@ -46,8 +47,9 @@ export const courseApi = {
   addLesson: (courseId: string, data: { title: string; content: string; videoUrl?: string; order: number }) => API.post(`/courses/${courseId}/lessons`, data),
   deleteLesson: (courseId: string, lessonId: string) => API.delete(`/courses/${courseId}/lessons/${lessonId}`),
 
-  // Stats
-  getInstructorStats: () => API.get("/courses/instructor/stats"),
+// Stats
+   getInstructorStats: () => API.get("/courses/instructor/stats"),
+  getInstructorCourseAnalytics: () => API.get("/courses/instructor/course-analytics"),
 
   // Timeline
   getCourseTimeline: (id: string) => API.get(`/courses/${id}/timeline`),

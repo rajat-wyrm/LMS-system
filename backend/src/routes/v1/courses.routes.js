@@ -1,6 +1,20 @@
 const express = require('express');
 const {
+   getCourses,
+   getCourse,
+   createCourse,
+   updateCourse,
+   deleteCourse,
+   addLesson,
+   deleteLesson,
+   getInstructorStats,
+  getInstructorCourseAnalytics,
+   getLearningPaths,
+   generateLessonsAI,
+   getCourseTimeline,
+ } = require('../../controllers/courses.controller');
   getCourses,
+  getTrendingCourses,
   getCourse,
   createCourse,
   updateCourse,
@@ -24,11 +38,19 @@ router.route('/')
   .get(cacheMiddleware(300), getCourses)
   .post(protect, authorize('admin'), validate(courseSchema), createCourse);
 
+  //route trending courses
+router.route('/trending')
+  .get(getTrendingCourses);
+
 router.route('/learning-paths')
   .get(getLearningPaths);
 
-router.route('/instructor/stats')
-  .get(protect, authorize('admin'), getInstructorStats);
+  router.route('/instructor/stats')
+   .get(protect, authorize('admin'), getInstructorStats);
+
+router.route('/instructor/course-analytics')
+  .get(protect, authorize('admin'), getInstructorCourseAnalytics);
+
 
 router.route('/:id')
   .get(getCourse)
