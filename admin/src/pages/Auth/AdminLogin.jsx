@@ -61,7 +61,7 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="no-theme min-h-screen flex items-center justify-center bg-[#0d1117] relative overflow-hidden font-sans">
+    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden font-sans">
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-30%] left-[-30%] w-[60%] h-[60%] bg-accent-cyan rounded-full blur-[120px] opacity-30" />
         <div className="absolute bottom-[-30%] right-[-30%] w-[60%] h-[60%] bg-accent-purple rounded-full blur-[120px] opacity-30" />
@@ -81,7 +81,7 @@ const AdminLogin = () => {
 
       <button
         onClick={handleClose}
-        className="absolute top-6 left-6 flex items-center gap-2 text-gray-400 hover:text-white transition-colors group text-sm"
+        className="absolute top-6 left-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors group text-sm"
       >
         <MdArrowBack className="group-hover:-translate-x-1 transition-transform" /> Back to Home
       </button>
@@ -89,7 +89,7 @@ const AdminLogin = () => {
       <div className="max-w-md w-full mx-4 glass-card glass-card-hover p-8 rounded-2xl relative z-10">
         <button
           type="button"
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+          className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
           onClick={handleClose}
         >
           <MdClose size={20} />
@@ -97,17 +97,17 @@ const AdminLogin = () => {
 
         <div className="text-center mb-6">
           <img src="/favicon.svg" alt="UptoSkills Logo" className="mx-auto h-12 mb-4" />
-          <h2 className="text-3xl font-bold text-[#f8fafc] mb-2 tracking-tight">Admin Sign In</h2>
-          <p className="text-[#cbd5e1] text-sm mb-4">Use the backend admin account to manage real database users.</p>
-          <div className="bg-blue-500/10 border border-blue-500/30 p-2.5 rounded-lg text-xs text-blue-200 flex flex-col gap-1 items-center justify-center">
-            <span className="font-semibold text-blue-400 uppercase tracking-wider text-[10px]">Administrator sign in</span>
+          <h2 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Admin Sign In</h2>
+          <p className="text-muted-foreground text-sm mb-4">Use the backend admin account to manage real database users.</p>
+          <div className="bg-primary/10 border border-primary/20 p-2.5 rounded-lg text-xs text-foreground flex flex-col gap-1 items-center justify-center">
+            <span className="font-semibold text-primary uppercase tracking-wider text-[10px]">Administrator sign in</span>
             <span>Email: <strong>admin.amit@lms.com</strong></span>
             <span>Password: <strong>password123</strong></span>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-lg text-sm text-red-200 mb-4">
+          <div className="bg-destructive/10 border border-destructive/30 p-3 rounded-lg text-sm text-destructive mb-4">
             {error}
           </div>
         )}
@@ -118,12 +118,12 @@ const AdminLogin = () => {
               type="email"
               required
               autoComplete="email"
-              className="w-full bg-[#1a1f2e] border border-white/20 rounded-md px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent-cyan focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a1f2e] transition-colors"
+              className="w-full bg-input border border-border rounded-md px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors"
               placeholder="Admin Email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
-            <MdEmail className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <MdEmail className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
           </div>
 
           <div className="relative">
@@ -131,7 +131,7 @@ const AdminLogin = () => {
               type={showPassword ? 'text' : 'password'}
               required
               autoComplete="current-password"
-              className="w-full bg-[#1a1f2e] border border-white/20 rounded-md px-4 py-2.5 pr-10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent-cyan focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1a1f2e] transition-colors"
+              className="w-full bg-input border border-border rounded-md px-4 py-2.5 pr-10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-[#FF6B35] focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-colors"
               placeholder="Password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
@@ -139,7 +139,7 @@ const AdminLogin = () => {
             <button
               type="button"
               onClick={() => setShowPassword((current) => !current)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
             >
               {showPassword ? <MdVisibility size={18} /> : <MdVisibilityOff size={18} />}
             </button>
@@ -154,7 +154,7 @@ const AdminLogin = () => {
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-400 mt-4">
+        <p className="text-center text-xs text-muted-foreground mt-4">
           Protected by backend JWT authentication
         </p>
       </div>
