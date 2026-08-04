@@ -1,7 +1,21 @@
 const express = require('express');
 
 const {
+   getCourses,
+   getCourse,
+   createCourse,
+   updateCourse,
+   deleteCourse,
+   addLesson,
+   deleteLesson,
+   getInstructorStats,
+  getInstructorCourseAnalytics,
+   getLearningPaths,
+   generateLessonsAI,
+   getCourseTimeline,
+ } = require('../../controllers/courses.controller');
   getCourses,
+  getTrendingCourses,
   getCourse,
   createCourse,
   updateCourse,
@@ -11,7 +25,8 @@ const {
   deleteLesson,
   getInstructorStats,
   getLearningPaths,
-  generateLessonsAI
+  generateLessonsAI,
+  getCourseTimeline,
 } = require('../../controllers/courses.controller');
 
 
@@ -50,6 +65,10 @@ router.route('/')
 // Learning Paths
 // ===============================
 
+  //route trending courses
+router.route('/trending')
+  .get(getTrendingCourses);
+
 router.route('/learning-paths')
 
   .get(getLearningPaths);
@@ -73,6 +92,12 @@ router.route('/instructor/stats')
 // ===============================
 // Single Course
 // ===============================
+  router.route('/instructor/stats')
+   .get(protect, authorize('admin'), getInstructorStats);
+
+router.route('/instructor/course-analytics')
+  .get(protect, authorize('admin'), getInstructorCourseAnalytics);
+
 
 router.route('/:id')
 
@@ -110,6 +135,9 @@ router.route('/:id/restore')
 // ===============================
 // Lessons
 // ===============================
+
+router.route('/:id/timeline')
+  .get(protect, getCourseTimeline);
 
 router.route('/:courseId/lessons')
 

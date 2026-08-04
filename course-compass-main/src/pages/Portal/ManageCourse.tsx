@@ -3,7 +3,7 @@ import { useParams, Link, Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, BookOpen, Film, Loader2, PlusCircle, Trash2,
   Save, Edit2, AlertTriangle, CheckCircle2, GraduationCap,
-  Users, BarChart3, X, Sparkles
+  Users, BarChart3, X, Sparkles, History
 } from "lucide-react";
 import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
@@ -52,7 +52,7 @@ const ConfirmModal = ({ label, onConfirm, onCancel, loading }: {
 );
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-type PageTab = "details" | "lessons";
+type PageTab = "details" | "lessons" | "timeline";
 
 const ManageCourse = () => {
   const { id } = useParams<{ id: string }>();
@@ -80,6 +80,26 @@ const ManageCourse = () => {
   const [deleteLesson, setDeleteLesson] = useState<Lesson | null>(null);
   const [deleteLessonLoading, setDeleteLessonLoading] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
+
+  // ── Timeline ──────────────────────────────────────────────────────────────
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [timelineLoading, setTimelineLoading] = useState(false);
+
+  useEffect(() => {
+    if (tab === "timeline" && id) {
+      setTimelineLoading(true);
+      courseApi.getCourseTimeline(id)
+        .then((res) => {
+          setTimeline(res.data.data || []);
+        })
+        .catch(() => {
+          toast({ title: "Failed to load timeline", description: "Error fetching activity log.", variant: "destructive" });
+        })
+        .finally(() => {
+          setTimelineLoading(false);
+        });
+    }
+  }, [tab, id]);
 
   // ── Guard ──────────────────────────────────────────────────────────────────
   if (user?.role !== "admin") return <Navigate to="/" replace />;
@@ -240,6 +260,7 @@ const ManageCourse = () => {
         {([
           { key: "details", icon: Edit2,    label: "Edit Details"    },
           { key: "lessons", icon: BookOpen, label: `Lessons (${sortedLessons.length})` },
+          { key: "timeline", icon: History, label: "Activity Timeline" },
         ] as const).map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`flex items-center gap-2 px-5 py-3 text-sm font-medium border-b-2 transition-colors ${
@@ -444,6 +465,69 @@ const ManageCourse = () => {
       {showCourseDeleteModal && (
         <ConfirmModal label={course.title} onConfirm={handleDeleteCourse}
           onCancel={() => setShowCourseDeleteModal(false)} loading={deleteCourseLoading} />
+      )}
+
+      {/* ── Activity Timeline Tab ── */}
+      {tab === "timeline" && (
+        <div className="glass-card p-8 border border-border/50 space-y-6">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="font-semibold text-lg">Activity Timeline</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">Audit log of course creations, edits, status updates, and instructor changes.</p>
+            </div>
+            <History className="w-5 h-5 text-muted-foreground opacity-60" />
+          </div>
+
+          {timelineLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : timeline.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground text-sm flex flex-col items-center gap-2">
+              <History className="w-8 h-8 opacity-30" />
+              No activity logs recorded for this course yet.
+            </div>
+          ) : (
+            <div className="relative border-l border-border pl-6 ml-3 space-y-8 py-2">
+              {timeline.map((act) => {
+                let iconColor = "text-secondary bg-secondary/10 border-secondary/20";
+                
+                if (act.action === "created") {
+                  iconColor = "text-blue-400 bg-blue-400/10 border-blue-400/20";
+                } else if (act.action === "published") {
+                  iconColor = "text-emerald-400 bg-emerald-400/10 border-emerald-400/20";
+                } else if (act.action === "instructor_changed") {
+                  iconColor = "text-amber-400 bg-amber-400/10 border-amber-400/20";
+                }
+
+                return (
+                  <div key={act.id} className="relative group">
+                    {/* Timeline dot/icon */}
+                    <span className={`absolute -left-[38px] top-0 w-6 h-6 rounded-full border flex items-center justify-center ${iconColor}`}>
+                      <History className="w-3 h-3" />
+                    </span>
+                    
+                    {/* Content */}
+                    <div className="glass-card p-5 transition-all duration-300 group-hover:border-primary/20 bg-muted/10">
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-secondary/10 border border-secondary/20 text-secondary uppercase tracking-wider font-semibold">
+                          {act.action.replace("_", " ")}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-mono">
+                          {new Date(act.createdAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <h4 className="font-semibold text-sm mb-1">{act.details}</h4>
+                      <p className="text-xs text-muted-foreground">
+                        Performed by <span className="text-foreground font-medium">{act.userName}</span> (ID: {act.userId})
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

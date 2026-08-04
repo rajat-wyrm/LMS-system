@@ -100,15 +100,17 @@ exports.login = async (req, res, next) => {
       return res.status(400).json({ success: false, error: 'Please provide an email and password' });
     }
 
-    const normalizedEmail = email.toLowerCase();
-    const demoUser = getDemoUser(normalizedEmail);
+    // const normalizedEmail = email.toLowerCase();
+    // const demoUser = getDemoUser(normalizedEmail);
 
-    if (demoUser) {
-      if (password !== demoUser.password) {
-        return res.status(401).json({ success: false, error: 'Invalid credentials' });
-      }
-      return res.status(200).json(buildAuthResponse(demoUser));
-    }
+    // if (demoUser) {
+    //   if (password !== demoUser.password) {
+    //     return res.status(401).json({ success: false, error: 'Invalid credentials' });
+    //   }
+    //   return res.status(200).json(buildAuthResponse(demoUser));
+    // }
+
+    const normalizedEmail = email.toLowerCase();
 
     const user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
 

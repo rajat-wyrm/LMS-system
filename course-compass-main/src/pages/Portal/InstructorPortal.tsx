@@ -10,7 +10,16 @@ import { useAuth } from "@/store/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { getCourseImageUrl } from "@/utils/courseImage";
 
-type Tab = "courses" | "curriculum";
+type Tab = "courses" | "curriculum" | "analytics";
+
+interface CourseAnalytics {
+  courseId: string;
+  courseTitle: string;
+  enrollments: number;
+  completionRate: number;
+  averageRating: number;
+  revenue: number;
+}
 
 interface CourseItem {
   id: string;
@@ -91,6 +100,26 @@ const InstructorPortal = () => {
   });
   const [lessonLoading, setLessonLoading] = useState(false);
 
+  // Analytics tab state
+  const [analytics, setAnalytics] = useState<CourseAnalytics[]>([]);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
+    const fetchAnalytics = useCallback(async () => {
+    setAnalyticsLoading(true);
+    setAnalyticsError(null);
+    try {
+      const res = await courseApi.getInstructorCourseAnalytics();
+      setAnalytics(res.data.data || []);
+    } catch (err: any) {
+      setAnalyticsError(err?.response?.data?.error || "Failed to load analytics.");
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (tab === "analytics") fetchAnalytics();
+  }, [tab, fetchAnalytics]);
   // ── Guard ──────────────────────────────────────────────────────────────────
   if (user?.role !== "admin") {
     return <Navigate to="/" replace />;
@@ -228,6 +257,7 @@ const InstructorPortal = () => {
         {([
           { key: "courses",    icon: LayoutGrid, label: "All Courses" },
           { key: "curriculum", icon: BookOpen,   label: "Manage Curriculum" },
+          { key: "analytics",  icon: BarChart3,  label: "Analytics" },
         ] as const).map((t) => (
           <button
             key={t.key}
@@ -507,7 +537,83 @@ const InstructorPortal = () => {
           </div>
         </div>
       )}
+{/* ── Tab: Analytics ── */}
+{tab === "analytics" && (
+  <div className="glass-card p-6">
+    <div className="flex items-center justify-between mb-6">
+      <div>
+        <h2 className="font-display font-semibold text-lg">Course Analytics</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Enrollments, completion, ratings, and revenue for your courses.
+        </p>
+      </div>
+      <button
+        onClick={fetchAnalytics}
+        className="text-xs text-secondary hover:text-primary transition-colors"
+      >
+        Refresh
+      </button>
+    </div>
 
+    {analyticsLoading ? (
+      <div className="flex justify-center py-16">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    ) : analyticsError ? (
+      <div className="py-12 text-center">
+        <AlertTriangle className="w-10 h-10 mx-auto text-destructive/60 mb-3" />
+        <p className="text-sm text-destructive mb-4">{analyticsError}</p>
+        <button onClick={fetchAnalytics} className="btn-outline-teal !py-2 !px-4 text-sm">
+          Try Again
+        </button>
+      </div>
+    ) : analytics.length === 0 ? (
+      <div className="py-16 text-center">
+        <BarChart3 className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
+        <p className="text-muted-foreground">No courses to analyze yet.</p>
+      </div>
+    ) : (
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {analytics.map((row) => (
+          <div
+            key={row.courseId}
+            className="rounded-xl border border-border/60 bg-muted/10 p-5 hover:border-primary/40 transition-colors"
+          >
+            <h3 className="font-display font-semibold text-sm mb-4 line-clamp-2">
+              {row.courseTitle}
+            </h3>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Users className="w-3.5 h-3.5" /> Enrollments
+                </p>
+                <p className="font-bold text-lg">{row.enrollments}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Completion
+                </p>
+                <p className="font-bold text-lg">{row.completionRate}%</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">⭐ Rating</p>
+                <p className="font-bold text-lg">
+                  {row.averageRating > 0 ? row.averageRating.toFixed(1) : "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <DollarSign className="w-3.5 h-3.5" /> Revenue
+                </p>
+                <p className="font-bold text-lg">${row.revenue.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
       {/* Delete modal */}
       {deleteTarget && (
         <ConfirmModal
