@@ -1,0 +1,1 @@
+-- Migration schema_refinements was applied directly to database
