@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { exportToCSV } from '../../../utils/export';
-import { apiRequest } from '../../../utils/api';
 
 import TeachersHero from '../../../components/admin/teachers/TeachersHero';
 import TeacherKpiRow from '../../../components/admin/teachers/TeacherKpiRow';
@@ -10,123 +10,109 @@ import TeacherGrid from '../../../components/admin/teachers/TeacherGrid';
 import TeacherPerformanceAnalytics from '../../../components/admin/teachers/TeacherPerformanceAnalytics';
 import TeacherDrawer from '../../../components/admin/teachers/TeacherDrawer';
 import TeacherProfileView from '../../../components/admin/teachers/TeacherProfileView';
-import { normalizeTeacher } from '../../../utils/teacherUtils';
-
-const instructorRequest = async (path, options) => {
-  try {
-    return await apiRequest(`/v1/admin${path}`, options);
-  } catch (error) {
-    if (error?.status === 404) {
-      return apiRequest(`/admin${path}`, options);
-    }
-
-    throw error;
-  }
-};
+import InviteTeacherModal from '../../../components/admin/teachers/InviteTeacherModal';
+import { loadTeachers } from '../../../utils/teacherUtils';
 
 const Teachers = () => {
-  const [teachers, setTeachers] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [teachers, setTeachers] = useState(loadTeachers);
+
+  useEffect(() => {
+    localStorage.setItem('lms_teachers_data', JSON.stringify(teachers));
+  }, [teachers]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState('All');
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [editTeacher, setEditTeacher] = useState(null);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
 
-  const loadTeachers = async () => {
-    try {
-      setError('');
-      const result = await instructorRequest('/instructors?limit=1000');
-      setTeachers((result.data || []).map((teacher, index) => normalizeTeacher(teacher, index)));
-    } catch (fetchError) {
-      setError(fetchError.message || 'Failed to load instructors.');
-      setTeachers([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadTeachers();
-  }, []);
-
   const filteredTeachers = useMemo(
     () =>
-      teachers.filter((teacher) => {
-        const matchSearch = teacher.name.toLowerCase().includes(searchQuery.toLowerCase());
+      teachers.filter((t) => {
+        const matchSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase());
         const matchFilter =
-          filter === 'All' ? true : filter === 'Active' ? teacher.enabled : !teacher.enabled;
-
+          filter === 'All' ? true : filter === 'Active' ? t.enabled : !t.enabled;
         return matchSearch && matchFilter;
       }),
     [teachers, searchQuery, filter]
   );
 
-  const activeTeachers = teachers.filter((teacher) => teacher.enabled).length;
+  const activeTeachers = teachers.filter((t) => t.enabled).length;
 
   const monthlyGrowth = useMemo(() => {
-    const now = new Date();
-    const createdThisMonth = teachers.filter((teacher) => {
-      if (!teacher.joinDate || teacher.joinDate === 'N/A') return false;
-      const joinedAt = new Date(teacher.joinDate);
-      return joinedAt.getFullYear() === now.getFullYear() && joinedAt.getMonth() === now.getMonth();
+    const recent = teachers.filter((t) => {
+      const d = t.joinDate || '';
+      return d.includes('2024') && (d.includes('May') || d.includes('Apr'));
     }).length;
-
-    return String(createdThisMonth);
+    if (teachers.length === 0) return '0%';
+    const pct = Math.max(8, Math.round((recent / teachers.length) * 100) + 12);
+    return `+${pct}%`;
   }, [teachers]);
 
-  const handleAddSave = async (form) => {
-    await instructorRequest('/instructors', {
-      method: 'POST',
-      body: JSON.stringify({
-        name: form.name,
-        email: form.email,
-        password: form.password,
-        bio: form.bio,
-        avatar: form.avatar,
-        status: form.enabled ? 'approved' : 'suspended',
-      }),
-    });
-    setIsAddOpen(false);
-    await loadTeachers();
+  const handleAddSave = (form) => {
+    setTeachers((prev) => [
+      {
+        ...form,
+        id: Date.now(),
+        students: 0,
+        rating: 0,
+        revenue: 0,
+        courses: 1,
+        course: form.style,
+        joinDate: new Date().toLocaleDateString('en-US', {
+          month: 'short',
+          day: '2-digit',
+          year: 'numeric',
+        }),
+        photo: form.avatar || null,
+        verified: false,
+        featured: false,
+        topMentor: false,
+      },
+      ...prev,
+    ]);
   };
 
-  const handleEditSave = async (form) => {
-    await instructorRequest(`/instructors/${editTeacher.id}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        name: form.name,
-        email: form.email,
-        password: form.password || undefined,
-        bio: form.bio,
-        avatar: form.avatar,
-        status: form.enabled ? 'approved' : 'suspended',
-      }),
-    });
-    setEditTeacher(null);
-    await loadTeachers();
+  const handleEditSave = (form) => {
+    setTeachers((prev) =>
+      prev.map((t) =>
+        t.id === editTeacher.id ? { ...t, ...form, photo: form.avatar || t.photo } : t
+      )
+    );
+    if (selectedTeacher && selectedTeacher.id === editTeacher.id) {
+      setSelectedTeacher((prev) => ({ ...prev, ...form, photo: form.avatar || prev.photo }));
+    }
   };
 
-  const handleDelete = async (id) => {
-    await instructorRequest(`/instructors/${id}`, {
-      method: 'DELETE',
-    });
+  const handleDelete = (id) => {
+    setTeachers((prev) => prev.filter((t) => t.id !== id));
     if (selectedTeacher?.id === id) setSelectedTeacher(null);
-    await loadTeachers();
   };
 
   const handleExport = () => {
     exportToCSV(
       filteredTeachers,
-      ['name', 'email', 'status', 'students', 'rating', 'revenue', 'courses', 'joinDate', 'bio'],
+      [
+        'name',
+        'style',
+        'course',
+        'enabled',
+        'students',
+        'rating',
+        'revenue',
+        'courses',
+        'email',
+        'phone',
+        'joinDate',
+        'bio',
+      ],
       'lms-teachers.csv'
     );
   };
 
   if (selectedTeacher) {
-    const liveTeacher = teachers.find((teacher) => teacher.id === selectedTeacher.id) || selectedTeacher;
-
+    const liveTeacher = teachers.find((t) => t.id === selectedTeacher.id) || selectedTeacher;
     return (
       <>
         <TeacherProfileView
@@ -138,7 +124,7 @@ const Teachers = () => {
         <TeacherDrawer
           isOpen={!!editTeacher}
           onClose={() => setEditTeacher(null)}
-          title="Edit Instructor"
+          title="Edit Teacher"
           teacher={editTeacher}
           onSave={handleEditSave}
         />
@@ -146,26 +132,16 @@ const Teachers = () => {
     );
   }
 
-  const emptyMessage =
-    searchQuery || filter !== 'All'
-      ? 'No instructors match your search or filters.'
-      : 'No instructors found.';
-
   return (
-    <div className="space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 border border-border shadow-sm bg-card/60 backdrop-blur-xl font-body">
+    <div className="admin-page space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 -m-4 md:-m-6 border border-[var(--admin-border)] shadow-[var(--admin-shadow-card)] bg-[var(--admin-page-panel)]">
       <TeachersHero
         totalCount={teachers.length.toLocaleString()}
         monthlyGrowth={monthlyGrowth}
         activeCount={activeTeachers}
         onAddTeacher={() => setIsAddOpen(true)}
+        onInviteTeacher={() => setIsInviteOpen(true)}
         onExport={handleExport}
       />
-
-      {error ? (
-        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-          {error}
-        </div>
-      ) : null}
 
       <TeacherKpiRow teachers={teachers} />
 
@@ -178,42 +154,35 @@ const Teachers = () => {
         onFilterChange={setFilter}
       />
 
-      {isLoading ? (
-        <div
-          className="rounded-2xl border p-12 text-center admin-text-secondary"
-          style={{
-            borderColor: 'var(--admin-border)',
-            background: 'var(--admin-surface)',
-          }}
-        >
-          Loading instructors...
-        </div>
-      ) : (
-        <TeacherGrid
-          teachers={filteredTeachers}
-          onView={setSelectedTeacher}
-          onEdit={setEditTeacher}
-          onDelete={handleDelete}
-          emptyMessage={emptyMessage}
-        />
-      )}
+      <TeacherGrid
+        teachers={filteredTeachers}
+        onView={setSelectedTeacher}
+        onEdit={setEditTeacher}
+        onDelete={handleDelete}
+      />
 
       <TeacherPerformanceAnalytics teachers={teachers} />
 
       <TeacherDrawer
         isOpen={isAddOpen}
         onClose={() => setIsAddOpen(false)}
-        title="Add New Instructor"
+        title="Add New Teacher"
         teacher={null}
         onSave={handleAddSave}
       />
       <TeacherDrawer
         isOpen={!!editTeacher}
         onClose={() => setEditTeacher(null)}
-        title="Edit Instructor"
+        title="Edit Teacher"
         teacher={editTeacher}
         onSave={handleEditSave}
       />
+
+      <AnimatePresence>
+        {isInviteOpen && (
+          <InviteTeacherModal isOpen={isInviteOpen} onClose={() => setIsInviteOpen(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

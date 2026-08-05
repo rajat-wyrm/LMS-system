@@ -4,7 +4,7 @@ CREATE TYPE "Role" AS ENUM ('user', 'instructor', 'admin');
 -- CreateEnum
 CREATE TYPE "EnrollmentStatus" AS ENUM ('active', 'completed', 'dropped');
 
--- CreateTable
+-- CreateTable 
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,

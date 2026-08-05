@@ -1,0 +1,295 @@
+export const todaySummary = {
+  newEnrollments: 47,
+  coursesPublished: 2,
+  certificatesIssued: 18,
+  liveSessions: 5,
+};
+
+/** Compact metrics for Recent Activity — Today's Platform Summary */
+export const todayPlatformSummary = [
+  {
+    label: 'New Students Today',
+    value: '47',
+    trend: '+12%',
+    trendUp: true,
+    iconKey: 'students',
+    accent: '#3B82F6',
+    glow: 'rgba(59,130,246,0.35)',
+    border: 'rgba(59,130,246,0.35)',
+  },
+  {
+    label: 'Certificates Issued',
+    value: '18',
+    trend: '+6',
+    trendUp: true,
+    iconKey: 'certificates',
+    accent: '#06B6D4',
+    glow: 'rgba(6,182,212,0.35)',
+    border: 'rgba(6,182,212,0.35)',
+  },
+  {
+    label: 'Revenue Today',
+    value: '₹1.2L',
+    trend: '+18%',
+    trendUp: true,
+    iconKey: 'revenue',
+    accent: '#F59E0B',
+    glow: 'rgba(245,158,11,0.35)',
+    border: 'rgba(245,158,11,0.35)',
+  },
+  {
+    label: 'Courses Published',
+    value: '2',
+    trend: '1 live',
+    trendUp: true,
+    iconKey: 'courses',
+    accent: '#8B5CF6',
+    glow: 'rgba(139,92,246,0.35)',
+    border: 'rgba(139,92,246,0.35)',
+  },
+  {
+    label: 'Active Teachers',
+    value: '38',
+    trend: '+3',
+    trendUp: true,
+    iconKey: 'teachers',
+    accent: '#10B981',
+    glow: 'rgba(16,185,129,0.35)',
+    border: 'rgba(16,185,129,0.35)',
+  },
+];
+
+export const kpiMetrics = [
+  {
+    title: 'Total Students',
+    value: '12,845',
+    trend: '+12.5%',
+    trendUp: true,
+    iconKey: 'students',
+    gradient:
+      'linear-gradient(135deg, rgba(59,130,246,0.45) 0%, rgba(6,182,212,0.2) 100%)',
+    iconBg: '#3B82F6',
+    glow: 'rgba(59,130,246,0.35)',
+    border: 'rgba(59,130,246,0.4)',
+  },
+  {
+    title: 'Active Teachers',
+    value: '48',
+    trend: '+8.3%',
+    trendUp: true,
+    iconKey: 'teachers',
+    gradient:
+      'linear-gradient(135deg, rgba(16,185,129,0.4) 0%, rgba(6,182,212,0.15) 100%)',
+    iconBg: '#10B981',
+    glow: 'rgba(16,185,129,0.35)',
+    border: 'rgba(16,185,129,0.4)',
+  },
+  {
+    title: 'Total Courses',
+    value: '156',
+    trend: '+10.2%',
+    trendUp: true,
+    iconKey: 'courses',
+    gradient:
+      'linear-gradient(135deg, rgba(139,92,246,0.45) 0%, rgba(59,130,246,0.15) 100%)',
+    iconBg: '#8B5CF6',
+    glow: 'rgba(139,92,246,0.35)',
+    border: 'rgba(139,92,246,0.4)',
+  },
+  {
+    title: 'Monthly Revenue',
+    value: '₹24.8L',
+    trend: '+18.7%',
+    trendUp: true,
+    iconKey: 'revenue',
+    gradient:
+      'linear-gradient(135deg, rgba(245,158,11,0.4) 0%, rgba(239,68,68,0.12) 100%)',
+    iconBg: '#F59E0B',
+    glow: 'rgba(245,158,11,0.35)',
+    border: 'rgba(245,158,11,0.4)',
+  },
+];
+
+export const platformHighlights = [
+  {
+    label: 'Top Course',
+    value: 'Full Stack Web Dev',
+    sub: '2,451 enrollments',
+    accent: '#3B82F6',
+    iconKey: 'course',
+  },
+  {
+    label: 'Top Teacher',
+    value: 'Virat Kohli',
+    sub: '4.9 ★ · 12.4k learners',
+    accent: '#10B981',
+    iconKey: 'teacher',
+  },
+  {
+    label: 'Most Active Student',
+    value: 'Deepika Mishra',
+    sub: '72% progress · 14-day streak',
+    accent: '#8B5CF6',
+    iconKey: 'student',
+  },
+  {
+    label: 'Certificates Today',
+    value: '18',
+    sub: '+6 vs yesterday',
+    accent: '#06B6D4',
+    iconKey: 'certificate',
+  },
+];
+
+export const recentActivity = [
+  {
+    id: 1,
+    title: 'Rahul Sharma enrolled',
+    desc: 'Full Stack Web Development',
+    time: '2 min ago',
+    category: 'Enrollment',
+    accent: '#3B82F6',
+    iconKey: 'enroll',
+  },
+  {
+    id: 2,
+    title: 'Certificate issued',
+    desc: 'DSA with Java — Priya Patel',
+    time: '12 min ago',
+    category: 'Certificate',
+    accent: '#10B981',
+    iconKey: 'cert',
+  },
+  {
+    id: 3,
+    title: 'Course published',
+    desc: 'React Native Development',
+    time: '28 min ago',
+    category: 'Course',
+    accent: '#8B5CF6',
+    iconKey: 'publish',
+  },
+  {
+    id: 4,
+    title: 'Milestone reached',
+    desc: '100 students completed Java Basics',
+    time: '1 hr ago',
+    category: 'Milestone',
+    accent: '#F59E0B',
+    iconKey: 'milestone',
+  },
+  {
+    id: 5,
+    title: 'Payment received',
+    desc: '₹12,999 from Aman Verma',
+    time: '2 hrs ago',
+    category: 'Revenue',
+    accent: '#06B6D4',
+    iconKey: 'payment',
+  },
+];
+
+/** category: enrollment | completion | revenue | courseUpdate | critical */
+export const notificationPreview = [
+  {
+    id: 1,
+    title: 'Server maintenance scheduled',
+    desc: 'Tonight 11 PM – 1 AM IST',
+    time: '5 min ago',
+    category: 'critical',
+    accent: '#EF4444',
+    priority: true,
+  },
+  {
+    id: 2,
+    title: 'Enrollment spike detected',
+    desc: '47 new students in the last 24 hours',
+    time: '18 min ago',
+    category: 'enrollment',
+    accent: '#3B82F6',
+    priority: false,
+  },
+  {
+    id: 3,
+    title: 'Course completed milestone',
+    desc: '100 students finished Java Basics',
+    time: '32 min ago',
+    category: 'completion',
+    accent: '#10B981',
+    priority: false,
+  },
+  {
+    id: 4,
+    title: 'Revenue target reached',
+    desc: '₹24.8L monthly goal achieved',
+    time: '1 hr ago',
+    category: 'revenue',
+    accent: '#F59E0B',
+    priority: false,
+  },
+  {
+    id: 5,
+    title: 'MERN Stack — Module 4 live',
+    desc: 'Course content updated by Virat Kohli',
+    time: '2 hrs ago',
+    category: 'courseUpdate',
+    accent: '#8B5CF6',
+    priority: false,
+  },
+];
+
+export const topPerformersSpotlight = [
+  {
+    label: 'Top Course',
+    name: 'Full Stack Web Development',
+    iconKey: 'course',
+    accent: '#3B82F6',
+    glow: 'rgba(59,130,246,0.4)',
+    gradient:
+      'linear-gradient(145deg, rgba(59,130,246,0.22) 0%, rgba(59,130,246,0.04) 55%, transparent 100%)',
+    trend: '+14%',
+    trendUp: true,
+    enrollments: 2451,
+    enrollmentsDisplay: '2,451',
+    progress: 87,
+    sparkline: [18, 22, 20, 28, 32, 38, 45, 52],
+  },
+  {
+    label: 'Top Teacher',
+    name: 'Virat Kohli',
+    iconKey: 'teacher',
+    accent: '#10B981',
+    glow: 'rgba(16,185,129,0.4)',
+    gradient:
+      'linear-gradient(145deg, rgba(16,185,129,0.22) 0%, rgba(16,185,129,0.04) 55%, transparent 100%)',
+    trend: '+9%',
+    trendUp: true,
+    learners: 12400,
+    learnersDisplay: '12.4k',
+    rating: 4.9,
+    sparkline: [30, 34, 33, 38, 42, 44, 48, 51],
+  },
+  {
+    label: 'Top Student',
+    name: 'Deepika Mishra',
+    iconKey: 'student',
+    accent: '#8B5CF6',
+    glow: 'rgba(139,92,246,0.4)',
+    gradient:
+      'linear-gradient(145deg, rgba(139,92,246,0.22) 0%, rgba(139,92,246,0.04) 55%, transparent 100%)',
+    trend: '+6%',
+    trendUp: true,
+    completion: 72,
+    streak: 14,
+    sparkline: [40, 44, 48, 52, 55, 58, 64, 72],
+  },
+];
+
+export const studentGrowthData = [
+  { month: 'Jan', students: 9200 },
+  { month: 'Feb', students: 9800 },
+  { month: 'Mar', students: 10400 },
+  { month: 'Apr', students: 11100 },
+  { month: 'May', students: 11800 },
+  { month: 'Jun', students: 12845 },
+];

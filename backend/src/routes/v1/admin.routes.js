@@ -1,23 +1,12 @@
 const express = require('express');
 const {
   getDashboardStats,
-  getTopPerformers,
-  getRecentActivity,
-  getDashboardNotifications,
-  getStudentGrowth,
-  getAnalytics,
-  getInstructors,
-  createInstructor,
-  updateInstructor,
-  deleteInstructor,
   getAdminUsers,
-  getAdminUser,
   updateUserStatus,
   deleteAdminUser,
   getAdminCourses,
   updateCourseStatus,
-  deleteAdminCourse,
-  createAdminCourse
+  deleteAdminCourse
 } = require('../../controllers/admin.controller');
 const { protect, authorize } = require('../../middlewares/auth.middleware');
 
@@ -28,20 +17,13 @@ router.use(authorize('admin')); // All admin routes are admin only
 
 // Stats
 router.route('/stats').get(getDashboardStats);
-router.route('/analytics').get(getAnalytics);
-router.route('/dashboard/top-performers').get(getTopPerformers);
-router.route('/dashboard/recent-activity').get(getRecentActivity);
-router.route('/dashboard/notifications').get(getDashboardNotifications);
-router.route('/dashboard/student-growth').get(getStudentGrowth);
 
 // User management
 router.route('/users').get(getAdminUsers);
-router.route('/users/:id').get(getAdminUser).put(updateUserStatus).delete(deleteAdminUser);
-router.route('/instructors').get(getInstructors).post(createInstructor);
-router.route('/instructors/:id').put(updateInstructor).delete(deleteInstructor);
+router.route('/users/:id').put(updateUserStatus).delete(deleteAdminUser);
 
 // Course management
-router.route('/courses').get(getAdminCourses).post(createAdminCourse);
+router.route('/courses').get(getAdminCourses);
 router.route('/courses/:id').put(updateCourseStatus).delete(deleteAdminCourse);
 
 // Certificate management

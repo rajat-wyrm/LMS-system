@@ -22,9 +22,33 @@ export const Footer = () => (
       <div>
         <h5 className="font-medium mb-3">Connect</h5>
         <div className="flex gap-3">
-          <Github className="w-5 h-5 text-muted-foreground hover:text-primary cursor-pointer" />
-          <Twitter className="w-5 h-5 text-muted-foreground hover:text-primary cursor-pointer" />
-          <Linkedin className="w-5 h-5 text-muted-foreground hover:text-primary cursor-pointer" />
+          <a
+            href="https://github.com/UptoSkills"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub"
+            className="text-muted-foreground hover:text-primary transition duration-200 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm inline-block"
+          >
+            <Github className="w-5 h-5" />
+          </a>
+          <a
+            href="https://x.com/UptoSkills"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Twitter (X)"
+            className="text-muted-foreground hover:text-primary transition duration-200 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm inline-block"
+          >
+            <Twitter className="w-5 h-5" />
+          </a>
+          <a
+            href="https://www.linkedin.com/company/uptoskills"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="LinkedIn"
+            className="text-muted-foreground hover:text-primary transition duration-200 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm inline-block"
+          >
+            <Linkedin className="w-5 h-5" />
+          </a>
         </div>
       </div>
     </div>

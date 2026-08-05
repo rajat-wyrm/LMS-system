@@ -1,7 +1,8 @@
 import { useMemo, useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
-import { Search, SlidersHorizontal, Plus } from "lucide-react";
+import { Search, SlidersHorizontal, Plus, SearchX } from "lucide-react";
 import { CourseCard } from "@/components/common/CourseCard";
+import { EmptyState } from "@/components/common/EmptyState";
 import { AppSidebar } from "@/components/ui/AppSidebar";
 import { courseApi, CourseData } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
@@ -43,7 +44,7 @@ const Courses = () => {
 
   const filtered = useMemo(() => {
     const result = dbCourses.filter((c) => {
-      const instructorName = typeof c.instructor === 'object' ? c.instructor?.name : (c.instructor || '');
+      const instructorName = typeof c.instructor === 'object' ? c.instructor?.name : (c.celebrityTeacher || c.instructor || '');
       if (query && !`${c.title} ${instructorName} ${c.category}`.toLowerCase().includes(query.toLowerCase())) return false;
       if (selLevels.length && !selLevels.includes(c.level as any)) return false;
       if (selTopics.length && !selTopics.includes(c.category)) return false;
@@ -117,10 +118,13 @@ const Courses = () => {
                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
              </div>
           ) : filtered.length === 0 ? (
-            <div className="p-16 text-center border border-border/50 rounded-2xl bg-card/30 backdrop-blur-sm">
-              <p className="text-muted-foreground mb-6 text-lg">No courses found matching your filters.</p>
-              <button onClick={clearAll} className="btn-outline-teal">Clear filters</button>
-            </div>
+            <EmptyState
+              icon={<SearchX size={60} />}
+              title="No Courses Found"
+              description="We couldn't find any courses matching your search. Try different keywords."
+              buttonText="Browse Courses"
+              buttonLink="/courses"
+            />
           ) : (
             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 animate-fade-in">
               {filtered.map((c, i) => <CourseCard key={c.id} course={c} index={i} />)}

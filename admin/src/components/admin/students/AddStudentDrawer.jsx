@@ -2,17 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MdClose, MdUploadFile, MdPerson, MdEmail, MdPhone,
-  MdLock, MdCheckCircle, MdCancel, MdEvent,
+  MdLock, MdSchool, MdCheckCircle, MdCancel, MdEvent,
   MdStar
 } from 'react-icons/md';
 import { useFocusTrap } from '../../../hooks/useFocusTrap';
+
+const COURSES = [
+  'DSA with Java', 'Python', 'C++', 'HTML', 'CSS',
+  'JavaScript', 'MERN', 'ReactJS',
+];
+
+const TEACHERS = [
+  'Salman Khan', 'Anushka Sharma', 'Katrina Kaif', 'Shahrukh Khan',
+  'Hrithik Roshan', 'Virat Kohli', 'Sachin Tendulkar', 'MS Dhoni',
+  'Smriti Mandhana', 'Narendra Modi', 'Deepika Padukone',
+  'Ranbir Kapoor', 'Alia Bhatt', 'Aamir Khan',
+];
 
 const PLANS = ['Basic Plan', 'Pro Plan', 'Premium Plan'];
 
 const defaultForm = {
   name: '', email: '', phone: '', password: '',
-  plan: 'Pro Plan',
-  status: 'Active',
+  course: 'DSA with Java', plan: 'Pro Plan',
+  status: 'Active', teacher: 'Salman Khan',
   joinedDate: new Date().toISOString().split('T')[0],
   avatar: null,
 };
@@ -31,8 +43,10 @@ const AddStudentDrawer = ({ isOpen, onClose, onAdd, studentToEdit }) => {
         email:      studentToEdit.email       || '',
         phone:      studentToEdit.phone       || '',
         password:   '',
+        course:     studentToEdit.enrolledCourse || 'DSA with Java',
         plan:       studentToEdit.plan        || 'Pro Plan',
         status:     studentToEdit.status      || 'Active',
+        teacher:    studentToEdit.mentorName  || 'Salman Khan',
         joinedDate: studentToEdit.joinedDate  || defaultForm.joinedDate,
         avatar:     studentToEdit.avatar      || null,
       });
@@ -58,7 +72,10 @@ const AddStudentDrawer = ({ isOpen, onClose, onAdd, studentToEdit }) => {
     e.preventDefault();
     onAdd({
       ...form,
+      enrolledCourse: form.course,
+      mentorName:     form.teacher,
       progress:       studentToEdit ? studentToEdit.progress : 0,
+      lastActive:     studentToEdit ? studentToEdit.lastActive : 'Just now',
       xp:             studentToEdit ? studentToEdit.xp        : 0,
     });
     onClose();
@@ -170,6 +187,22 @@ const AddStudentDrawer = ({ isOpen, onClose, onAdd, studentToEdit }) => {
                       className={`${inputCls} pl-10`}
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Course + Teacher side by side */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className={`${labelCls} flex items-center gap-1`}><MdSchool size={13} /> Course</label>
+                  <select value={form.course} onChange={set('course')} className={selectCls}>
+                    {COURSES.map(c => <option key={c} value={c} className="bg-[#0f172a]">{c}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className={`${labelCls} flex items-center gap-1`}><MdPerson size={13} /> Teacher</label>
+                  <select value={form.teacher} onChange={set('teacher')} className={selectCls}>
+                    {TEACHERS.map(t => <option key={t} value={t} className="bg-[#0f172a]">{t}</option>)}
+                  </select>
                 </div>
               </div>
 

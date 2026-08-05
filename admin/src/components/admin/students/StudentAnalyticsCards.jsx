@@ -15,7 +15,10 @@ const StudentAnalyticsCards = ({ students = [] }) => {
       total > 0
         ? students.reduce((sum, s) => sum + (s.progress ?? 0), 0) / total
         : 0;
-    const certificates = students.reduce((sum, s) => sum + Number(s.certificates || 0), 0);
+    const certificates = students.reduce(
+      (sum, s) => sum + (s.certificates ?? Math.floor((s.progress ?? 0) / 25)),
+      0
+    );
     return {
       total: total.toLocaleString(),
       active: active.toLocaleString(),
@@ -28,6 +31,8 @@ const StudentAnalyticsCards = ({ students = [] }) => {
     {
       title: 'Total Students',
       value: metrics.total,
+      trend: '+8.2%',
+      trendUp: true,
       icon: MdPeople,
       gradient: 'linear-gradient(135deg, rgba(59,130,246,0.45) 0%, rgba(6,182,212,0.2) 100%)',
       iconBg: '#3B82F6',
@@ -37,6 +42,8 @@ const StudentAnalyticsCards = ({ students = [] }) => {
     {
       title: 'Active Students',
       value: metrics.active,
+      trend: '+5.4%',
+      trendUp: true,
       icon: MdCheckCircle,
       gradient: 'linear-gradient(135deg, rgba(16,185,129,0.4) 0%, rgba(6,182,212,0.15) 100%)',
       iconBg: '#10B981',
@@ -46,6 +53,8 @@ const StudentAnalyticsCards = ({ students = [] }) => {
     {
       title: 'Completion Rate',
       value: metrics.completionRate,
+      trend: '+3.1%',
+      trendUp: true,
       icon: MdShowChart,
       gradient: 'linear-gradient(135deg, rgba(139,92,246,0.45) 0%, rgba(59,130,246,0.15) 100%)',
       iconBg: '#8B5CF6',
@@ -55,6 +64,8 @@ const StudentAnalyticsCards = ({ students = [] }) => {
     {
       title: 'Certificates Earned',
       value: metrics.certificates,
+      trend: '+11.8%',
+      trendUp: true,
       icon: MdEmojiEvents,
       gradient: 'linear-gradient(135deg, rgba(245,158,11,0.4) 0%, rgba(239,68,68,0.12) 100%)',
       iconBg: '#F59E0B',

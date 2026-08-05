@@ -2,13 +2,7 @@ import React from 'react';
 import { AnimatePresence } from 'framer-motion';
 import TeacherCard from './TeacherCard';
 
-const TeacherGrid = ({
-  teachers,
-  onView,
-  onEdit,
-  onDelete,
-  emptyMessage = 'No instructors found.',
-}) => {
+const TeacherGrid = ({ teachers, onView, onEdit, onDelete }) => {
   if (teachers.length === 0) {
     return (
       <div
@@ -18,7 +12,7 @@ const TeacherGrid = ({
           background: 'var(--admin-surface)',
         }}
       >
-        {emptyMessage}
+        No mentors match your search or filters.
       </div>
     );
   }

@@ -6,10 +6,9 @@
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd course-compass-main && npm run dev",
     "dev:admin": "cd admin && npm run dev",
-    "install:all": "npm install && cd backend && npm install && cd ../course-compass-main && npm install && cd ../admin && npm install"
+    "install:all": "npm install --legacy-peer-deps && cd backend && npm install --legacy-peer-deps && cd ../course-compass-main && npm install --legacy-peer-deps && cd ../admin && npm install --legacy-peer-deps"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
-    "nodemon": "^3.1.14"
+    "concurrently": "^8.2.2"
   }
 }

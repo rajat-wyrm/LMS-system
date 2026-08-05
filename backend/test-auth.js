@@ -1,10 +1,5 @@
 const http = require('http');
 
-if (process.env.RUN_MUTATING_SMOKE !== 'true') {
-  console.log('Skipping mutating auth smoke. Set RUN_MUTATING_SMOKE=true to create a temporary test user.');
-  process.exit(0);
-}
-
 const request = (options, data) => new Promise((resolve, reject) => {
   const req = http.request(options, res => {
     let body = '';

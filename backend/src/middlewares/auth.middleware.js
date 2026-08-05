@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const { prisma } = require('../config/db');
-const AppError = require('../utils/AppError');
 
 // Protect routes - verify JWT token
 const protect = async (req, res, next) => {
@@ -12,70 +11,39 @@ const protect = async (req, res, next) => {
   ) {
     try {
       token = req.headers.authorization.split(' ')[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-const decoded = jwt.verify(token, process.env.JWT_SECRET);
-console.log("Decoded Token:", decoded);
+      req.user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: { id: true, name: true, email: true, role: true }
+      });
 
-req.user = await prisma.user.findUnique({
-  where: { id: decoded.id },
-  select: {
-    id: true,
-    name: true,
-    email: true,
-    role: true
-  }
-});
-
-console.log("User Found:", req.user);
-
-if (!req.user) {
-  return next(new AppError('Not authorized, user not found', 401, 'AUTHENTICATION_ERROR'));
-}
-
-      return next();
-    } catch (error) {
-      if (error.name === 'TokenExpiredError') {
-        return next(new AppError('Access token has expired', 401, 'AUTHENTICATION_ERROR'));
+      if (!req.user) {
+        return res.status(401).json({ success: false, error: 'Not authorized, user not found' });
       }
-      return next(new AppError('Not authorized, token failed', 401, 'AUTHENTICATION_ERROR'));
+
+      next();
+    } catch (error) {
+      return res.status(401).json({ success: false, error: 'Not authorized, token failed' });
     }
   }
 
   if (!token) {
-    return next(new AppError('Not authorized, no token provided', 401, 'AUTHENTICATION_ERROR'));
+    return res.status(401).json({ success: false, error: 'Not authorized, no token provided' });
   }
 };
 
 // Grant access to specific roles
 const authorize = (...roles) => {
   return (req, res, next) => {
-    if (!req.user) {
-      return next(new AppError('Not authorized', 401, 'AUTHENTICATION_ERROR'));
-    }
-    const hasRole = roles.some(role => req.user.role.toLowerCase() === role.toLowerCase());
-    if (!hasRole) {
-      return next(new AppError(
-        `Role '${req.user.role}' is not authorized to access this route`,
-        403,
-        'AUTHORIZATION_ERROR'
-      ));
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        error: `Role '${req.user.role}' is not authorized to access this route`
+      });
     }
     next();
   };
 };
 
-const verifyToken = protect;
-
-const verifyAdmin = (req, res, next) => {
-  if (!req.user || req.user.role.toLowerCase() !== 'admin') {
-    return next(new AppError('Admin permission required', 403, 'AUTHORIZATION_ERROR'));
-  }
-  next();
-};
-
-module.exports = {
-  protect,
-  authorize,
-  verifyToken,
-  verifyAdmin
-};
+module.exports = { protect, authorize };

@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import { Award, BookOpen, Clock, Flame, ChevronLeft, ChevronRight, Trophy, Star, Zap, Target, Medal, Loader2, Layers, CheckCircle2, ArrowRight } from "lucide-react";
 import { CourseCard } from "@/components/common/CourseCard";
+import { EmptyState } from "@/components/common/EmptyState";
 import { useAuth } from "@/store/AuthContext";
 import { courseApi } from "@/api/course.api";
-import { getCourseImageUrl } from "@/utils/courseImage";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -31,9 +31,7 @@ const Dashboard = () => {
           ...e.course,
           progress: e.progress || 0,
           lessons: e.course.lessons?.length || 0,
-          completedLessons: e.completedLessons || [],
-          certificateApproved: e.certificateApproved,
-          thumbnail: getCourseImageUrl(e.course.thumbnail)
+          thumbnail: e.course.thumbnail || "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&q=80"
         })));
         
 
@@ -41,13 +39,13 @@ const Dashboard = () => {
           .filter((c: any) => !enrolledCourseIds.has(c.id))
           .map((c: any) => ({
             ...c,
-            thumbnail: getCourseImageUrl(c.thumbnail),
-            level: c.level,
-            rating: c.rating,
+            thumbnail: c.thumbnail || "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&q=80",
+            level: c.level || "Beginner",
+            rating: c.rating || 4.8,
             enrollments: c._count?.enrollments || 0,
-            duration: c.duration,
+            duration: c.duration || "4h 30m",
             lessons: c.lessons?.length || 0,
-            instructor: c.instructor?.name || "",
+            instructor: c.celebrityTeacher || c.instructor?.name || "Virtual Mentor",
           }));
           
         setRecommended(unEnrolled.slice(0, 6));
@@ -69,11 +67,19 @@ const Dashboard = () => {
 
   const stats = [
     { icon: BookOpen, label: "Courses Enrolled", val: inProgress.length, color: "text-primary" },
-    { icon: CheckCircle2, label: "Completed Courses", val: inProgress.filter((course) => course.progress === 100).length, color: "text-secondary" },
-    { icon: Award, label: "Certificates", val: inProgress.filter((course) => course.progress === 100 && course.certificateApproved).length, color: "text-primary" },
-    { icon: Layers, label: "Lessons Completed", val: inProgress.reduce((total, course) => total + (course.completedLessons?.length || 0), 0), color: "text-secondary" },
+    { icon: Clock, label: "Hours Learned", val: user?.hoursLearned || 0, color: "text-secondary" },
+    { icon: Award, label: "Certificates", val: user?.certificates || 0, color: "text-primary" },
+    { icon: Flame, label: "Day Streak", val: user?.streak || 0, color: "text-secondary" },
   ];
 
+  const achievements = [
+    { icon: Trophy, name: "First Course", earned: true },
+    { icon: Star, name: "5-Star Rating", earned: true },
+    { icon: Zap, name: "10-Day Streak", earned: true },
+    { icon: Target, name: "Goal Crusher", earned: true },
+    { icon: Medal, name: "Top Learner", earned: false },
+    { icon: Award, name: "AI Master", earned: false },
+  ];
 
   return (
     <div className="container py-10">
@@ -112,45 +118,72 @@ const Dashboard = () => {
       <section className="mb-14">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display font-bold text-2xl">Continue Learning</h2>
-          <div className="flex gap-2">
-            <button onClick={() => scroll(-1)} className="w-9 h-9 rounded-lg border border-border hover:border-primary hover:text-primary flex items-center justify-center transition-colors">
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <button onClick={() => scroll(1)} className="w-9 h-9 rounded-lg border border-border hover:border-primary hover:text-primary flex items-center justify-center transition-colors">
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
+          {inProgress.length > 0 && (
+            <div className="flex gap-2">
+              <button onClick={() => scroll(-1)} className="w-9 h-9 rounded-lg border border-border hover:border-primary hover:text-primary flex items-center justify-center transition-colors">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button onClick={() => scroll(1)} className="w-9 h-9 rounded-lg border border-border hover:border-primary hover:text-primary flex items-center justify-center transition-colors">
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
         </div>
-        <div ref={carouselRef} className="flex gap-5 overflow-x-auto pb-4 snap-x scroll-smooth -mx-4 px-4">
-          {inProgress.map((c) => (
-            <div key={c.id} className="course-card min-w-[300px] snap-start relative flex flex-col">
-              <Link to={`/learn/${c.id}`} className="block aspect-video relative">
-                <img src={c.thumbnail} alt={c.title} className="w-full h-full object-cover" />
-              </Link>
-              <div className="p-5 flex-1 flex flex-col">
-                <Link to={`/learn/${c.id}`}>
-                  <h4 className="font-display font-semibold mb-3 line-clamp-1 hover:text-primary transition-colors">{c.title}</h4>
+        {inProgress.length === 0 ? (
+          <EmptyState
+            icon={<BookOpen size={60} />}
+            title="No Enrolled Courses"
+            description="You haven't enrolled in any courses yet. Browse our catalog and start learning."
+            buttonText="Browse Courses"
+            buttonLink="/courses"
+          />
+        ) : (
+          <div ref={carouselRef} className="flex gap-5 overflow-x-auto pb-4 snap-x scroll-smooth -mx-4 px-4">
+            {inProgress.map((c) => (
+              <div key={c.id} className="course-card min-w-[300px] snap-start relative flex flex-col">
+                <Link to={`/learn/${c.id}`} className="block aspect-video relative">
+                  <img src={c.thumbnail} alt={c.title} className="w-full h-full object-cover" />
                 </Link>
-                <div className="mt-auto">
-                  <div className="flex justify-between text-xs text-muted-foreground mb-2">
-                    <span>{c.progress}% complete</span>
-                    <span>{c.lessons} lessons</span>
+                <div className="p-5 flex-1 flex flex-col">
+                  <Link to={`/learn/${c.id}`}>
+                    <h4 className="font-display font-semibold mb-3 line-clamp-1 hover:text-primary transition-colors">{c.title}</h4>
+                  </Link>
+                  <div className="mt-auto">
+                    <div className="flex justify-between text-xs text-muted-foreground mb-2">
+                      <span>{c.progress}% complete</span>
+                      <span>{c.lessons} lessons</span>
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-700" style={{ width: `${c.progress}%` }} />
+                    </div>
+                    {c.progress === 100 && (
+                      <Link to={`/certificate/${c.id}`} className="mt-4 block w-full text-center py-2 text-sm font-semibold bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors">
+                        View Certificate
+                      </Link>
+                    )}
                   </div>
-                  <div className="h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-700" style={{ width: `${c.progress}%` }} />
-                  </div>
-                  {c.progress === 100 && (
-                    <Link to={`/certificate/${c.id}`} className="mt-4 block w-full text-center py-2 text-sm font-semibold bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors">
-                      View Certificate
-                    </Link>
-                  )}
                 </div>
               </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+
+      {/* Achievements */}
+      <section className="mb-14">
+        <h2 className="font-display font-bold text-2xl mb-6">Achievements</h2>
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+          {achievements.map((a, i) => (
+            <div key={i} className={`glass-card p-5 text-center transition-all ${a.earned ? "border-primary/40" : "opacity-40 grayscale"}`}>
+              <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center mb-3 ${a.earned ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}>
+                <a.icon className="w-6 h-6" />
+              </div>
+              <p className="text-xs font-medium">{a.name}</p>
             </div>
           ))}
         </div>
       </section>
-
 
       {/* Recommended */}
       <section>

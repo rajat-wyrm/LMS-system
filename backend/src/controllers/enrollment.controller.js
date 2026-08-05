@@ -14,9 +14,6 @@ exports.enrollInCourse = async (req, res, next) => {
     if (!course) {
       return res.status(404).json({ success: false, error: 'Course not found' });
     }
-    if (course.status !== 'approved') {
-      return res.status(400).json({ success: false, error: 'Only published courses can be enrolled in' });
-    }
 
     // Check if already enrolled
     const existingEnrollment = await prisma.enrollment.findUnique({

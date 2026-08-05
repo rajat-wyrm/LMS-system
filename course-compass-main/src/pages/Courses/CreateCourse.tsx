@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BookOpen, Sparkles, PlusCircle, ImageOff, CheckCircle2, Loader2 } from "lucide-react";
 import { courseApi } from "@/api/course.api";
@@ -6,6 +6,7 @@ import { useAuth } from "@/store/AuthContext";
 
 // removed celebrities array
 const levels = ["Beginner", "Intermediate", "Advanced"];
+const categories = ["Python", "CSS", "MERN Stack", "Data Science", "AI & Machine Learning"];
 
 const CreateCourse = () => {
   const { user } = useAuth();
@@ -13,7 +14,7 @@ const CreateCourse = () => {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    category: "",
+    category: "Python",
     level: "Beginner",
     thumbnail: "",
     price: 0,
@@ -21,18 +22,8 @@ const CreateCourse = () => {
   const [generateAI, setGenerateAI] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [categories, setCategories] = useState<string[]>([]);
   // thumbnail preview states
   const [thumbStatus, setThumbStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
-
-  useEffect(() => {
-    courseApi.getCategories()
-      .then((response) => {
-        const values = (response.data?.data || []).map((category: any) => category.name).filter(Boolean) as string[];
-        setCategories(values);
-      })
-      .catch(() => setCategories([]));
-  }, []);
 
   if (user?.role !== "admin") {
     return (
@@ -54,8 +45,8 @@ const CreateCourse = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.title || !form.description || !form.category) {
-      setError("Title, description, and category are required.");
+    if (!form.title || !form.description) {
+      setError("Title and description are required.");
       return;
     }
 
@@ -125,7 +116,6 @@ const CreateCourse = () => {
                 onChange={handleChange}
                 className="w-full bg-muted/40 border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
               >
-                <option value="" disabled>{categories.length ? "Select a category" : "No categories available"}</option>
                 {categories.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>

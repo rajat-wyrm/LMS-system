@@ -16,7 +16,7 @@ function readCollapsedFromStorage() {
 
 export function AdminSidebarProvider({ children }) {
   const [collapsed, setCollapsed] = useState(readCollapsedFromStorage);
-const [mobileOpen, setMobileOpen] = useState(false);
+
   const setCollapsedPersisted = useCallback((value) => {
     setCollapsed(value);
     try {
@@ -37,13 +37,6 @@ const [mobileOpen, setMobileOpen] = useState(false);
       return next;
     });
   }, []);
-  const toggleMobileSidebar = useCallback(() => {
-  setMobileOpen((prev) => !prev);
-}, []);
-
-const closeMobileSidebar = useCallback(() => {
-  setMobileOpen(false);
-}, []);
 
   const sidebarWidth = collapsed ? SIDEBAR_WIDTH_COLLAPSED : SIDEBAR_WIDTH_EXPANDED;
 
@@ -53,11 +46,8 @@ const closeMobileSidebar = useCallback(() => {
       toggleCollapsed,
       setCollapsed: setCollapsedPersisted,
       sidebarWidth,
-      mobileOpen,
-      toggleMobileSidebar,
-      closeMobileSidebar,
     }),
-    [collapsed, toggleCollapsed, setCollapsedPersisted, sidebarWidth, mobileOpen, toggleMobileSidebar, closeMobileSidebar]
+    [collapsed, toggleCollapsed, setCollapsedPersisted, sidebarWidth]
   );
 
   return (

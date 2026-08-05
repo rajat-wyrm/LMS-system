@@ -1,9 +1,4 @@
 async function testDelete() {
-  if (process.env.RUN_MUTATING_SMOKE !== 'true') {
-    console.log('Skipping mutating API smoke. Set RUN_MUTATING_SMOKE=true to create temporary test records.');
-    return;
-  }
-
   try {
     const ts = Date.now();
     // Register

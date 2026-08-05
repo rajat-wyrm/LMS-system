@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MdClose, MdEmail, MdPhone, MdDateRange, MdSchool, MdHistory, MdWorkspacePremium, MdAccessTime, MdPerson } from 'react-icons/md';
+import { MdClose, MdEmail, MdPhone, MdDateRange, MdStar, MdSchool, MdHistory, MdPlayCircleOutline, MdAssignmentTurnedIn, MdWorkspacePremium, MdAccessTime, MdCheckCircle, MdPerson } from 'react-icons/md';
 import { useFocusTrap } from '../../../hooks/useFocusTrap';
 
 const StudentProfileDrawer = ({ isOpen, onClose, student }) => {
@@ -65,6 +65,10 @@ const StudentProfileDrawer = ({ isOpen, onClose, student }) => {
                       )}
                     </div>
                   </div>
+                  {/* Level Badge */}
+                  <div className="absolute -top-2 -right-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full border-2 border-[#0f141e] shadow-lg flex items-center gap-1">
+                    <MdStar size={10} /> Lvl 12
+                  </div>
                 </div>
               </div>
             </div>
@@ -76,9 +80,7 @@ const StudentProfileDrawer = ({ isOpen, onClose, student }) => {
               <div>
                 <h2 className="text-2xl font-bold text-white">{student.name}</h2>
                 <div className="flex items-center gap-2 mt-1 mb-4">
-                   {student.plan && (
-                     <span className="text-sm text-cyan-400 font-medium bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">{student.plan}</span>
-                   )}
+                   <span className="text-sm text-cyan-400 font-medium bg-cyan-500/10 px-2 py-0.5 rounded border border-cyan-500/20">{student.plan}</span>
                    <span className={`text-sm font-medium px-2 py-0.5 rounded border ${student.status === 'Active' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-red-400 bg-red-500/10 border-red-500/20'}`}>
                      {student.status}
                    </span>
@@ -99,7 +101,7 @@ const StudentProfileDrawer = ({ isOpen, onClose, student }) => {
                   </div>
                   <div className="flex items-center gap-3 text-gray-400 text-sm bg-white/5 p-2 rounded-lg border border-white/5">
                     <MdAccessTime size={18} className="text-gray-500" />
-                    <span className="truncate">Active: {student.lastActive || '—'}</span>
+                    <span className="truncate">Active: {student.lastActive}</span>
                   </div>
                 </div>
               </div>
@@ -116,12 +118,16 @@ const StudentProfileDrawer = ({ isOpen, onClose, student }) => {
                      <p className="text-2xl font-bold text-white">{student.progress}%</p>
                    </div>
                    <div className="glass-card rounded-xl p-4 border border-white/10 bg-gradient-to-br from-emerald-500/10 to-transparent">
-                     <p className="text-xs text-emerald-300 font-semibold mb-1">Certificates</p>
-                     <p className="text-2xl font-bold text-white">{student.certificates ?? 0}</p>
+                     <p className="text-xs text-emerald-300 font-semibold mb-1">Attendance</p>
+                     <p className="text-2xl font-bold text-white">94%</p>
                    </div>
                    <div className="glass-card rounded-xl p-4 border border-white/10 bg-gradient-to-br from-purple-500/10 to-transparent">
-                     <p className="text-xs text-purple-300 font-semibold mb-1">Enrollments</p>
-                     <p className="text-2xl font-bold text-white">{student.enrollmentsCount ?? 0}</p>
+                     <p className="text-xs text-purple-300 font-semibold mb-1">Completed Lessons</p>
+                     <p className="text-2xl font-bold text-white">28<span className="text-sm text-gray-500"> / 40</span></p>
+                   </div>
+                   <div className="glass-card rounded-xl p-4 border border-white/10 bg-gradient-to-br from-amber-500/10 to-transparent">
+                     <p className="text-xs text-amber-300 font-semibold mb-1">Avg Quiz Score</p>
+                     <p className="text-2xl font-bold text-white">88%</p>
                    </div>
                 </div>
               </div>
@@ -142,16 +148,16 @@ const StudentProfileDrawer = ({ isOpen, onClose, student }) => {
                           <MdSchool size={24} className="text-white" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="text-white font-bold text-base group-hover:text-purple-400 transition-colors">{student.enrolledCourse || 'No active course'}</h4>
+                          <h4 className="text-white font-bold text-base group-hover:text-purple-400 transition-colors">{student.enrolledCourse}</h4>
                           <div className="flex items-center gap-2 mt-1 mb-3">
                              <div className="w-5 h-5 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
                                <MdPerson size={10} className="text-cyan-400" />
                              </div>
-                             <span className="text-xs text-gray-400">Mentor: <span className="text-gray-300 font-medium">{student.mentorName || '—'}</span></span>
+                             <span className="text-xs text-gray-400">Mentor: <span className="text-gray-300 font-medium">{student.mentorName}</span></span>
                           </div>
                           
                           <div className="flex justify-between items-end mb-1">
-                            <span className="text-xs text-gray-500">Progress from enrollment data</span>
+                            <span className="text-xs text-gray-500">Lesson 28 of 40</span>
                             <span className="text-xs font-bold text-white">{student.progress}%</span>
                           </div>
                           <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
@@ -180,9 +186,9 @@ const StudentProfileDrawer = ({ isOpen, onClose, student }) => {
                     <div className="absolute -left-8 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center ring-4 ring-[#0a0f18] shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
                     <div className="glass-card rounded-xl p-3 border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
                        <div className="flex items-center gap-2 text-white text-sm font-medium">
-                         <MdHistory className="text-emerald-400" size={16} /> No database activity recorded
+                         <MdPlayCircleOutline className="text-emerald-400" size={16} /> Completed Lesson 28: Typography Systems
                        </div>
-                       <p className="text-xs text-gray-500 mt-1 pl-6">Learner activity will appear here once it is stored in the database.</p>
+                       <p className="text-xs text-gray-500 mt-1 pl-6">Today, 2 hours ago</p>
                     </div>
                   </div>
 
@@ -190,9 +196,9 @@ const StudentProfileDrawer = ({ isOpen, onClose, student }) => {
                     <div className="absolute -left-8 w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center ring-4 ring-[#0a0f18] shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
                     <div className="glass-card rounded-xl p-3 border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
                        <div className="flex items-center gap-2 text-white text-sm font-medium">
-                         <MdHistory className="text-blue-400" size={16} /> —
+                         <MdAssignmentTurnedIn className="text-blue-400" size={16} /> Submitted Final Wireframes
                        </div>
-                       <p className="text-xs text-gray-500 mt-1 pl-6">—</p>
+                       <p className="text-xs text-gray-500 mt-1 pl-6">Yesterday, 4:30 PM • Graded: 92%</p>
                     </div>
                   </div>
 
@@ -200,9 +206,9 @@ const StudentProfileDrawer = ({ isOpen, onClose, student }) => {
                     <div className="absolute -left-8 w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center ring-4 ring-[#0a0f18] shadow-[0_0_10px_rgba(245,158,11,0.5)]"></div>
                     <div className="glass-card rounded-xl p-3 border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
                        <div className="flex items-center gap-2 text-white text-sm font-medium">
-                         <MdWorkspacePremium className="text-amber-400" size={16} /> —
+                         <MdWorkspacePremium className="text-amber-400" size={16} /> Earned UX Principles Badge
                        </div>
-                       <p className="text-xs text-gray-500 mt-1 pl-6">—</p>
+                       <p className="text-xs text-gray-500 mt-1 pl-6">May 20, 2026</p>
                     </div>
                   </div>
 

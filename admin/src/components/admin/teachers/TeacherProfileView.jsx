@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import {
   MdArrowBack,
   MdMail,
+  MdPhone,
   MdDateRange,
   MdStar,
   MdEdit,
@@ -74,7 +75,7 @@ const TeacherProfileView = ({ teacher, onBack, onEdit, onDelete }) => {
                       borderColor: 'var(--admin-border)',
                     }}
                   >
-                    {teacher.bio || 'Instructor profile'}
+                    {teacher.style}
                   </span>
                   <span
                     className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider border ${
@@ -83,7 +84,7 @@ const TeacherProfileView = ({ teacher, onBack, onEdit, onDelete }) => {
                         : 'bg-red-500/20 text-red-400 border-red-500/30'
                     }`}
                   >
-                    {teacher.enabled ? 'Active' : 'Inactive'}
+                    {teacher.enabled ? '● Active' : '● Disabled'}
                   </span>
                 </div>
               </div>
@@ -109,9 +110,9 @@ const TeacherProfileView = ({ teacher, onBack, onEdit, onDelete }) => {
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { label: 'Students', value: (teacher.students || 0).toLocaleString(), icon: MdGroups, color: '#3B82F6' },
-                { label: 'Rating', value: `${teacher.rating} *`, icon: MdStar, color: '#F59E0B' },
+                { label: 'Rating', value: `${teacher.rating} ★`, icon: MdStar, color: '#F59E0B' },
                 { label: 'Revenue', value: formatRevenue(teacher.revenue || 0), icon: MdAttachMoney, color: '#10B981' },
-                { label: 'Courses', value: String(teacher.courses ?? 0), icon: MdMenuBook, color: '#8B5CF6' },
+                { label: 'Courses', value: String(teacher.courses ?? 1), icon: MdMenuBook, color: '#8B5CF6' },
               ].map((stat) => {
                 const Icon = stat.icon;
                 return (
@@ -141,7 +142,7 @@ const TeacherProfileView = ({ teacher, onBack, onEdit, onDelete }) => {
               }}
             >
               <h3 className="text-lg font-semibold mb-3 admin-text-primary">About</h3>
-              <p className="admin-text-secondary leading-relaxed">{teacher.bio || 'No bio provided yet.'}</p>
+              <p className="admin-text-secondary leading-relaxed">{teacher.bio}</p>
             </div>
 
             <div
@@ -160,6 +161,12 @@ const TeacherProfileView = ({ teacher, onBack, onEdit, onDelete }) => {
                       {teacher.email}
                     </a>
                   </div>
+                  <div className="flex items-center gap-3 admin-text-secondary">
+                    <MdPhone className="admin-text-muted shrink-0" />
+                    <a href={`tel:${teacher.phone}`} className="hover:text-[var(--admin-text-primary)] transition-colors">
+                      {teacher.phone}
+                    </a>
+                  </div>
                 </div>
               </div>
               <div>
@@ -169,7 +176,7 @@ const TeacherProfileView = ({ teacher, onBack, onEdit, onDelete }) => {
                   Joined on {teacher.joinDate}
                 </div>
                 <p className="mt-3 text-sm admin-text-secondary">
-                  Published courses: <span className="font-semibold admin-text-primary">{teacher.activeCourses || 0}</span>
+                  Primary course: <span className="font-semibold admin-text-primary">{teacher.course}</span>
                 </p>
               </div>
             </div>

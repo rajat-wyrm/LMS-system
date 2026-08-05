@@ -1,16 +1,20 @@
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { MdSchool, MdCheckCircle, MdGroups, MdAttachMoney } from 'react-icons/md';
+import {
+  MdSchool,
+  MdCheckCircle,
+  MdGroups,
+  MdAttachMoney,
+} from 'react-icons/md';
 import { formatRevenue } from '../../../utils/teacherUtils';
 
 const TeacherKpiRow = ({ teachers = [] }) => {
   const metrics = useMemo(() => {
     const total = teachers.length;
-    const active = teachers.filter((teacher) => teacher.enabled).length;
-    const totalStudents = teachers.reduce((sum, teacher) => sum + (teacher.students || 0), 0);
-    const totalRevenue = teachers.reduce((sum, teacher) => sum + (teacher.revenue || 0), 0);
+    const active = teachers.filter((t) => t.enabled).length;
+    const totalStudents = teachers.reduce((sum, t) => sum + (t.students || 0), 0);
+    const totalRevenue = teachers.reduce((sum, t) => sum + (t.revenue || 0), 0);
     const activePct = total > 0 ? Math.round((active / total) * 100) : 0;
-
     return {
       total: total.toLocaleString(),
       active: active.toLocaleString(),
@@ -24,7 +28,7 @@ const TeacherKpiRow = ({ teachers = [] }) => {
     {
       title: 'Total Teachers',
       value: metrics.total,
-      trend: 'Database total',
+      trend: '+25%',
       icon: MdSchool,
       gradient:
         'linear-gradient(135deg, rgba(139,92,246,0.5) 0%, rgba(59,130,246,0.15) 100%)',
@@ -46,7 +50,7 @@ const TeacherKpiRow = ({ teachers = [] }) => {
     {
       title: 'Total Students',
       value: metrics.students,
-      trend: 'Across instructor courses',
+      trend: '+18%',
       icon: MdGroups,
       gradient:
         'linear-gradient(135deg, rgba(59,130,246,0.45) 0%, rgba(6,182,212,0.15) 100%)',
@@ -57,7 +61,7 @@ const TeacherKpiRow = ({ teachers = [] }) => {
     {
       title: 'Revenue Generated',
       value: metrics.revenue,
-      trend: 'Paid enrollments',
+      trend: '+32%',
       icon: MdAttachMoney,
       gradient:
         'linear-gradient(135deg, rgba(245,158,11,0.45) 0%, rgba(239,68,68,0.1) 100%)',
@@ -71,7 +75,6 @@ const TeacherKpiRow = ({ teachers = [] }) => {
     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
       {cards.map((card, index) => {
         const Icon = card.icon;
-
         return (
           <motion.div
             key={card.title}
@@ -103,7 +106,7 @@ const TeacherKpiRow = ({ teachers = [] }) => {
                   className="text-xs font-bold px-2 py-1 rounded-lg text-[#10B981]"
                   style={{ background: 'var(--admin-stat-pill-bg)' }}
                 >
-                  {card.trend}
+                  ↑ {card.trend}
                 </span>
               </div>
 

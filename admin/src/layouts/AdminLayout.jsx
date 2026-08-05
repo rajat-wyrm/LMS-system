@@ -6,7 +6,7 @@ import { DateRangeProvider } from '../context/DateRangeContext';
 import { AdminSidebarProvider, useAdminSidebar } from '../context/AdminSidebarContext';
 
 function AdminLayoutContent() {
-  const { sidebarWidth, mobileOpen, toggleMobileSidebar, closeMobileSidebar } = useAdminSidebar();
+  const { sidebarWidth } = useAdminSidebar();
   const location = useLocation();
 
   useEffect(() => {
@@ -17,21 +17,17 @@ function AdminLayoutContent() {
 
   return (
     <div
-      className="flex min-h-screen bg-background text-foreground font-body antialiased"
+      className="flex min-h-screen bg-[var(--admin-shell-bg)]"
       style={{ '--sidebar-width': `${sidebarWidth}px` }}
     >
-      <AdminSidebar mobileOpen={mobileOpen} />
-      {mobileOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
-          onClick={closeMobileSidebar}
-        />
-      )}
+      <AdminSidebar />
+
       <div
-        className="flex-1 flex flex-col min-h-screen md:ml-[var(--sidebar-width)] transition-[margin-left] duration-[250ms] ease-in-out"
+        className="flex-1 flex flex-col min-h-screen transition-[margin-left] duration-[250ms] ease-in-out"
+        style={{ marginLeft: 'var(--sidebar-width)' }}
       >
-        <Navbar onMenuClick={toggleMobileSidebar} />
-        <main className="flex-1 overflow-y-auto bg-background/50 p-6 sm:p-8">
+        <Navbar />
+        <main className="flex-1 overflow-y-auto bg-[var(--admin-shell-bg)] p-6">
           <Outlet />
         </main>
       </div>

@@ -57,3 +57,5 @@ backend/uploads/*
 # Prisma local
 backend/prisma/*.db
 backend/prisma/*.db-journal
+backend/*.db
+backend/*.db-journal

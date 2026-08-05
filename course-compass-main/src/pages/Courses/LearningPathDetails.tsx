@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { ArrowRight, Clock, Layers, CheckCircle2, ChevronLeft, Map, PlayCircle } from "lucide-react";
 import { courseApi } from "@/api/course.api";
-import { COURSE_PLACEHOLDER } from "@/utils/courseImage";
 
 const LearningPathDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,10 +20,10 @@ const LearningPathDetails = () => {
           id: c.id,
           title: c.title,
           description: c.description,
-          instructor: c.instructor?.name || "Instructor unavailable",
+          instructor: c.celebrityTeacher || c.instructor?.name || "Unknown",
           category: c.category,
           level: c.level || "Beginner",
-          thumbnail: c.thumbnail || COURSE_PLACEHOLDER,
+          thumbnail: c.thumbnail || "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=800&q=80",
           lessons: Array.isArray(c.lessons) ? c.lessons.length : (c.lessons || 0),
           duration: c.duration || "Self-paced",
           rating: c.rating || 0,

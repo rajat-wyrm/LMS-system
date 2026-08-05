@@ -85,7 +85,7 @@ const Settings = () => {
         return (
           <>
             <ProfileSection profile={profile} onUpdate={updateProfile} />
-            <div className="mt-10 pt-8 border-t border-border">
+            <div className="mt-10 pt-8 border-t" style={{ borderColor: 'var(--admin-border-subtle)' }}>
               <QuickPreferences
                 quickPrefs={quickPrefs}
                 accent={accent}
@@ -133,7 +133,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 border border-border shadow-sm bg-card/60 backdrop-blur-xl font-body">
+    <div className="admin-page space-y-6 md:space-y-8 animate-fade-in relative z-10 pb-16 min-h-full rounded-2xl p-4 md:p-6 -m-4 md:-m-6 border border-[var(--admin-border)] shadow-[var(--admin-shadow-card)] bg-[var(--admin-page-panel)]">
       <SettingsHero
         onSave={handleSave}
         onSecurityCenter={handleSecurityCenter}
@@ -158,20 +158,27 @@ const Settings = () => {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[190] flex items-center gap-4 px-6 py-3 rounded-2xl shadow-2xl border border-border bg-card/90 backdrop-blur-xl"
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[190] flex items-center gap-4 px-6 py-3 rounded-2xl shadow-2xl border"
+            style={{
+              background: 'var(--admin-surface-raised)',
+              borderColor: 'var(--admin-border)',
+              backdropFilter: 'blur(20px)',
+            }}
           >
-            <span className="text-xs text-muted-foreground font-medium font-body">Unsaved changes</span>
+            <span className="text-xs admin-text-muted font-medium">Unsaved changes</span>
             <button
               type="button"
               onClick={resetDirty}
-              className="px-4 py-1.5 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground border border-border transition-all font-body"
+              className="px-4 py-1.5 rounded-xl text-xs font-semibold admin-text-muted hover:admin-text-primary border transition-all"
+              style={{ borderColor: 'var(--admin-border)' }}
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="btn-primary px-5 py-1.5 text-xs font-bold font-display"
+              className="px-5 py-1.5 rounded-xl text-xs font-bold text-white"
+              style={{ background: 'linear-gradient(135deg, #3B82F6, #8B5CF6)' }}
             >
               Save Changes
             </button>

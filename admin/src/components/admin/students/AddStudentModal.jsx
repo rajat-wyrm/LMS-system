@@ -10,10 +10,10 @@ const AddStudentModal = ({ onClose, onAdd, studentToEdit }) => {
     email: '',
     phone: '',
     password: '',
-    course: '',
+    course: 'DSA with Java',
     plan: 'Pro Plan',
     status: 'Active',
-    teacher: '',
+    teacher: 'Salman Khan',
     joinedDate: new Date().toISOString().split('T')[0],
     avatar: null,
   });
@@ -27,10 +27,10 @@ const AddStudentModal = ({ onClose, onAdd, studentToEdit }) => {
         email: studentToEdit.email || '',
         phone: studentToEdit.phone || '',
         password: '', // Keep empty unless updating
-        course: studentToEdit.enrolledCourse || '',
+        course: studentToEdit.enrolledCourse || 'DSA with Java',
         plan: studentToEdit.plan || 'Pro Plan',
         status: studentToEdit.status || 'Active',
-        teacher: studentToEdit.mentorName || '',
+        teacher: studentToEdit.mentorName || 'Salman Khan',
         joinedDate: studentToEdit.joinedDate || new Date().toISOString().split('T')[0],
         avatar: studentToEdit.avatar || null,
       });
@@ -223,7 +223,14 @@ const AddStudentModal = ({ onClose, onAdd, studentToEdit }) => {
                      value={formData.course} onChange={(e) => setFormData({...formData, course: e.target.value})}
                      className="w-full h-14 bg-[#111827] backdrop-blur-[12px] border border-white/10 rounded-2xl px-4 text-white focus:outline-none focus:border-[#8B5CF6] focus:shadow-[0_0_0_4px_rgba(139,92,246,0.15)] transition-all duration-250 appearance-none cursor-pointer"
                    >
-                     <option value="">No database course assigned</option>
+                     <option value="DSA with Java">DSA with Java</option>
+                     <option value="Python">Python</option>
+                     <option value="C++">C++</option>
+                     <option value="HTML">HTML</option>
+                     <option value="CSS">CSS</option>
+                     <option value="JavaScript">JavaScript</option>
+                     <option value="MERN">MERN</option>
+                     <option value="ReactJS">ReactJS</option>
                    </select>
                  </div>
 
@@ -235,7 +242,20 @@ const AddStudentModal = ({ onClose, onAdd, studentToEdit }) => {
                      value={formData.teacher} onChange={(e) => setFormData({...formData, teacher: e.target.value})}
                      className="w-full h-14 bg-[#111827] backdrop-blur-[12px] border border-white/10 rounded-2xl px-4 text-white focus:outline-none focus:border-[#8B5CF6] focus:shadow-[0_0_0_4px_rgba(139,92,246,0.15)] transition-all duration-250 appearance-none cursor-pointer"
                    >
-                     <option value="">No database teacher assigned</option>
+                     <option value="Salman Khan">Salman Khan</option>
+                     <option value="Anushka Sharma">Anushka Sharma</option>
+                     <option value="Katrina Kaif">Katrina Kaif</option>
+                     <option value="Shahrukh Khan">Shahrukh Khan</option>
+                     <option value="Hrithik Roshan">Hrithik Roshan</option>
+                     <option value="Virat Kohli">Virat Kohli</option>
+                     <option value="Sachin Tendulkar">Sachin Tendulkar</option>
+                     <option value="MS Dhoni">MS Dhoni</option>
+                     <option value="Smriti Mandhana">Smriti Mandhana</option>
+                     <option value="Narendra Modi">Narendra Modi</option>
+                     <option value="Deepika Padukone">Deepika Padukone</option>
+                     <option value="Ranbir Kapoor">Ranbir Kapoor</option>
+                     <option value="Alia Bhatt">Alia Bhatt</option>
+                     <option value="Aamir Khan">Aamir Khan</option>
                    </select>
                  </div>
               </div>
