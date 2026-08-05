@@ -1,8 +1,8 @@
 const express = require('express');
 const { register, login, logout, getMe, forgotPassword, resetPassword } = require('../../controllers/auth.controller');
 const { protect } = require('../../middlewares/auth.middleware');
-const { validate } = require('../../middlewares/validate.middleware');
-const { registerSchema, loginSchema } = require('../../validations/auth.validation');
+const validate = require('../../middlewares/validate');
+const { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } = require('../../validations/auth.validation');
 
 const router = express.Router();
 
@@ -103,7 +103,7 @@ router.get('/me', protect, getMe);
  *       200:
  *         description: Reset link sent
  */
-router.post('/forgot-password', forgotPassword);
+router.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
 
 /**
  * @swagger
@@ -135,6 +135,6 @@ router.post('/forgot-password', forgotPassword);
  *       200:
  *         description: Password successfully reset
  */
-router.put('/reset-password/:id/:token', resetPassword);
+router.put('/reset-password/:id/:token', validate(resetPasswordSchema), resetPassword);
 
 module.exports = router;

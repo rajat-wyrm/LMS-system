@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { prisma } = require('../src/config/db');
 const authController = require('../src/controllers/auth.controller');
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'secret';
 
 test('login falls back to seeded demo credentials when Prisma cannot connect', async () => {
   const originalFindUnique = prisma.user.findUnique;

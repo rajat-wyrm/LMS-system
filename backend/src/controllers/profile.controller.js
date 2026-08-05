@@ -35,10 +35,6 @@ exports.updatePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({ success: false, error: 'Please provide both current and new password' });
-    }
-
     const user = await prisma.user.findUnique({ where: { id: req.user.id } });
 
     const isMatch = await bcrypt.compare(currentPassword, user.password);

@@ -96,10 +96,6 @@ exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ success: false, error: 'Please provide an email and password' });
-    }
-
     const normalizedEmail = email.toLowerCase();
     const demoUser = getDemoUser(normalizedEmail);
 
@@ -171,9 +167,6 @@ exports.getMe = async (req, res, next) => {
 exports.forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ success: false, error: 'Please provide an email' });
-    }
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
@@ -211,10 +204,6 @@ exports.resetPassword = async (req, res, next) => {
   try {
     const { id, token } = req.params;
     const { password } = req.body;
-
-    if (!password) {
-      return res.status(400).json({ success: false, error: 'Please provide a new password' });
-    }
 
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) {

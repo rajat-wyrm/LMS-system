@@ -13,7 +13,7 @@ const {
 } = require('../../controllers/courses.controller');
 
 const { protect, authorize } = require('../../middlewares/auth.middleware');
-const { validate } = require('../../middlewares/validate.middleware');
+const validate = require('../../middlewares/validate');
 const { courseSchema, lessonSchema } = require('../../validations/course.validation');
 const { cacheMiddleware } = require('../../middlewares/cache.middleware');
 
