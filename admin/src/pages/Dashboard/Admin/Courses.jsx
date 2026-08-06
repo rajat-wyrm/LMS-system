@@ -8,6 +8,7 @@ import TopPerformingCourses from '../../../components/admin/courses/TopPerformin
 import CoursesFilters from '../../../components/admin/courses/CoursesFilters';
 import CourseGrid from '../../../components/admin/courses/CourseGrid';
 import { apiFetch } from '../../../api/config';
+import { apiRequest } from '../../../utils/api';
 import {
   normalizeCourse,
   getCategories,
@@ -18,6 +19,7 @@ import { notifyCourseSync } from '../../../utils/courseSyncEvents';
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
+  const [teachers, setTeachers] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [levelFilter, setLevelFilter] = useState('');
@@ -40,6 +42,34 @@ const Courses = () => {
   useEffect(() => {
     fetchCourses();
   }, [fetchCourses]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadTeachers = async () => {
+      try {
+        const payload = await apiRequest('/v1/admin/instructors?limit=1000');
+        if (cancelled) return;
+        const list = Array.isArray(payload?.data) ? payload.data : [];
+        setTeachers(list.map((t) => ({ id: t.id, name: t.name || t.fullName || '' })));
+      } catch (error) {
+        if (error?.status === 404) {
+          try {
+            const payload = await apiRequest('/admin/instructors?limit=1000');
+            if (cancelled) return;
+            const list = Array.isArray(payload?.data) ? payload.data : [];
+            setTeachers(list.map((t) => ({ id: t.id, name: t.name || t.fullName || '' })));
+          } catch {
+            if (!cancelled) setTeachers([]);
+          }
+        } else {
+          console.error('Failed to fetch teachers:', error);
+          if (!cancelled) setTeachers([]);
+        }
+      }
+    };
+    loadTeachers();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (!notice) return undefined;
@@ -133,9 +163,6 @@ const Courses = () => {
       showNotice('Unable to save course.');
     }
   };
-const handleClone = (course) => {
-  const copyTitle = `${course.title} (Copy)`;
-
 const handleClone = async (course) => {
   try {
     const copyTitle = `${course.title} (Copy)`;
@@ -252,6 +279,8 @@ const handleClone = async (course) => {
         onClose={handleCloseDrawer}
         onSave={handleSaveCourse}
         courseToEdit={selectedCourse}
+        teachers={teachers}
+        categories={categories}
       />
 
       <AnimatePresence>

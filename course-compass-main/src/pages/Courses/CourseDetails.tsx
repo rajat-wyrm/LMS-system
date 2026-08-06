@@ -262,7 +262,7 @@ const CourseDetails = () => {
           <div className="grid lg:grid-cols-[1fr_400px] gap-10 items-start">
             <div>
               <span className="inline-block text-xs font-mono px-2.5 py-1 rounded-md bg-secondary/20 text-secondary border border-secondary/40 mb-4">
-                {course.category} · {course.level}
+                {course.category?.name} · {course.level}
               </span>
               <h1 className="font-display font-bold text-3xl md:text-5xl mb-4">
                 {course.title}

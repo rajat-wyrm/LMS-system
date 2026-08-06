@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const { prisma } = require("../config/db");
 const { logAdminAction } = require("../utils/auditLogger");
+const { resolveCategoryId } = require("../utils/categoryResolver");
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 const getTrend = (curr, prev) => {
   if (prev === 0) {
@@ -757,11 +758,11 @@ exports.getAnalytics = async (req, res, next) => {
     // Course distribution by category
     const allCourses = await prisma.course.findMany({
       where: { status: "approved" },
-      select: { category: true },
+      select: { category: { select: { name: true } } },
     });
     const catMap = {};
     for (const c of allCourses) {
-      const cat = c.category || "Other";
+      const cat = c.category?.name || "Other";
       catMap[cat] = (catMap[cat] || 0) + 1;
     }
     const PALETTE = [
@@ -1006,7 +1007,12 @@ exports.getAdminUser = async (req, res, next) => {
         enrollments: {
           include: {
             course: {
-              select: { id: true, title: true, price: true, category: true },
+              select: {
+                id: true,
+                title: true,
+                price: true,
+                category: { select: { name: true } },
+              },
             },
             completedLessons: { select: { id: true } },
           },
@@ -1146,6 +1152,7 @@ exports.createAdminCourse = async (req, res, next) => {
       title,
       description,
       category,
+      categoryId,
       level = "Beginner",
       price,
       thumbnail,
@@ -1156,26 +1163,22 @@ exports.createAdminCourse = async (req, res, next) => {
       gradient,
       icon,
     } = req.body;
-    if (!title || !description || !category || !instructorId)
+    if (!title || !description || !instructorId)
       return res.status(400).json({
         success: false,
-        error: "Title, description, category, and instructor are required.",
+        error: "Title, description, and instructor are required.",
       });
-    const [instructor, categoryRecord] = await Promise.all([
-      prisma.user.findFirst({
-        where: { id: instructorId, role: "instructor", status: "approved" },
-        select: { id: true },
-      }),
-      prisma.category.findUnique({ where: { name: category } }),
-    ]);
+    const instructor = await prisma.user.findFirst({
+      where: { id: instructorId, role: "instructor", status: "approved" },
+      select: { id: true },
+    });
     if (!instructor)
       return res
         .status(400)
         .json({ success: false, error: "Selected instructor was not found." });
-    if (!categoryRecord)
-      return res
-        .status(400)
-        .json({ success: false, error: "Selected category was not found." });
+    const resolved = await resolveCategoryId({ categoryId, category });
+    if (!resolved.ok)
+      return res.status(400).json({ success: false, error: resolved.error });
     if (!["pending", "approved", "rejected"].includes(status))
       return res
         .status(400)
@@ -1184,8 +1187,7 @@ exports.createAdminCourse = async (req, res, next) => {
       data: {
         title,
         description,
-        category,
-        categoryId: categoryRecord.id,
+        categoryId: resolved.categoryId,
         level,
         price: Number(price) || 0,
         thumbnail: thumbnail || null,
@@ -1563,7 +1565,7 @@ exports.getAdminCourses = async (req, res, next) => {
 
     const where = {};
     if (status) where.status = status;
-    if (category) where.category = category;
+    if (category) where.category = { name: category };
     if (level) where.level = level;
     if (search) {
       where.OR = [
@@ -1584,6 +1586,7 @@ exports.getAdminCourses = async (req, res, next) => {
         take: limitNumber,
         include: {
           instructor: { select: { id: true, name: true, email: true } },
+          category: true,
           _count: { select: { enrollments: true, lessons: true } },
         },
       }),
@@ -1627,6 +1630,7 @@ exports.updateCourseStatus = async (req, res, next) => {
       "title",
       "description",
       "category",
+      "categoryId",
       "level",
       "price",
       "thumbnail",
@@ -1638,15 +1642,18 @@ exports.updateCourseStatus = async (req, res, next) => {
     for (const key of allowed) {
       if (req.body[key] !== undefined) updateData[key] = req.body[key];
     }
-    if (updateData.category !== undefined) {
-      const categoryRecord = await prisma.category.findUnique({
-        where: { name: updateData.category },
+    if (
+      updateData.category !== undefined ||
+      updateData.categoryId !== undefined
+    ) {
+      const resolved = await resolveCategoryId({
+        categoryId: updateData.categoryId,
+        category: updateData.category,
       });
-      if (!categoryRecord)
-        return res
-          .status(400)
-          .json({ success: false, error: "Selected category was not found." });
-      updateData.categoryId = categoryRecord.id;
+      if (!resolved.ok)
+        return res.status(400).json({ success: false, error: resolved.error });
+      updateData.categoryId = resolved.categoryId;
+      delete updateData.category;
     }
     if (updateData.price !== undefined)
       updateData.price = parseFloat(updateData.price) || 0;
@@ -1671,7 +1678,10 @@ exports.updateCourseStatus = async (req, res, next) => {
     const course = await prisma.course.update({
       where: { id: req.params.id },
       data: updateData,
-      include: { instructor: { select: { id: true, name: true } } },
+      include: {
+        instructor: { select: { id: true, name: true } },
+        category: true,
+      },
     });
 
     // Log the change

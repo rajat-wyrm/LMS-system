@@ -1,10 +1,16 @@
 import API from "./client";
 
+export interface CategoryRef {
+  id: string;
+  name: string;
+}
+
 export interface CourseData {
   id?: string;
   title: string;
   description: string;
-  category: string;
+  category?: string | CategoryRef | null;
+  categoryId?: string;
   level: string;
   duration?: string;
   price?: number;
@@ -26,7 +32,8 @@ export interface CourseData {
 
 export const courseApi = {
   getAllCourses: (config?: object) => API.get("/courses", config),
-  getTrendingCourses: () => API.get("/courses/trending"),
+  getTrendingCourses: (limit?: number) => API.get(`/courses/trending${limit ? `?limit=${limit}` : ""}`),
+  getAdminCourses: (page?: number, limit?: number) => API.get(`/courses/admin/all${page || limit ? `?${page ? `page=${page}` : ''}${limit ? `&limit=${limit}` : ''}` : ""}`),
   getCategories: () => API.get("/categories"),
   getLearningPaths: () => API.get("/courses/learning-paths"),
   getCourseById: (id: string) => API.get(`/courses/${id}`),

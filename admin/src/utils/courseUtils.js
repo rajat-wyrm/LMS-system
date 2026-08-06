@@ -48,6 +48,7 @@ export function normalizeCourse(c, index = 0) {
     thumbnail: merged.thumbnail ?? merged.avatar ?? null,
     gradient: merged.gradient || 'from-blue-600 via-blue-500 to-cyan-400',
     icon: merged.icon || '📚',
+    category: merged.category?.name || merged.category || '',
     active: merged.active ?? (merged.status === 'approved' || merged.status === 'Published'),
     status: merged.status || 'approved',
   };

@@ -49,7 +49,7 @@ export const CourseCard = ({ course, index = 0 }: { course: CourseData; index?: 
 
           {/* Top badges */}
           <span className="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-full border bg-black/40 backdrop-blur-md border-white/10 text-white shadow-sm">
-            {course.category}
+            {course.category?.name}
           </span>
           <div className="absolute top-3 right-3 flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full border bg-black/40 backdrop-blur-md border-white/10 text-white shadow-sm">
             <Clock size={12} className="text-primary" />

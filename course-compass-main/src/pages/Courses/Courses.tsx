@@ -37,16 +37,16 @@ const Courses = () => {
   }, []);
 
   const topics = useMemo(() => {
-    const allTopics = dbCourses.map((c) => c.category);
-    return Array.from(new Set(allTopics)).sort();
+    const allTopics = dbCourses.map((c) => c.category?.name);
+    return Array.from(new Set(allTopics.filter(Boolean))).sort();
   }, [dbCourses]);
 
   const filtered = useMemo(() => {
     const result = dbCourses.filter((c) => {
-      const instructorName = typeof c.instructor === 'object' ? c.instructor?.name : (c.instructor || '');
-      if (query && !`${c.title} ${instructorName} ${c.category}`.toLowerCase().includes(query.toLowerCase())) return false;
+      const instructorName = typeof c.instructor === 'object' ? c.instructor?.name : (c.celebrityTeacher || c.instructor || '');
+      if (query && !`${c.title} ${instructorName} ${c.category?.name}`.toLowerCase().includes(query.toLowerCase())) return false;
       if (selLevels.length && !selLevels.includes(c.level as any)) return false;
-      if (selTopics.length && !selTopics.includes(c.category)) return false;
+      if (selTopics.length && !selTopics.includes(c.category?.name)) return false;
       return true;
     });
 

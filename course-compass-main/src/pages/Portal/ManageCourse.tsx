@@ -15,8 +15,8 @@ const categories  = ["Python", "CSS", "MERN Stack", "Data Science", "AI & Machin
 
 interface Lesson { id: string; title: string; content: string; videoUrl?: string; order: number; }
 interface CourseDetail {
-  id: string; title: string; description: string; category: string; level: string;
-  thumbnail?: string;
+  id: string; title: string; description: string; category?: { id: string; name: string } | null; level: string;
+  thumbnail?: string; celebrityTeacher?: string;
   instructor?: { id: string; name: string };
   lessons: Lesson[];
   _count?: { enrollments: number };
@@ -113,8 +113,8 @@ const ManageCourse = () => {
       const c: CourseDetail = res.data.data;
       setCourse(c);
       setEditForm({
-        title: c.title, description: c.description, category: c.category,
-        level: c.level, thumbnail: c.thumbnail ?? "",
+        title: c.title, description: c.description, category: c.category?.name || '',
+        level: c.level, thumbnail: c.thumbnail ?? "", celebrityTeacher: c.celebrityTeacher ?? "",
       });
       setLessonForm((f) => ({ ...f, order: (c.lessons?.length ?? 0) + 1 }));
     } catch {
@@ -249,7 +249,7 @@ const ManageCourse = () => {
             </div>
             <h1 className="font-display font-bold text-2xl md:text-3xl truncate">{course?.title}</h1>
             <p className="text-muted-foreground text-sm mt-1">
-              {course?.category} · {course?.level} · {course?._count?.enrollments ?? 0} students enrolled
+              {course?.category?.name || "Uncategorized"} · {course?.level} · {course?._count?.enrollments ?? 0} students enrolled
             </p>
           </div>
         </div>

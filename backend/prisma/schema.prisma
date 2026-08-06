@@ -53,8 +53,7 @@ model Course {
   id               String          @id @default(cuid())
   title            String
   description      String
-  category         String
-  categoryId       String?
+  categoryId       String
   level            String          @default("Beginner")
   price            Float           @default(0)
   thumbnail        String?
@@ -69,7 +68,7 @@ model Course {
   status           CourseStatus    @default(pending)
 
   instructor       User            @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
-  categoryRecord   Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  category         Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
 
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt

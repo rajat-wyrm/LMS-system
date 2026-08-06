@@ -24,7 +24,7 @@ interface CourseAnalytics {
 interface CourseItem {
   id: string;
   title: string;
-  category: string;
+  category?: { id: string; name: string } | null;
   level: string;
   thumbnail?: string;
   instructor?: { id: string; name: string };
@@ -331,7 +331,7 @@ const InstructorPortal = () => {
                     {c.title}
                   </h3>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    {c.category} · {c.instructor?.name || "Instructor unavailable"}
+                    {c.category?.name} · {c.celebrityTeacher || c.instructor?.name || "Unknown"}
                   </p>
                 </div>
 

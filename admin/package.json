@@ -12,6 +12,7 @@
     "test:watch": "vitest --config vitest.config.js"
   },
   "dependencies": {
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "firebase": "^9.23.0",
     "framer-motion": "^12.40.0",
     "react": "^19.2.6",

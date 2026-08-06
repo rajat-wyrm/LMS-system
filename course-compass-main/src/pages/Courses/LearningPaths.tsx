@@ -89,7 +89,7 @@ const LearningPaths = () => {
                 </div>
 
                 <Link 
-                  to={`/paths/${path.slug}`}
+                  to={`/learning-paths/${path.id}`}
                   className="inline-flex justify-center items-center gap-2 py-3.5 mt-auto btn-primary w-full"
                 >
                   View Full Roadmap <ArrowRight className="w-4 h-4" />

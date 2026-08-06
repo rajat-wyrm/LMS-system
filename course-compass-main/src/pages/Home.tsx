@@ -16,7 +16,7 @@ const Home = () => {
 
     const loadFeaturedCourses = async () => {
       try {
-        const res = await courseApi.getTrendingCourses();
+        const res = await courseApi.getTrendingCourses(6);
         if (!active) return;
         setFeatured(res.data.data ?? []);
       } catch (error) {
@@ -158,12 +158,12 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured */}
+      {/* Trending Courses */}
       <section className="container py-16">
         <div className="flex items-end justify-between mb-10">
           <div>
             <h2 className="font-display font-bold text-3xl md:text-4xl mb-2">Trending Courses</h2>
-            <p className="text-muted-foreground">Most enrolled this week</p>
+            <p className="text-muted-foreground">Most enrolled courses</p>
           </div>
           <Link to="/courses" className="text-secondary text-sm font-medium hover:text-primary">
             View all -&gt;
