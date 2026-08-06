@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MdPerson,
@@ -8,6 +9,8 @@ import {
   MdSchool,
   MdLocalFireDepartment,
   MdWorkspacePremium,
+  MdSearch,
+  MdClear,
 } from 'react-icons/md';
 
 const getAvatarContent = (student) => {
@@ -82,8 +85,32 @@ const deriveCertificates = (student) =>
 const deriveStreak = (student) =>
   student.streak ?? Math.max(1, Math.floor((student.progress ?? 0) / 12));
 
-const StudentTable = ({ students, onViewProfile, onNotify, onEdit, onDelete }) => {
+const StudentTable = ({ students = [], onViewProfile, onNotify, onEdit, onDelete }) => {
   const [activeDropdownId, setActiveDropdownId] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // URL Persistence and Filter States (Issue #130 Requirements)
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'All');
+  const [courseFilter, setCourseFilter] = useState(searchParams.get('course') || 'All');
+  const [sortBy, setSortBy] = useState(searchParams.get('sort') || 'newest');
+
+  // Search Debounce Engine
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearch(searchTerm), 300);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // Sync to URL Parameters
+  useEffect(() => {
+    const params = {};
+    if (debouncedSearch) params.search = debouncedSearch;
+    if (statusFilter !== 'All') params.status = statusFilter;
+    if (courseFilter !== 'All') params.course = courseFilter;
+    if (sortBy !== 'newest') params.sort = sortBy;
+    setSearchParams(params, { replace: true });
+  }, [debouncedSearch, statusFilter, courseFilter, sortBy]);
 
   useEffect(() => {
     const handleOutsideClick = () => setActiveDropdownId(null);
@@ -91,19 +118,111 @@ const StudentTable = ({ students, onViewProfile, onNotify, onEdit, onDelete }) =
     return () => document.removeEventListener('click', handleOutsideClick);
   }, []);
 
+  // Extract unique course list dynamically
+  const uniqueCourses = useMemo(() => {
+    const courses = students.map((s) => s.enrolledCourse).filter(Boolean);
+    return ['All', ...new Set(courses)];
+  }, [students]);
+
+  // Filtering + Full Text Search + Sorting Logic
+  const filteredStudents = useMemo(() => {
+    return students
+      .filter((student) => {
+        const matchesSearch =
+          (student.name || '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+          (student.email || '').toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+          (student.enrolledCourse || '').toLowerCase().includes(debouncedSearch.toLowerCase());
+
+        const matchesStatus = statusFilter === 'All' || student.status === statusFilter;
+        const matchesCourse = courseFilter === 'All' || student.enrolledCourse === courseFilter;
+
+        return matchesSearch && matchesStatus && matchesCourse;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'popular') return (b.progress || 0) - (a.progress || 0);
+        if (sortBy === 'alphabetical') return (a.name || '').localeCompare(b.name || '');
+        return (b.id || 0) - (a.id || 0); // Default newest
+      });
+  }, [students, debouncedSearch, statusFilter, courseFilter, sortBy]);
+
   return (
     <div
       className="relative overflow-hidden rounded-2xl border shadow-[var(--admin-shadow-lg)] bg-[var(--admin-surface)]"
       style={{ borderColor: 'var(--admin-border)' }}
     >
+      {/* ── ADVANCED SEARCH & FILTER HEADER (Issue #130) ── */}
       <div
-        className="px-6 py-4 border-b flex items-center justify-between"
+        className="px-6 py-4 border-b flex flex-col md:flex-row gap-4 items-center justify-between"
         style={{ borderColor: 'var(--admin-border-subtle)' }}
       >
-        <h2 className="text-lg font-bold admin-text-primary">Student Directory</h2>
-        <span className="text-xs font-medium admin-text-secondary">{students.length} shown</span>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <h2 className="text-lg font-bold admin-text-primary whitespace-nowrap">Student Directory</h2>
+          <span className="text-xs font-medium admin-text-secondary px-2.5 py-1 rounded-full bg-[var(--admin-surface-raised)]">
+            {filteredStudents.length} shown
+          </span>
+        </div>
+
+        {/* Filter Controls Bar */}
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          {/* Full-Text Search Input */}
+          <div className="relative flex-1 sm:w-60">
+            <MdSearch size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search student or course..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-[var(--admin-surface-raised)] border border-[var(--admin-border)] rounded-xl pl-9 pr-8 py-1.5 text-xs admin-text-primary focus:outline-none focus:border-[#3B82F6]"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+              >
+                <MdClear size={14} />
+              </button>
+            )}
+          </div>
+
+          {/* Course Filter */}
+          <select
+            value={courseFilter}
+            onChange={(e) => setCourseFilter(e.target.value)}
+            className="bg-[var(--admin-surface-raised)] border border-[var(--admin-border)] rounded-xl px-2.5 py-1.5 text-xs admin-text-primary focus:outline-none"
+          >
+            {uniqueCourses.map((c) => (
+              <option key={c} value={c}>
+                {c === 'All' ? 'All Courses' : c}
+              </option>
+            ))}
+          </select>
+
+          {/* Status Filter */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-[var(--admin-surface-raised)] border border-[var(--admin-border)] rounded-xl px-2.5 py-1.5 text-xs admin-text-primary focus:outline-none"
+          >
+            <option value="All">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Completed">Completed</option>
+            <option value="Pending">Pending</option>
+          </select>
+
+          {/* Sort By */}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-[var(--admin-surface-raised)] border border-[#3B82F6]/40 rounded-xl px-2.5 py-1.5 text-xs text-[#3B82F6] font-semibold focus:outline-none"
+          >
+            <option value="newest">Newest</option>
+            <option value="popular">Top Progress</option>
+            <option value="alphabetical">Alphabetical (A-Z)</option>
+          </select>
+        </div>
       </div>
 
+      {/* ── TABLE DISPLAY ── */}
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-left border-collapse min-w-[1050px]">
           <thead>
@@ -130,14 +249,14 @@ const StudentTable = ({ students, onViewProfile, onNotify, onEdit, onDelete }) =
             </tr>
           </thead>
           <tbody>
-            {students.length === 0 ? (
+            {filteredStudents.length === 0 ? (
               <tr>
                 <td colSpan={8} className="py-16 text-center admin-text-secondary text-sm">
                   No students match your filters.
                 </td>
               </tr>
             ) : (
-              students.map((student, index) => (
+              filteredStudents.map((student, index) => (
                 <motion.tr
                   key={student.id}
                   initial={{ opacity: 0, y: 8 }}

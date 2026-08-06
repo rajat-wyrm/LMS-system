@@ -1,33 +1,63 @@
 const { prisma } = require('../config/db');
 const { clearCache } = require('../middlewares/cache.middleware');
 
-// @desc    Get all courses
+// @desc    Get all courses (Enhanced with Unified Search, Multi-Filter & Sorting - Issue #130)
 // @route   GET /api/courses
 // @access  Public
 exports.getCourses = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', search, category, level } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = 'createdAt',
+      sortOrder = 'desc',
+      search,
+      category,
+      level,
+      status,
+      instructorId
+    } = req.query;
 
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
     const skip = (pageNumber - 1) * limitNumber;
 
-    const where = { status: 'approved' };
+    // Base Filter Condition
+    const where = {};
 
-    if (category) where.category = category;
-    if (level) where.level = level;
+    // Dynamic Status Filter (Default to 'approved' if not specified)
+    if (status && status !== 'All') {
+      where.status = status;
+    } else if (!status) {
+      where.status = 'approved';
+    }
 
+    // Category and Level Filters
+    if (category && category !== 'All') where.category = category;
+    if (level && level !== 'All') where.level = level;
+    if (instructorId) where.instructorId = instructorId;
+
+    // Full-Text / Multi-Field Search
     if (search) {
       where.OR = [
         { title: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
-        { celebrityTeacher: { contains: search, mode: 'insensitive' } }
+        { celebrityTeacher: { contains: search, mode: 'insensitive' } },
+        { category: { contains: search, mode: 'insensitive' } },
+        { instructor: { name: { contains: search, mode: 'insensitive' } } }
       ];
     }
 
-    const orderBy = {};
-    if (sortBy) {
+    // Advanced Sorting Logic
+    let orderBy = {};
+    if (sortBy === 'popular') {
+      orderBy = { enrollments: { _count: 'desc' } };
+    } else if (sortBy === 'alphabetical') {
+      orderBy = { title: 'asc' };
+    } else if (sortBy) {
       orderBy[sortBy] = sortOrder === 'asc' ? 'asc' : 'desc';
+    } else {
+      orderBy = { createdAt: 'desc' };
     }
 
     const [courses, total] = await Promise.all([
