@@ -53,7 +53,7 @@ router.route('/trending')
   .get(cacheMiddleware(300), getTrendingCourses);
 
 router.route('/admin/all')
-  .get(cacheMiddleware(300), getAdminCourses);
+  .get(protect, authorize('admin'), cacheMiddleware(300), getAdminCourses);
 
 router.route('/learning-paths')
   .get(getLearningPaths);
