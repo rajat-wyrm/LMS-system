@@ -269,7 +269,28 @@ exports.updateCourse = async (req, res, next) => {
 
     const dataToUpdate = { ...req.body };
     if (req.user.role !== "admin") {
-      delete dataToUpdate.status;
+      // Instructors may only edit course content, never approval status,
+      // ownership, ratings, or soft-delete flags.
+      const instructorAllowed = [
+        "title",
+        "description",
+        "category",
+        "categoryId",
+        "level",
+        "price",
+        "thumbnail",
+        "duration",
+        "outcomes",
+        "xp",
+        "gradient",
+        "icon",
+        "celebrityTeacher",
+      ];
+      for (const key of Object.keys(dataToUpdate)) {
+        if (!instructorAllowed.includes(key)) {
+          delete dataToUpdate[key];
+        }
+      }
     }
     if (dataToUpdate.category !== undefined) {
       const categoryRecord = await prisma.category.findUnique({ where: { name: dataToUpdate.category } });
