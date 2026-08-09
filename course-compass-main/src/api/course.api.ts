@@ -42,6 +42,12 @@ export const courseApi = {
   getEnrollmentByCourse: (courseId: string) => API.get(`/enrollments/${courseId}`),
   updateEnrollmentMentor: (courseId: string, mentor: string) => API.put(`/enrollments/${courseId}/mentor`, { mentor }),
   completeLesson: (courseId: string, lessonId: string) => API.put(`/enrollments/${courseId}/lessons/${lessonId}`),
+  syncProgress: (courseId: string, data: {
+    completedLessonIds: string[];
+    lastWatchedLessonId?: string;
+    lastWatchedAt?: string;
+    playbackPositions?: Record<string, number>;
+  }) => API.put(`/enrollments/${courseId}/sync`, data),
 
   // Lessons
   addLesson: (courseId: string, data: { title: string; content: string; videoUrl?: string; order: number }) => API.post(`/courses/${courseId}/lessons`, data),

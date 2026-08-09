@@ -133,7 +133,9 @@ model Enrollment {
   status              EnrollmentStatus @default(active)
   certificateApproved Boolean          @default(false)
   mentor              String?
-
+  lastWatchedLessonId String?
+  lastWatchedAt       DateTime?
+  playbackPositions   Json?            @default("{}")
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
 

@@ -5,7 +5,8 @@ const {
   getEnrollmentByCourse,
   completeLesson,
   unenroll,
-  updateEnrollmentMentor
+  updateEnrollmentMentor,
+  syncProgress
 } = require('../../controllers/enrollment.controller');
 
 const { protect } = require('../../middlewares/auth.middleware');
@@ -27,5 +28,8 @@ router.route('/:courseId/mentor')
 
 router.route('/:courseId/lessons/:lessonId')
   .put(completeLesson);
+
+router.route('/:courseId/sync')
+  .put(syncProgress);
 
 module.exports = router;
