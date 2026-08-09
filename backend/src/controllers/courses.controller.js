@@ -546,14 +546,41 @@ exports.completeLesson = async (req, res, next) => {
       });
     }
 
-    // 4. Save progress
-    const progress = await prisma.lessonProgress.upsert({
-      where: { userId_lessonId: { userId, lessonId } },
-      update: { completed: true },
-      create: { userId, lessonId, courseId, completed: true },
+    // 4. Mark lesson as completed (connect is idempotent) and recalc progress
+    const updatedEnrollment = await prisma.enrollment.update({
+      where: { userId_courseId: { userId, courseId } },
+      data: {
+        completedLessons: {
+          connect: { id: lessonId },
+        },
+      },
+      include: {
+        completedLessons: true,
+        course: { include: { lessons: { select: { id: true } } } },
+      },
     });
 
-    return res.status(200).json({ success: true, data: progress });
+    const totalLessons = updatedEnrollment.course.lessons.length;
+    const newProgress =
+      totalLessons > 0
+        ? Math.min(
+            100,
+            Math.round(
+              (updatedEnrollment.completedLessons.length / totalLessons) * 100
+            )
+          )
+        : 0;
+
+    const result = await prisma.enrollment.update({
+      where: { userId_courseId: { userId, courseId } },
+      data: {
+        progress: newProgress,
+        status: newProgress === 100 ? "completed" : "active",
+      },
+      include: { completedLessons: true },
+    });
+
+    return res.status(200).json({ success: true, data: result });
   } catch (error) {
     next(error);
   }

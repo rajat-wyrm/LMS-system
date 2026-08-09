@@ -9,7 +9,7 @@
     "dev": "node server.js",
     "dev:watch": "nodemon server.js",
     "pdf:phase2": "node gen_pdf.js",
-    "test": "node --test test/validation.test.js"
+    "test": "node --test test/validation.test.js test/lessonProgress.test.js"
   },
   "keywords": [],
   "author": "",
