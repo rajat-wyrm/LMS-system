@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { ArrowLeft, PlayCircle, FileText, CheckCircle, Loader2, ChevronRight, Lock, Award, Check, Clock } from "lucide-react";
+import { ArrowLeft, PlayCircle, FileText, CheckCircle, Loader2, ChevronRight, Lock, Award, Check, Clock, RefreshCw, Wifi, WifiOff } from "lucide-react";
 import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { toast } from "sonner";
+import { getSyncQueue, saveSyncQueue, clearSyncQueue, mergeLocalAndServerEnrollment } from "@/utils/progressSync";
 
 export default function CoursePlayer() {
   const { id } = useParams<{ id: string }>();
@@ -18,11 +19,71 @@ export default function CoursePlayer() {
   // To check if they are actually enrolled
   const [isEnrolled, setIsEnrolled] = useState(false);
 
-  const fetchEnrollment = async () => {
+  // Sync state
+  const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'offline'>(
+    navigator.onLine ? 'synced' : 'offline'
+  );
+  const [hasResumed, setHasResumed] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Sync queue to backend
+  const syncProgress = async (retryCount = 0) => {
+    if (!navigator.onLine || !id) {
+      setSyncStatus('offline');
+      return;
+    }
+
+    const queue = getSyncQueue(id);
+    if (
+      queue.completedLessonIds.length === 0 &&
+      !queue.lastWatchedLessonId &&
+      Object.keys(queue.playbackPositions || {}).length === 0
+    ) {
+      setSyncStatus('synced');
+      return;
+    }
+
+    setSyncStatus('syncing');
+
+    try {
+      const res = await courseApi.syncProgress(id, queue);
+      if (res.data.success) {
+        const updated = res.data.data;
+        setEnrollment((prev: any) => prev ? ({
+          ...prev,
+          progress: updated.progress,
+          status: updated.status,
+          completedLessons: updated.completedLessons,
+          lastWatchedLessonId: updated.lastWatchedLessonId,
+          playbackPositions: updated.playbackPositions,
+        }) : null);
+        clearSyncQueue(id);
+        setSyncStatus('synced');
+      } else {
+        throw new Error("Sync failed");
+      }
+    } catch (err) {
+      console.error("Sync progress failed", err);
+      setSyncStatus('offline');
+      if (retryCount < 3) {
+        const delay = Math.pow(2, retryCount) * 1000;
+        setTimeout(() => syncProgress(retryCount + 1), delay);
+      }
+    }
+  };
+
+  const fetchEnrollment = async (lessonsCount?: number) => {
     try {
       const res = await courseApi.getEnrollmentByCourse(id!);
-      setEnrollment(res.data.data);
-      return res.data.data;
+      const fetched = res.data.data;
+      
+      // Conflict Resolution: merge local unsynced pending changes
+      const queue = getSyncQueue(id);
+      const count = lessonsCount || course?.lessons?.length || 0;
+      const merged = mergeLocalAndServerEnrollment(fetched, queue, count);
+      
+      setEnrollment(merged);
+      return merged;
     } catch (e) {
       return null;
     }
@@ -41,7 +102,7 @@ export default function CoursePlayer() {
         if (user?.role === "admin") {
           setIsEnrolled(true);
         } else {
-          const enr = await fetchEnrollment();
+          const enr = await fetchEnrollment(c.lessons.length);
           setIsEnrolled(!!enr);
         }
       } catch (err) {
@@ -54,26 +115,125 @@ export default function CoursePlayer() {
     if (id) fetchData();
   }, [id, user]);
 
+  // Sync listeners
+  useEffect(() => {
+    const handleOnlineStatus = () => {
+      if (navigator.onLine) {
+        syncProgress();
+      } else {
+        setSyncStatus('offline');
+      }
+    };
+
+    window.addEventListener('online', handleOnlineStatus);
+    window.addEventListener('offline', handleOnlineStatus);
+
+    handleOnlineStatus();
+
+    return () => {
+      window.removeEventListener('online', handleOnlineStatus);
+      window.removeEventListener('offline', handleOnlineStatus);
+    };
+  }, []);
+
+  // Resume playback on load
+  useEffect(() => {
+    if (course && enrollment && !hasResumed) {
+      const lastId = enrollment.lastWatchedLessonId;
+      if (lastId) {
+        const idx = course.lessons.findIndex((l: any) => l.id === lastId);
+        if (idx !== -1) {
+          setActiveLessonIndex(idx);
+        }
+      }
+      setHasResumed(true);
+    }
+  }, [course, enrollment, hasResumed]);
+
+  // Track active lesson change
+  useEffect(() => {
+    if (activeLesson && enrollment) {
+      const queue = getSyncQueue(id);
+      queue.lastWatchedLessonId = activeLesson.id;
+      queue.lastWatchedAt = new Date().toISOString();
+      saveSyncQueue(id, queue);
+
+      setEnrollment((prev: any) => prev ? ({
+        ...prev,
+        lastWatchedLessonId: activeLesson.id,
+      }) : null);
+
+      syncProgress();
+    }
+  }, [activeLessonIndex]);
+
   const handleMarkComplete = async () => {
     if (!enrollment || !activeLesson) return;
     
-    try {
-      setIsMarkingComplete(true);
-      await courseApi.completeLesson(id!, activeLesson.id);
-      
-      // Re-fetch enrollment to get updated progress and completed lessons
-      await fetchEnrollment();
-      
-      toast.success("Lesson marked as complete!");
-      
-      // Auto-advance to next lesson if available
-      if (activeLessonIndex < course.lessons.length - 1) {
-        setActiveLessonIndex(prev => prev + 1);
-      }
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to mark lesson as complete");
-    } finally {
-      setIsMarkingComplete(false);
+    // Optimistic UI updates
+    const updatedCompletedLessons = [...(enrollment.completedLessons || [])];
+    if (!updatedCompletedLessons.some((l: any) => l.id === activeLesson.id)) {
+      updatedCompletedLessons.push({ id: activeLesson.id });
+    }
+    
+    const totalLessons = course.lessons.length;
+    const localProgress = totalLessons > 0 ? Math.round((updatedCompletedLessons.length / totalLessons) * 100) : 0;
+    
+    setEnrollment((prev: any) => prev ? ({
+      ...prev,
+      completedLessons: updatedCompletedLessons,
+      progress: localProgress > 100 ? 100 : localProgress,
+    }) : null);
+
+    const queue = getSyncQueue(id);
+    if (!queue.completedLessonIds.includes(activeLesson.id)) {
+      queue.completedLessonIds.push(activeLesson.id);
+    }
+    saveSyncQueue(id, queue);
+
+    toast.success("Progress saved locally.");
+    syncProgress();
+    
+    if (activeLessonIndex < course.lessons.length - 1) {
+      setActiveLessonIndex(prev => prev + 1);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (!videoRef.current || !activeLesson) return;
+    const currentTime = Math.floor(videoRef.current.currentTime);
+
+    const queue = getSyncQueue(id);
+    const prevPos = queue.playbackPositions[activeLesson.id] || 0;
+    if (Math.abs(currentTime - prevPos) >= 3) {
+      queue.playbackPositions[activeLesson.id] = currentTime;
+      saveSyncQueue(id, queue);
+
+      setEnrollment((prev: any) => {
+        if (!prev) return null;
+        const positions = prev.playbackPositions && typeof prev.playbackPositions === 'object' ? { ...prev.playbackPositions } : {};
+        positions[activeLesson.id] = currentTime;
+        return {
+          ...prev,
+          playbackPositions: positions
+        };
+      });
+
+      syncProgress();
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (!videoRef.current || !activeLesson || !enrollment) return;
+
+    const queue = getSyncQueue(id);
+    const localPos = queue.playbackPositions[activeLesson.id];
+    const dbPositions = enrollment.playbackPositions || {};
+    const resumeTime = localPos !== undefined ? localPos : (dbPositions[activeLesson.id] || 0);
+
+    if (resumeTime > 0) {
+      videoRef.current.currentTime = resumeTime;
+      toast.info(`Resumed video at ${Math.floor(resumeTime / 60)}m ${Math.floor(resumeTime % 60)}s`);
     }
   };
 
@@ -111,7 +271,14 @@ export default function CoursePlayer() {
     
     if (url.toLowerCase().endsWith(".mp4") || url.toLowerCase().endsWith(".webm") || url.toLowerCase().endsWith(".ogg")) {
       return (
-        <video controls className="w-full h-full bg-black" src={url}>
+        <video 
+          ref={videoRef}
+          controls 
+          className="w-full h-full bg-black" 
+          src={url}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+        >
           Your browser does not support the video tag.
         </video>
       );
@@ -148,8 +315,35 @@ export default function CoursePlayer() {
         
         {enrollment && (
           <div className="flex items-center gap-4">
-            <div className="text-sm font-medium">
-              Progress: <span className="text-primary">{enrollment.progress}%</span>
+            <div className="text-sm font-medium flex items-center gap-3">
+              <span>
+                Progress: <span className="text-primary">{enrollment.progress}%</span>
+              </span>
+              
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
+                syncStatus === 'synced' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                syncStatus === 'syncing' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+              }`}>
+                {syncStatus === 'synced' && (
+                  <>
+                    <Wifi className="w-3.5 h-3.5 text-green-500" />
+                    Synced
+                  </>
+                )}
+                {syncStatus === 'syncing' && (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 text-blue-500 animate-spin" />
+                    Syncing...
+                  </>
+                )}
+                {syncStatus === 'offline' && (
+                  <>
+                    <WifiOff className="w-3.5 h-3.5 text-yellow-500" />
+                    Offline (Saved Local)
+                  </>
+                )}
+              </span>
             </div>
             {isFullyCompleted && enrollment.certificateApproved && (
               <Link to={`/certificate/${id}`} className="btn-primary !py-1.5 !px-3 text-sm flex items-center gap-2">
