@@ -1,9 +1,11 @@
+
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const compression = require("compression");
 const pinoHttp = require("pino-http");
+const path = require("path");
 
 const logger = require("./utils/logger");
 const { errorHandler } = require("./middlewares/error.middleware");
@@ -14,24 +16,40 @@ const requestLogger = require("./middlewares/requestLogger");
 
 const app = express();
 
-// Initialize Swagger Documentation
+// ============================================================
+// Swagger Documentation
+// ============================================================
+
 setupSwagger(app);
 
-// Compress responses
+// ============================================================
+// Compression
+// ============================================================
+
 app.use(compression());
 
+// ============================================================
 // HTTP Request Logging
+// ============================================================
+
 app.use(pinoHttp({ logger }));
 
-// Security headers
+// ============================================================
+// Security
+// ============================================================
+
 app.use(helmet());
+
 app.use(
   helmet.crossOriginResourcePolicy({
     policy: "cross-origin",
   })
 );
 
+// ============================================================
 // Rate Limiting
+// ============================================================
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -46,7 +64,10 @@ const limiter = rateLimit({
 
 app.use("/api", limiter);
 
-// Middleware
+// ============================================================
+// CORS
+// ============================================================
+
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
@@ -61,9 +82,12 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
+      // Allow requests without an Origin header
+      // and configured development origins.
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        // Preserve existing development behavior.
         callback(null, true);
       }
     },
@@ -71,18 +95,31 @@ app.use(
   })
 );
 
+// ============================================================
+// Body Parsers
+// ============================================================
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// ============================================================
+// Request Logger
+// ============================================================
+
 app.use(requestLogger);
 
-const path = require("path");
+// ============================================================
+// Static Uploads
+// ============================================================
 
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "../uploads"))
+);
 
-
-// ===============================
-// v1 Routes
-// ===============================
+// ============================================================
+// API V1 ROUTES
+// ============================================================
 
 const authRoutesV1 = require("./routes/v1/auth.routes");
 const courseRoutesV1 = require("./routes/v1/courses.routes");
@@ -93,11 +130,18 @@ const profileRoutesV1 = require("./routes/v1/profile.routes");
 const uploadRoutesV1 = require("./routes/v1/upload.routes");
 const wishlistRoutesV1 = require("./routes/v1/wishlist.routes");
 const categoryRoutesV1 = require("./routes/v1/categories.routes");
+
+// IMPORTANT:
+// The filename is review.routes.js.
+// Do NOT use review\.routes.js.
+const reviewRoutesV1 = require("./routes/v1/review.routes");
+
 const analyticsRoutes = require("./analytics/analytics.routes");
 const auditRoutes = require("./routes/v1/audit.routes");
 
-
-// v1 API Routes
+// ============================================================
+// V1 API Routes
+// ============================================================
 
 app.use("/api/v1/auth", authRoutesV1);
 app.use("/api/v1/courses", courseRoutesV1);
@@ -108,11 +152,19 @@ app.use("/api/v1/profile", profileRoutesV1);
 app.use("/api/v1/upload", uploadRoutesV1);
 app.use("/api/v1/wishlist", wishlistRoutesV1);
 app.use("/api/v1/categories", categoryRoutesV1);
+
+// ============================================================
+// REVIEW ROUTES
+// ============================================================
+
+app.use("/api/v1/reviews", reviewRoutesV1);
+
 app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/audit-logs", auditRoutes);
 
-
-// Backward compatibility routes
+// ============================================================
+// BACKWARD COMPATIBILITY ROUTES
+// ============================================================
 
 app.use("/api/auth", authRoutesV1);
 app.use("/api/courses", courseRoutesV1);
@@ -123,19 +175,23 @@ app.use("/api/profile", profileRoutesV1);
 app.use("/api/upload", uploadRoutesV1);
 app.use("/api/wishlist", wishlistRoutesV1);
 app.use("/api/categories", categoryRoutesV1);
+app.use("/api/reviews", reviewRoutesV1);
 app.use("/api/analytics", analyticsRoutes);
 
-
+// ============================================================
 // Default Route
+// ============================================================
 
 app.get("/", (req, res) => {
-  res.json({
+  res.status(200).json({
+    success: true,
     message: "Welcome to LMS Backend API",
   });
 });
 
-
+// ============================================================
 // Health Check
+// ============================================================
 
 app.get("/health", async (req, res) => {
   try {
@@ -148,7 +204,6 @@ app.get("/health", async (req, res) => {
       db: "ok",
       redis: redisStatus === "PONG" ? "ok" : redisStatus,
     });
-
   } catch (error) {
     logger.error({ err: error }, "Health check failed");
 
@@ -159,8 +214,9 @@ app.get("/health", async (req, res) => {
   }
 });
 
-
-// 404 Handler
+// ============================================================
+// 404 HANDLER
+// ============================================================
 
 app.use((req, res, next) => {
   const AppError = require("./utils/AppError");
@@ -174,10 +230,11 @@ app.use((req, res, next) => {
   );
 });
 
-
-// Global Error Handler
+// ============================================================
+// GLOBAL ERROR HANDLER
+// ============================================================
 
 app.use(errorHandler);
 
-
 module.exports = app;
+
