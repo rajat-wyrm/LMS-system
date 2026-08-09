@@ -1,4 +1,4 @@
-const { prisma } = require("../config/db");
+﻿const { prisma } = require("../config/db");
 const { clearCache } = require("../middlewares/cache.middleware");
 const { logAdminAction } = require("../utils/auditLogger");
 
@@ -301,7 +301,7 @@ exports.createCourse = async (req, res, next) => {
         outcomes: outcomes || [],
         xp: xp || "1000 XP",
         gradient: gradient || "from-blue-600 via-blue-500 to-cyan-400",
-        icon: icon || "🤖",
+        icon: icon || "≡ƒñû",
         status: status || "approved",
         instructorId: req.user.id,
       },
@@ -879,3 +879,81 @@ exports.generateLessonsAI = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.completeLesson = async (req, res, next) => {
+  try {
+    // Read from params or body depending on where data comes from
+    const courseId = req.params.courseId || req.body.courseId;
+    const lessonId = req.params.lessonId || req.body.lessonId;
+    const userId = req.user.id;
+
+    // 1. Enrollment check
+    const enrollment = await prisma.enrollment.findFirst({
+      where: { userId, courseId },
+    });
+    if (!enrollment) {
+      return res
+        .status(403)
+        .json({ success: false, error: "Not enrolled in this course." });
+    }
+
+    // 2. Fetch the lesson
+    const lesson = await prisma.lesson.findUnique({
+      where: { id: lessonId },
+    });
+    if (!lesson) {
+      return res.status(404).json({ success: false, error: "Lesson not found." });
+    }
+
+    // 3. MAIN CHECK: Match lesson's courseId with requested courseId
+    if (lesson.courseId !== courseId) {
+      return res.status(400).json({
+        success: false,
+        error: "This lesson does not belong to the enrolled course!",
+      });
+    }
+
+    // 4. Mark lesson as completed (connect is idempotent) and recalc progress
+    const updatedEnrollment = await prisma.enrollment.update({
+      where: { userId_courseId: { userId, courseId } },
+      data: {
+        completedLessons: {
+          connect: { id: lessonId },
+        },
+      },
+      include: {
+        completedLessons: true,
+        course: { include: { lessons: { select: { id: true } } } },
+      },
+    });
+
+    const totalLessons = updatedEnrollment.course.lessons.length;
+    const newProgress =
+      totalLessons > 0
+        ? Math.min(
+            100,
+            Math.round(
+              (updatedEnrollment.completedLessons.length / totalLessons) * 100
+            )
+          )
+        : 0;
+
+    const result = await prisma.enrollment.update({
+      where: { userId_courseId: { userId, courseId } },
+      data: {
+        progress: newProgress,
+        status: newProgress === 100 ? "completed" : "active",
+      },
+      include: { completedLessons: true },
+    });
+
+    return res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get course activity timeline
+// @route   GET /api/courses/:id/timeline
+// @access  Private
+

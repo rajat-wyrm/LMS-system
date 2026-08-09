@@ -13,6 +13,7 @@ const {
   getInstructorStats,
   getLearningPaths,
   generateLessonsAI,
+  completeLesson,
 } = require("../../controllers/courses.controller");
 
 const { protect, authorize } = require("../../middlewares/auth.middleware");
@@ -117,5 +118,14 @@ router
   .route("/:courseId/lessons/:lessonId")
 
   .delete(protect, authorize("admin"), deleteLesson);
+
+// ===============================
+// Complete Lesson
+// ===============================
+
+router
+  .route("/:courseId/lessons/:lessonId/complete")
+
+  .post(protect, completeLesson);
 
 module.exports = router;
