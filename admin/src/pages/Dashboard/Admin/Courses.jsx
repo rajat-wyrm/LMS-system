@@ -133,35 +133,50 @@ const Courses = () => {
       showNotice('Unable to save course.');
     }
   };
+const handleClone = (course) => {
+  const copyTitle = `${course.title} (Copy)`;
 
-  const handleClone = async (course) => {
-    try {
-      const clonePayload = {
-        title: `${course.title} (Copy)`,
-        description: course.description || course.shortDesc || 'Cloned course',
-        category: course.category,
-        level: course.level,
-        price: Number(course.price) || 0,
-        thumbnail: course.thumbnail || '',
-        celebrityTeacher: course.teacher || course.celebrityTeacher || '',
-        duration: course.duration || 'Self-paced',
-        rating: Number(course.rating) || 4.5,
-        outcomes: course.outcomes || [],
-        xp: course.xp || '1000 XP',
-        gradient: course.gradient || 'from-blue-600 via-blue-500 to-cyan-400',
-        icon: course.icon || '📚',
-        status: 'approved',
-      };
-      await apiFetch('/courses', { method: 'POST', body: JSON.stringify(clonePayload) });
-      await fetchCourses();
-      notifyCourseSync();
-      showNotice('Course cloned as draft.');
-    } catch (error) {
-      console.error('Failed to clone course:', error);
-      showNotice('Unable to clone course.');
-    }
-  };
+const handleClone = async (course) => {
+  try {
+    const copyTitle = `${course.title} (Copy)`;
 
+    const generatedSlug = copyTitle
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-');
+
+    const clonePayload = {
+      title: copyTitle,
+      slug: generatedSlug,
+      description: course.description || course.shortDesc || 'Cloned course',
+      category: course.category,
+      level: course.level,
+      price: Number(course.price) || 0,
+      thumbnail: course.thumbnail || '',
+      celebrityTeacher: course.teacher || course.celebrityTeacher || '',
+      duration: course.duration || 'Self-paced',
+      rating: Number(course.rating) || 4.5,
+      outcomes: course.outcomes || [],
+      xp: course.xp || '1000 XP',
+      gradient: course.gradient || 'from-blue-600 via-blue-500 to-cyan-400',
+      icon: course.icon || '📚',
+      status: 'draft',
+    };
+
+    await apiFetch('/courses', {
+      method: 'POST',
+      body: JSON.stringify(clonePayload),
+    });
+
+    await fetchCourses();
+    notifyCourseSync();
+    showNotice('Course cloned as draft.');
+  } catch (error) {
+    console.error('Failed to clone course:', error);
+    showNotice('Unable to clone course.');
+  }
+};
   const handleExport = () => {
     exportToCSV(
       filtered,

@@ -1,0 +1,1 @@
+-- Migration myproject_feature_parity was applied directly to database

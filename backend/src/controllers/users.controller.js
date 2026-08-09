@@ -1,11 +1,20 @@
-const { prisma } = require('../config/db');
+const { prisma } = require("../config/db");
+const { logAdminAction } = require("../utils/auditLogger");
 
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private/Admin
 exports.getUsers = async (req, res, next) => {
   try {
-    const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', search, role, status } = req.query;
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = "createdAt",
+      sortOrder = "desc",
+      search,
+      role,
+      status,
+    } = req.query;
 
     const pageNumber = parseInt(page, 10);
     const limitNumber = parseInt(limit, 10);
@@ -18,14 +27,14 @@ exports.getUsers = async (req, res, next) => {
 
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } }
+        { name: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
       ];
     }
 
     const orderBy = {};
     if (sortBy) {
-      orderBy[sortBy] = sortOrder === 'asc' ? 'asc' : 'desc';
+      orderBy[sortBy] = sortOrder === "asc" ? "asc" : "desc";
     }
 
     const [users, total] = await Promise.all([
@@ -37,13 +46,13 @@ exports.getUsers = async (req, res, next) => {
           email: true,
           role: true,
           status: true,
-          createdAt: true
+          createdAt: true,
         },
         skip,
         take: limitNumber,
-        orderBy
+        orderBy,
       }),
-      prisma.user.count({ where })
+      prisma.user.count({ where }),
     ]);
 
     res.status(200).json({
@@ -54,8 +63,8 @@ exports.getUsers = async (req, res, next) => {
         total,
         page: pageNumber,
         limit: limitNumber,
-        totalPages: Math.ceil(total / limitNumber)
-      }
+        totalPages: Math.ceil(total / limitNumber),
+      },
     });
   } catch (error) {
     next(error);
@@ -74,12 +83,12 @@ exports.getUser = async (req, res, next) => {
         name: true,
         email: true,
         role: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
 
     if (!user) {
-      return res.status(404).json({ success: false, error: 'User not found' });
+      return res.status(404).json({ success: false, error: "User not found" });
     }
 
     res.status(200).json({ success: true, data: user });
@@ -95,26 +104,27 @@ exports.updateUser = async (req, res, next) => {
   try {
     const { status, role } = req.body;
 
-    const allowedStatuses = ['pending', 'approved', 'rejected', 'suspended'];
+    const allowedStatuses = ["pending", "approved", "rejected", "suspended"];
     if (status && !allowedStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid status. Allowed values are: pending, approved, rejected, suspended.',
+        error:
+          "Invalid status. Allowed values are: pending, approved, rejected, suspended.",
       });
     }
 
-    const allowedRoles = ['user', 'instructor', 'admin'];
+    const allowedRoles = ["user", "instructor", "admin"];
     if (role && !allowedRoles.includes(role)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid role. Allowed values are: user, instructor, admin.',
+        error: "Invalid role. Allowed values are: user, instructor, admin.",
       });
     }
 
     const user = await prisma.user.findUnique({ where: { id: req.params.id } });
 
     if (!user) {
-      return res.status(404).json({ success: false, error: 'User not found' });
+      return res.status(404).json({ success: false, error: "User not found" });
     }
 
     const updatedUser = await prisma.user.update({
@@ -125,8 +135,20 @@ exports.updateUser = async (req, res, next) => {
         name: true,
         email: true,
         role: true,
-        status: true
-      }
+        status: true,
+      },
+    });
+    await logAdminAction({
+      adminId: req.user.id,
+      action: "updated",
+      resource:
+        user.role === "instructor" || role === "instructor"
+          ? "instructor"
+          : "user",
+      resourceId: user.id,
+      details: `Updated user ${user.name}. Changes: ${Object.keys(
+        req.body,
+      ).join(", ")}`,
     });
 
     res.status(200).json({ success: true, data: updatedUser });
@@ -143,10 +165,20 @@ exports.deleteUser = async (req, res, next) => {
     const user = await prisma.user.findUnique({ where: { id: req.params.id } });
 
     if (!user) {
-      return res.status(404).json({ success: false, error: 'User not found' });
+      return res.status(404).json({ success: false, error: "User not found" });
     }
 
-    await prisma.user.delete({ where: { id: req.params.id } });
+    await prisma.user.delete({
+      where: { id: req.params.id },
+    });
+
+    await logAdminAction({
+      adminId: req.user.id,
+      action: "deleted",
+      resource: user.role === "instructor" ? "instructor" : "user",
+      resourceId: user.id,
+      details: `Deleted ${user.role}: ${user.name}`,
+    });
 
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
