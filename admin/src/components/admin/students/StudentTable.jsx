@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { MdPeopleOutline } from 'react-icons/md';
+import EmptyState from "../../common/EmptyState";
 import {
   MdPerson,
   MdEdit,
@@ -75,9 +77,9 @@ const getStatusBadge = (status) => {
   );
 };
 
-const deriveLastActive = (student) =>
-  student.lastActive ||
-  (student.status === 'Active' ? '2h ago' : student.status === 'Pending' ? '5d ago' : '1w ago');
+const deriveLastActive = (student) => student.lastActive || '—';
+const deriveCertificates = (student) => Number(student.certificates || 0);
+const deriveStreak = (student) => student.streak ?? '—';
 
 const deriveCertificates = (student) =>
   student.certificates ?? Math.max(0, Math.floor((student.progress ?? 0) / 25));
@@ -251,8 +253,18 @@ const StudentTable = ({ students = [], onViewProfile, onNotify, onEdit, onDelete
           <tbody>
             {filteredStudents.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-16 text-center admin-text-secondary text-sm">
-                  No students match your filters.
+                <td colSpan={8} className="py-4 px-4">
+                  <EmptyState
+                    icon={MdPeopleOutline}
+                    title={hasFilters ? 'No Students Found' : 'No Students Yet'}
+                    description={
+                      hasFilters
+                        ? 'No students match your search or filters. Try adjusting your criteria.'
+                        : 'Students will appear here once they register on the platform.'
+                    }
+                    buttonText={hasFilters ? 'Clear Filters' : undefined}
+                    onButtonClick={onClearFilters}
+                  />
                 </td>
               </tr>
             ) : (

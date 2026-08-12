@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,32 +6,25 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
-  user
-  instructor
-  admin
-}
-
-enum EnrollmentStatus {
-  active
-  completed
-  dropped
-}
-
 model User {
-  id          String       @id @default(cuid())
-  name        String
-  email       String       @unique
-  password    String
-  role        Role         @default(user)
-  status      String       @default("pending") // pending, approved, rejected, suspended
-  bio         String?
-  avatar      String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id        String     @id @default(cuid())
+  name      String
+  email     String     @unique
+  password  String
+  role      Role       @default(user)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  status    UserStatus @default(pending)
+  avatar    String?
+  bio       String?
 
-  courses     Course[]     @relation("InstructorCourses")
-  enrollments Enrollment[]
+  courses                   Course[]       @relation("InstructorCourses")
+  enrollments               Enrollment[]
+  reviews                   Review[]       @relation("UserReviews")
+  reviewReports             ReviewReport[] @relation("ReviewReporter")
+  instructorReviewResponses Review[]       @relation("InstructorReviewResponses")
+  reviewModeratedBy         Review[]       @relation("ReviewModeratedBy")
+  auditLogs                 AuditLog[]
 }
 
 model Course {
@@ -42,25 +32,42 @@ model Course {
   title            String
   description      String
   category         String
-  level            String       @default("Beginner")
-  price            Float        @default(0)
-  thumbnail        String?
   celebrityTeacher String?
   instructorId     String
-  duration         String?
-  rating           Float        @default(4.5)
-  outcomes         String[]
-  xp               String?
-  gradient         String?
-  icon             String?
-  status           String       @default("pending") // pending, approved, rejected
-  instructor       User         @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
+  level            String       @default("Beginner")
+  thumbnail        String?
+  status           CourseStatus @default(pending)
+  categoryId       String?
+  deletedAt        DateTime?
+  duration         String?
+  gradient         String?
+  icon             String?
+  isDeleted        Boolean      @default(false)
+  outcomes         String[]
+  price            Float        @default(0)
+  rating           Float        @default(4.5)
+  xp               String?
 
-  lessons     Lesson[]
-  enrollments Enrollment[]
-  learningPaths LearningPath[] @relation("LearningPathCourses")
+  categoryRecord Category? @relation(fields: [categoryId], references: [id])
+  instructor     User      @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+
+  enrollments   Enrollment[]
+  lessons       Lesson[]
+  learningPaths LearningPath[]   @relation("LearningPathCourses")
+  reviews       Review[]
+  activities    CourseActivity[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  courses Course[]
 }
 
 model LearningPath {
@@ -70,9 +77,10 @@ model LearningPath {
   description String
   duration    String
   color       String   @default("teal")
-  courses     Course[] @relation("LearningPathCourses")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  courses Course[] @relation("LearningPathCourses")
 }
 
 model Lesson {
@@ -82,28 +90,155 @@ model Lesson {
   videoUrl  String?
   order     Int
   courseId  String
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   completedBy Enrollment[] @relation("CompletedLessons")
 }
 
 model Enrollment {
-  id               String           @id @default(cuid())
-  userId           String
-  courseId         String
+  id                  String           @id @default(cuid())
+  userId              String
+  courseId            String
   progress            Int              @default(0)
   status              EnrollmentStatus @default(active)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
   certificateApproved Boolean          @default(false)
   mentor              String?
+  lastWatchedLessonId String?
+  lastWatchedAt       DateTime?
+  playbackPositions   Json?            @default("{}")
   createdAt           DateTime         @default(now())
   updatedAt           DateTime         @updatedAt
 
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  completedLessons Lesson[] @relation("CompletedLessons")
+model Review {
+  id String @id @default(cuid())
 
-  @@unique([userId, courseId]) // Prevent duplicate enrollments
-   @@index([createdAt]) //for weekly stats performance
+  rating  Int
+  comment String?
+
+  // Moderation
+  status         ReviewStatus @default(pending)
+  moderationNote String?
+  moderatedById  String?
+  moderatedAt    DateTime?
+
+  userId   String
+  courseId String
+
+  user   User   @relation("UserReviews", fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  // Admin who moderated this review
+  moderatedBy User? @relation("ReviewModeratedBy", fields: [moderatedById], references: [id], onDelete: SetNull)
+
+  reports ReviewReport[]
+
+  // Instructor response
+  instructorResponse    String?
+  instructorResponderId String?
+  instructorResponder   User?   @relation("InstructorReviewResponses", fields: [instructorResponderId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([instructorResponderId])
+  @@index([moderatedById])
+}
+
+model ReviewReport {
+  id String @id @default(cuid())
+
+  reviewId   String
+  reporterId String
+
+  reason  String
+  details String?
+
+  status ReviewReportStatus @default(pending)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  reporter User   @relation("ReviewReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, reporterId])
+  @@index([reviewId])
+  @@index([reporterId])
+  @@index([createdAt])
+}
+
+model CourseActivity {
+  id        String   @id @default(cuid())
+  courseId  String
+  action    String
+  details   String?
+  userId    String
+  userName  String
+  createdAt DateTime @default(now())
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  resource   String
+  resourceId String?
+  details    String?
+  createdAt  DateTime @default(now())
+
+  admin User @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([createdAt])
+}
+
+enum Role {
+  user
+  instructor
+  admin
+}
+
+enum UserStatus {
+  pending
+  approved
+  rejected
+  suspended
+}
+
+enum CourseStatus {
+  pending
+  approved
+  rejected
+}
+
+enum EnrollmentStatus {
+  active
+  completed
+  dropped
+}
+
+enum ReviewStatus {
+  pending
+  approved
+  rejected
+  removed
+}
+
+enum ReviewReportStatus {
+  pending
+  reviewed
+  dismissed
+  resolved
 }

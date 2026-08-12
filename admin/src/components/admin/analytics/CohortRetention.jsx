@@ -1,7 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MdGridOn } from 'react-icons/md';
-import { cohortRetentionData } from './analyticsData';
 
 function retentionColor(pct) {
   if (pct == null) return 'var(--admin-progress-track)';
@@ -11,8 +10,8 @@ function retentionColor(pct) {
   return 'rgba(245, 158, 11, 0.55)';
 }
 
-const CohortRetention = () => {
-  const { weeks, cohorts } = cohortRetentionData;
+const CohortRetention = ({ data, loading }) => {
+  const { weeks = [], cohorts = [] } = data || {};
 
   return (
     <motion.section
@@ -38,7 +37,7 @@ const CohortRetention = () => {
         </div>
       </div>
 
-      <table className="w-full min-w-[320px] text-xs border-collapse">
+      {loading ? <p className="admin-text-secondary text-sm py-8">Loading retention data…</p> : !cohorts.length ? <p className="admin-text-secondary text-sm py-8">No retention data has been recorded yet.</p> : <table className="w-full min-w-[320px] text-xs border-collapse">
         <thead>
           <tr>
             <th className="text-left py-2 pr-2 admin-text-secondary font-semibold">Cohort</th>
@@ -73,7 +72,7 @@ const CohortRetention = () => {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table>}
     </motion.section>
   );
 };

@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { ArrowLeft, PlayCircle, FileText, CheckCircle, Loader2, ChevronRight, Lock, Award, Check, Clock } from "lucide-react";
+import { ArrowLeft, PlayCircle, FileText, CheckCircle, Loader2, ChevronRight, Lock, Award, Check, Clock, RefreshCw, Wifi, WifiOff } from "lucide-react";
 import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { toast } from "sonner";
+import { getSyncQueue, saveSyncQueue, clearSyncQueue, mergeLocalAndServerEnrollment } from "@/utils/progressSync";
 
 export default function CoursePlayer() {
   const { id } = useParams<{ id: string }>();
@@ -18,17 +19,71 @@ export default function CoursePlayer() {
   // To check if they are actually enrolled
   const [isEnrolled, setIsEnrolled] = useState(false);
 
-  // Mentor Selection State
-  const [mentorChangeOpen, setMentorChangeOpen] = useState(false);
-  const [selectedMentor, setSelectedMentor] = useState("");
-  const [updatingMentor, setUpdatingMentor] = useState(false);
-  const celebrities = ["Virat Kohli", "Salman Khan", "Narendra Modi", "Sachin Tendulkar", "Hardik Pandya", "Virtual Mentor"];
+  // Sync state
+  const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'offline'>(
+    navigator.onLine ? 'synced' : 'offline'
+  );
+  const [hasResumed, setHasResumed] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
-  const fetchEnrollment = async () => {
+  // Sync queue to backend
+  const syncProgress = async (retryCount = 0) => {
+    if (!navigator.onLine || !id) {
+      setSyncStatus('offline');
+      return;
+    }
+
+    const queue = getSyncQueue(id);
+    if (
+      queue.completedLessonIds.length === 0 &&
+      !queue.lastWatchedLessonId &&
+      Object.keys(queue.playbackPositions || {}).length === 0
+    ) {
+      setSyncStatus('synced');
+      return;
+    }
+
+    setSyncStatus('syncing');
+
+    try {
+      const res = await courseApi.syncProgress(id, queue);
+      if (res.data.success) {
+        const updated = res.data.data;
+        setEnrollment((prev: any) => prev ? ({
+          ...prev,
+          progress: updated.progress,
+          status: updated.status,
+          completedLessons: updated.completedLessons,
+          lastWatchedLessonId: updated.lastWatchedLessonId,
+          playbackPositions: updated.playbackPositions,
+        }) : null);
+        clearSyncQueue(id);
+        setSyncStatus('synced');
+      } else {
+        throw new Error("Sync failed");
+      }
+    } catch (err) {
+      console.error("Sync progress failed", err);
+      setSyncStatus('offline');
+      if (retryCount < 3) {
+        const delay = Math.pow(2, retryCount) * 1000;
+        setTimeout(() => syncProgress(retryCount + 1), delay);
+      }
+    }
+  };
+
+  const fetchEnrollment = async (lessonsCount?: number) => {
     try {
       const res = await courseApi.getEnrollmentByCourse(id!);
-      setEnrollment(res.data.data);
-      return res.data.data;
+      const fetched = res.data.data;
+      
+      // Conflict Resolution: merge local unsynced pending changes
+      const queue = getSyncQueue(id);
+      const count = lessonsCount || course?.lessons?.length || 0;
+      const merged = mergeLocalAndServerEnrollment(fetched, queue, count);
+      
+      setEnrollment(merged);
+      return merged;
     } catch (e) {
       return null;
     }
@@ -47,7 +102,7 @@ export default function CoursePlayer() {
         if (user?.role === "admin") {
           setIsEnrolled(true);
         } else {
-          const enr = await fetchEnrollment();
+          const enr = await fetchEnrollment(c.lessons.length);
           setIsEnrolled(!!enr);
         }
       } catch (err) {
@@ -60,41 +115,125 @@ export default function CoursePlayer() {
     if (id) fetchData();
   }, [id, user]);
 
+  // Sync listeners
+  useEffect(() => {
+    const handleOnlineStatus = () => {
+      if (navigator.onLine) {
+        syncProgress();
+      } else {
+        setSyncStatus('offline');
+      }
+    };
+
+    window.addEventListener('online', handleOnlineStatus);
+    window.addEventListener('offline', handleOnlineStatus);
+
+    handleOnlineStatus();
+
+    return () => {
+      window.removeEventListener('online', handleOnlineStatus);
+      window.removeEventListener('offline', handleOnlineStatus);
+    };
+  }, []);
+
+  // Resume playback on load
+  useEffect(() => {
+    if (course && enrollment && !hasResumed) {
+      const lastId = enrollment.lastWatchedLessonId;
+      if (lastId) {
+        const idx = course.lessons.findIndex((l: any) => l.id === lastId);
+        if (idx !== -1) {
+          setActiveLessonIndex(idx);
+        }
+      }
+      setHasResumed(true);
+    }
+  }, [course, enrollment, hasResumed]);
+
+  // Track active lesson change
+  useEffect(() => {
+    if (activeLesson && enrollment) {
+      const queue = getSyncQueue(id);
+      queue.lastWatchedLessonId = activeLesson.id;
+      queue.lastWatchedAt = new Date().toISOString();
+      saveSyncQueue(id, queue);
+
+      setEnrollment((prev: any) => prev ? ({
+        ...prev,
+        lastWatchedLessonId: activeLesson.id,
+      }) : null);
+
+      syncProgress();
+    }
+  }, [activeLessonIndex]);
+
   const handleMarkComplete = async () => {
     if (!enrollment || !activeLesson) return;
     
-    try {
-      setIsMarkingComplete(true);
-      await courseApi.completeLesson(id!, activeLesson.id);
-      
-      // Re-fetch enrollment to get updated progress and completed lessons
-      await fetchEnrollment();
-      
-      toast.success("Lesson marked as complete!");
-      
-      // Auto-advance to next lesson if available
-      if (activeLessonIndex < course.lessons.length - 1) {
-        setActiveLessonIndex(prev => prev + 1);
-      }
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to mark lesson as complete");
-    } finally {
-      setIsMarkingComplete(false);
+    // Optimistic UI updates
+    const updatedCompletedLessons = [...(enrollment.completedLessons || [])];
+    if (!updatedCompletedLessons.some((l: any) => l.id === activeLesson.id)) {
+      updatedCompletedLessons.push({ id: activeLesson.id });
+    }
+    
+    const totalLessons = course.lessons.length;
+    const localProgress = totalLessons > 0 ? Math.round((updatedCompletedLessons.length / totalLessons) * 100) : 0;
+    
+    setEnrollment((prev: any) => prev ? ({
+      ...prev,
+      completedLessons: updatedCompletedLessons,
+      progress: localProgress > 100 ? 100 : localProgress,
+    }) : null);
+
+    const queue = getSyncQueue(id);
+    if (!queue.completedLessonIds.includes(activeLesson.id)) {
+      queue.completedLessonIds.push(activeLesson.id);
+    }
+    saveSyncQueue(id, queue);
+
+    toast.success("Progress saved locally.");
+    syncProgress();
+    
+    if (activeLessonIndex < course.lessons.length - 1) {
+      setActiveLessonIndex(prev => prev + 1);
     }
   };
 
-  const handleMentorChange = async () => {
-    if (!selectedMentor) return;
-    try {
-      setUpdatingMentor(true);
-      await courseApi.updateEnrollmentMentor(id!, selectedMentor);
-      setEnrollment((prev: any) => prev ? { ...prev, mentor: selectedMentor } : prev);
-      toast.success(`Mentor changed to ${selectedMentor}!`);
-      setMentorChangeOpen(false);
-    } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to change mentor");
-    } finally {
-      setUpdatingMentor(false);
+  const handleTimeUpdate = () => {
+    if (!videoRef.current || !activeLesson) return;
+    const currentTime = Math.floor(videoRef.current.currentTime);
+
+    const queue = getSyncQueue(id);
+    const prevPos = queue.playbackPositions[activeLesson.id] || 0;
+    if (Math.abs(currentTime - prevPos) >= 3) {
+      queue.playbackPositions[activeLesson.id] = currentTime;
+      saveSyncQueue(id, queue);
+
+      setEnrollment((prev: any) => {
+        if (!prev) return null;
+        const positions = prev.playbackPositions && typeof prev.playbackPositions === 'object' ? { ...prev.playbackPositions } : {};
+        positions[activeLesson.id] = currentTime;
+        return {
+          ...prev,
+          playbackPositions: positions
+        };
+      });
+
+      syncProgress();
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (!videoRef.current || !activeLesson || !enrollment) return;
+
+    const queue = getSyncQueue(id);
+    const localPos = queue.playbackPositions[activeLesson.id];
+    const dbPositions = enrollment.playbackPositions || {};
+    const resumeTime = localPos !== undefined ? localPos : (dbPositions[activeLesson.id] || 0);
+
+    if (resumeTime > 0) {
+      videoRef.current.currentTime = resumeTime;
+      toast.info(`Resumed video at ${Math.floor(resumeTime / 60)}m ${Math.floor(resumeTime % 60)}s`);
     }
   };
 
@@ -132,7 +271,14 @@ export default function CoursePlayer() {
     
     if (url.toLowerCase().endsWith(".mp4") || url.toLowerCase().endsWith(".webm") || url.toLowerCase().endsWith(".ogg")) {
       return (
-        <video controls className="w-full h-full bg-black" src={url}>
+        <video 
+          ref={videoRef}
+          controls 
+          className="w-full h-full bg-black" 
+          src={url}
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+        >
           Your browser does not support the video tag.
         </video>
       );
@@ -169,8 +315,35 @@ export default function CoursePlayer() {
         
         {enrollment && (
           <div className="flex items-center gap-4">
-            <div className="text-sm font-medium">
-              Progress: <span className="text-primary">{enrollment.progress}%</span>
+            <div className="text-sm font-medium flex items-center gap-3">
+              <span>
+                Progress: <span className="text-primary">{enrollment.progress}%</span>
+              </span>
+              
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
+                syncStatus === 'synced' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
+                syncStatus === 'syncing' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
+              }`}>
+                {syncStatus === 'synced' && (
+                  <>
+                    <Wifi className="w-3.5 h-3.5 text-green-500" />
+                    Synced
+                  </>
+                )}
+                {syncStatus === 'syncing' && (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 text-blue-500 animate-spin" />
+                    Syncing...
+                  </>
+                )}
+                {syncStatus === 'offline' && (
+                  <>
+                    <WifiOff className="w-3.5 h-3.5 text-yellow-500" />
+                    Offline (Saved Local)
+                  </>
+                )}
+              </span>
             </div>
             {isFullyCompleted && enrollment.certificateApproved && (
               <Link to={`/certificate/${id}`} className="btn-primary !py-1.5 !px-3 text-sm flex items-center gap-2">
@@ -255,31 +428,22 @@ export default function CoursePlayer() {
 
         {/* Right: Sidebar Syllabus */}
         <div className="w-full lg:w-[350px] border-l border-border bg-muted/5 flex flex-col shrink-0 h-full">
-          {enrollment && (
+          {course?.instructor?.name ? (
             <div className="p-5 border-b border-border shrink-0 bg-primary/5">
-              <h4 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Your Celebrity Mentor</h4>
+              <h4 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Course Instructor</h4>
               <div className="flex items-center gap-3">
                 <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(enrollment.mentor || "Virtual Mentor")}&background=8B5CF6&color=fff&bold=true`}
-                  alt={enrollment.mentor || "Virtual Mentor"}
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor.name)}&background=8B5CF6&color=fff&bold=true`}
+                  alt={course.instructor.name}
                   className="w-10 h-10 rounded-full object-cover border-2 border-secondary"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate text-foreground">{enrollment.mentor || "Virtual Mentor"}</p>
-                  <p className="text-xs text-muted-foreground">Personalized Guide</p>
+                  <p className="text-sm font-semibold truncate text-foreground">{course.instructor.name}</p>
+                  <p className="text-xs text-muted-foreground">Assigned from the database</p>
                 </div>
-                <button
-                  onClick={() => {
-                    setSelectedMentor(enrollment.mentor || "Virtual Mentor");
-                    setMentorChangeOpen(true);
-                  }}
-                  className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-                >
-                  Change
-                </button>
               </div>
             </div>
-          )}
+          ) : null}
 
           <div className="p-5 border-b border-border shrink-0">
             <h3 className="font-display font-bold text-lg mb-1">Course Content</h3>
@@ -330,50 +494,6 @@ export default function CoursePlayer() {
           </div>
         </div>
       </div>
-      
-      {/* Mentor Change Modal */}
-      {mentorChangeOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-background border border-border rounded-xl shadow-2xl max-w-md w-full overflow-hidden p-6 relative">
-            <h3 className="text-lg font-bold font-display mb-2 text-foreground">Change Celebrity Mentor</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Select the celebrity you want to guide you through this course.
-            </p>
-            
-            <div className="py-4">
-              <label className="text-sm font-medium text-foreground/80 mb-2 block">Choose Mentor</label>
-              <select
-                value={selectedMentor}
-                onChange={(e) => setSelectedMentor(e.target.value)}
-                className="w-full bg-muted/30 border border-border rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-foreground"
-              >
-                <option value="">Select a Mentor</option>
-                {celebrities.map((c) => (
-                  <option key={c} value={c} className="bg-background text-foreground">{c}</option>
-                ))}
-              </select>
-            </div>
-            
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setMentorChangeOpen(false)}
-                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 rounded-lg transition-colors"
-                disabled={updatingMentor}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleMentorChange}
-                disabled={!selectedMentor || updatingMentor}
-                className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/95 disabled:opacity-50 rounded-lg transition-colors flex items-center gap-2"
-              >
-                {updatingMentor && <Loader2 className="w-4 h-4 animate-spin" />}
-                Confirm Change
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

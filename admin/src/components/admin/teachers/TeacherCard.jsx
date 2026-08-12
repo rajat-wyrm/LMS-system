@@ -18,7 +18,7 @@ const BADGES = [
 ];
 
 const TeacherCard = ({ teacher, onView, onEdit, onDelete }) => {
-  const activeBadges = BADGES.filter((b) => teacher[b.key]);
+  const activeBadges = BADGES.filter((badge) => teacher[badge.key]);
   const menuRef = useRef(null);
 
   const handleCardKeyDown = (e) => {
@@ -51,8 +51,7 @@ const TeacherCard = ({ teacher, onView, onEdit, onDelete }) => {
         <div
           className="absolute inset-0"
           style={{
-            background:
-              'linear-gradient(to top, var(--admin-surface-raised) 0%, transparent 55%)',
+            background: 'linear-gradient(to top, var(--admin-surface-raised) 0%, transparent 55%)',
           }}
         />
         <div className="absolute top-3 right-3 z-10" onClick={(e) => e.stopPropagation()}>
@@ -71,7 +70,7 @@ const TeacherCard = ({ teacher, onView, onEdit, onDelete }) => {
               : 'bg-red-500/20 border-red-500/40 text-red-400'
           }`}
         >
-          {teacher.enabled ? '● Active' : '● Disabled'}
+          {teacher.enabled ? 'Active' : 'Inactive'}
         </span>
       </div>
 
@@ -110,40 +109,37 @@ const TeacherCard = ({ teacher, onView, onEdit, onDelete }) => {
         <h3 className="text-lg font-bold admin-text-primary mb-0.5 group-hover:text-[#A78BFA] transition-colors">
           {teacher.name}
         </h3>
-        <p className="text-xs admin-text-secondary mb-3 line-clamp-1">{teacher.style}</p>
+        <p className="text-xs admin-text-secondary mb-3 line-clamp-1">
+          {teacher.bio || 'Instructor profile'}
+        </p>
 
-        {activeBadges.length > 0 && (
+        {activeBadges.length > 0 ? (
           <div className="flex flex-wrap gap-1.5 mb-3">
-            {activeBadges.map((b) => {
-              const Icon = b.icon;
+            {activeBadges.map((badge) => {
+              const Icon = badge.icon;
               return (
                 <span
-                  key={b.key}
+                  key={badge.key}
                   className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full border"
                   style={{
-                    background: `${b.color}18`,
-                    borderColor: `${b.color}40`,
-                    color: b.color,
+                    background: `${badge.color}18`,
+                    borderColor: `${badge.color}40`,
+                    color: badge.color,
                   }}
                 >
                   <Icon size={12} />
-                  {b.label}
+                  {badge.label}
                 </span>
               );
             })}
           </div>
-        )}
+        ) : null}
 
         <div className="grid grid-cols-2 gap-2 pt-3 border-t" style={{ borderColor: 'var(--admin-border-subtle)' }}>
           <Stat icon={MdAttachMoney} label="Revenue" value={formatRevenue(teacher.revenue || 0)} accent="#F59E0B" />
           <Stat icon={MdGroups} label="Students" value={formatStudents(teacher.students || 0)} accent="#3B82F6" />
-          <Stat
-            icon={MdMenuBook}
-            label="Courses"
-            value={String(teacher.courses ?? 1)}
-            accent="#8B5CF6"
-          />
-          <Stat icon={MdStar} label="Rating" value={`${teacher.rating}★`} accent="#FBBF24" />
+          <Stat icon={MdMenuBook} label="Courses" value={String(teacher.courses ?? 0)} accent="#8B5CF6" />
+          <Stat icon={MdStar} label="Rating" value={`${teacher.rating}*`} accent="#FBBF24" />
         </div>
       </div>
     </motion.article>
@@ -152,10 +148,7 @@ const TeacherCard = ({ teacher, onView, onEdit, onDelete }) => {
 
 function Stat({ icon: Icon, label, value, accent }) {
   return (
-    <div
-      className="rounded-xl py-2 px-2 text-center"
-      style={{ background: 'var(--admin-surface)' }}
-    >
+    <div className="rounded-xl py-2 px-2 text-center" style={{ background: 'var(--admin-surface)' }}>
       <div className="flex items-center justify-center gap-1 mb-0.5">
         <Icon size={12} style={{ color: accent }} />
         <span className="text-[10px] admin-text-secondary uppercase font-semibold">{label}</span>
