@@ -9,7 +9,7 @@
     "dev": "node server.js",
     "dev:watch": "nodemon server.js",
     "pdf:phase2": "node gen_pdf.js",
-"test": "node --test test/validation.test.js test/courses.controller.test.js test/lessonProgress.test.js"
+    "test": "node --test test/validation.test.js test/courses.controller.test.js test/lessonProgress.test.js"
   },
   "keywords": [],
   "author": "",
@@ -33,6 +33,7 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
     "node-cache": "^5.1.2",
+    "node-cron": "^4.6.0",
     "pg": "^8.21.0",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
