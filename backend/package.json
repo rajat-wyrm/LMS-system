@@ -49,3 +49,13 @@
     "prisma": "^7.8.0"
   }
 }
+Add the new runtime dependency:
+
+```json
+"socket.io": "^4.8.1"
+```
+(run `npm install socket.io` from `backend/`).
+```json
+"socket.io-client": "^4.8.1"
+```
+(run `npm install socket.io-client` from `course-compass-main/`).

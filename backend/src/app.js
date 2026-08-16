@@ -136,3 +136,11 @@ app.use((req, res, next) => {
 app.use(errorHandler);
 
 module.exports = app;
+```js
+app.use("/api/notifications", notificationRoutesV1);
+```
+
+No other changes to `app.js` are required — CORS, auth, rate limiting, and the
+error handler are all already shared by every route in the app, including this
+one. The admin broadcast endpoint lives under the existing `adminRoutesV1`
+router (see `admin.routes.patch.md`), so it is already mounted.

@@ -183,4 +183,12 @@ export const Navbar = () => {
     </header>
   );
 };
+Import and render `<NotificationBell />` next to the existing auth/profile
+controls in the navbar (wherever the logged-in user menu currently sits),
+guarded by the same `isAuthenticated` check already used there:
 
+```tsx
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+// ...
+{isAuthenticated && <NotificationBell />}
+```

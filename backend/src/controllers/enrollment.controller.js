@@ -284,3 +284,14 @@ exports.updateEnrollmentMentor = async (req, res, next) => {
     next(error);
   }
 };
+```js
+const notificationService = require("../services/notification.service");
+// ...
+await notificationService.createNotification({
+  userId: course.instructorId,
+  title: "New enrollment",
+  message: `${req.user.name} just enrolled in "${course.title}".`,
+  category: "COURSE",
+  link: `/portal/courses/${course.id}`,
+});
+```
