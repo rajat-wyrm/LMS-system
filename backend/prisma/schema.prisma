@@ -39,6 +39,7 @@ model Course {
   level            String       @default("Beginner")
   thumbnail        String?
   status           CourseStatus @default(pending)
+  publishAt        DateTime?
   categoryId       String?
   deletedAt        DateTime?
   duration         String?
@@ -111,8 +112,11 @@ model Enrollment {
   lastWatchedLessonId String?
   lastWatchedAt       DateTime?
   playbackPositions   Json?            @default("{}")
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @updatedAt
+
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course           Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  completedLessons Lesson[] @relation("CompletedLessons")
+}
 
 model Review {
   id String @id @default(cuid())
