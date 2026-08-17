@@ -1825,3 +1825,48 @@ exports.getApprovedCertificates = async (req, res, next) => {
     next(error);
   }
 };
+if (changedFields.includes("status") && course.status === "approved") {
+  action = "published";
+  details = "Course approved and published.";
+
+  await notificationService.createNotification({
+    userId: course.instructorId,
+    title: "Course approved",
+    message: `Your course "${course.title}" has been approved and is now live.`,
+    category: "COURSE",
+    link: `/courses/${course.id}`,
+  });
+}
+```
+```js
+const notificationService = require("../services/notification.service");
+// ...
+await notificationService.createNotification({
+  userId: updated.userId,
+  title: "Certificate ready 🎉",
+  message: "Your course certificate has been approved and is ready to view.",
+  category: "COURSE",
+  link: `/certificate/${updated.courseId}`,
+});
+```js
+const notificationService = require("../services/notification.service");
+// ...
+await notificationService.createNotification({
+  userId: updated.userId,
+  title: "Certificate ready 🎉",
+  message: "Your course certificate has been approved and is ready to view.",
+  category: "COURSE",
+  link: `/certificate/${updated.courseId}`,
+});
+```
+```js
+if (status === "approved") {
+  await notificationService.createNotification({
+    userId: instructor.id,
+    title: "Instructor account approved",
+    message: "You're all set — you can now publish courses on the platform.",
+    category: "SYSTEM",
+    link: "/portal",
+  });
+}
+```

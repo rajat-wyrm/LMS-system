@@ -226,23 +226,31 @@ enum CourseStatus {
   approved
   rejected
 }
+model Notification {
+  id          String               @id @default(cuid())
+  userId      String?
+  title       String
+  message     String
+  category    NotificationCategory @default(SYSTEM)
+  isRead      Boolean              @default(false)
+  isBroadcast Boolean              @default(false)
+  link        String?
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
 
-enum EnrollmentStatus {
-  active
-  completed
-  dropped
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, isRead])
+  @@index([createdAt])
 }
 
-enum ReviewStatus {
-  pending
-  approved
-  rejected
-  removed
-}
-
-enum ReviewReportStatus {
-  pending
-  reviewed
-  dismissed
-  resolved
+enum NotificationCategory {
+  COURSE
+  ASSIGNMENT
+  QUIZ
+  ANNOUNCEMENT
+  SYSTEM
+  PAYMENT
+  MESSAGE
 }
