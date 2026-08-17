@@ -6,8 +6,14 @@ export interface CourseData {
   description: string;
   category: string;
   level: string;
+  duration?: string;
   price?: number;
   thumbnail?: string;
+  rating?: number;
+  progress?: number;
+  lessons?: Array<{ id?: string }> | number;
+  enrollments?: number;
+  celebrityTeacher?: string;
   instructor?: {
     id: string;
     name: string;
@@ -18,9 +24,9 @@ export interface CourseData {
   generateAI?: boolean;
 }
 
-
 export const courseApi = {
   getAllCourses: (config?: object) => API.get("/courses", config),
+  getTrendingCourses: () => API.get("/courses/trending"),
   getCategories: () => API.get("/categories"),
   getLearningPaths: () => API.get("/courses/learning-paths"),
   getCourseById: (id: string) => API.get(`/courses/${id}`),
@@ -36,6 +42,12 @@ export const courseApi = {
   getEnrollmentByCourse: (courseId: string) => API.get(`/enrollments/${courseId}`),
   updateEnrollmentMentor: (courseId: string, mentor: string) => API.put(`/enrollments/${courseId}/mentor`, { mentor }),
   completeLesson: (courseId: string, lessonId: string) => API.put(`/enrollments/${courseId}/lessons/${lessonId}`),
+  syncProgress: (courseId: string, data: {
+    completedLessonIds: string[];
+    lastWatchedLessonId?: string;
+    lastWatchedAt?: string;
+    playbackPositions?: Record<string, number>;
+  }) => API.put(`/enrollments/${courseId}/sync`, data),
 
   // Lessons
   addLesson: (courseId: string, data: { title: string; content: string; videoUrl?: string; order: number }) => API.post(`/courses/${courseId}/lessons`, data),

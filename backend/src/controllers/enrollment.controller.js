@@ -295,3 +295,112 @@ await notificationService.createNotification({
   link: `/portal/courses/${course.id}`,
 });
 ```
+
+// @desc    Sync progress and playback positions (offline-first sync)
+// @route   PUT /api/enrollments/:courseId/sync
+// @access  Private
+exports.syncProgress = async (req, res, next) => {
+  try {
+    const { courseId } = req.params;
+    const userId = req.user.id;
+    const { completedLessonIds, lastWatchedLessonId, lastWatchedAt, playbackPositions } = req.body;
+
+    // Check enrollment
+    let enrollment = await prisma.enrollment.findUnique({
+      where: {
+        userId_courseId: { userId, courseId }
+      },
+      include: {
+        completedLessons: true,
+        course: {
+          include: { lessons: { select: { id: true } } }
+        }
+      }
+    });
+
+    if (!enrollment) {
+      return res.status(404).json({ success: false, error: 'Enrollment not found' });
+    }
+
+    const existingCompletedIds = enrollment.completedLessons.map(l => l.id);
+    const incomingCompletedIds = completedLessonIds || [];
+    const allCompletedIds = Array.from(new Set([...existingCompletedIds, ...incomingCompletedIds]));
+    const newToConnect = allCompletedIds.filter(id => !existingCompletedIds.includes(id));
+
+    let updateData = {};
+    if (newToConnect.length > 0) {
+      updateData.completedLessons = {
+        connect: newToConnect.map(id => ({ id }))
+      };
+    }
+
+    if (lastWatchedLessonId) {
+      const incomingWatchedAt = lastWatchedAt ? new Date(lastWatchedAt) : new Date();
+      const currentWatchedAt = enrollment.lastWatchedAt ? new Date(enrollment.lastWatchedAt) : null;
+      if (!currentWatchedAt || incomingWatchedAt > currentWatchedAt) {
+        updateData.lastWatchedLessonId = lastWatchedLessonId;
+        updateData.lastWatchedAt = incomingWatchedAt;
+      }
+    }
+
+    let currentPositions = {};
+    if (enrollment.playbackPositions && typeof enrollment.playbackPositions === 'object') {
+      currentPositions = { ...enrollment.playbackPositions };
+    }
+    if (playbackPositions && typeof playbackPositions === 'object') {
+      for (const [lessonId, pos] of Object.entries(playbackPositions)) {
+        if (typeof pos === 'number') {
+          currentPositions[lessonId] = Math.max(currentPositions[lessonId] || 0, pos);
+        }
+      }
+      updateData.playbackPositions = currentPositions;
+    }
+
+    if (Object.keys(updateData).length > 0) {
+      enrollment = await prisma.enrollment.update({
+        where: { id: enrollment.id },
+        data: updateData,
+        include: {
+          completedLessons: true,
+          course: {
+            include: { lessons: { select: { id: true } } }
+          }
+        }
+      });
+    }
+
+    // Recalculate progress
+    const totalLessons = enrollment.course.lessons.length;
+    let newProgress = 0;
+    if (totalLessons > 0) {
+      newProgress = Math.round((enrollment.completedLessons.length / totalLessons) * 100);
+      if (newProgress > 100) newProgress = 100;
+    }
+
+    if (enrollment.progress !== newProgress) {
+      enrollment = await prisma.enrollment.update({
+        where: { id: enrollment.id },
+        data: {
+          progress: newProgress,
+          status: newProgress === 100 ? 'completed' : 'active'
+        },
+        include: {
+          completedLessons: true
+        }
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        progress: enrollment.progress,
+        status: enrollment.status,
+        completedLessons: enrollment.completedLessons,
+        lastWatchedLessonId: enrollment.lastWatchedLessonId,
+        playbackPositions: enrollment.playbackPositions
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
