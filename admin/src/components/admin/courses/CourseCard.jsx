@@ -161,7 +161,7 @@ const CourseCard = ({
 
         <p className="flex items-center gap-1.5 text-xs admin-text-secondary -mt-1">
           <MdSchool size={14} className="text-[#8B5CF6] shrink-0" />
-          <span className="truncate">{course.teacher || 'Unassigned'}</span>
+          <span className="truncate">{course.teacher || '—'}</span>
         </p>
 
         <StarRating rating={course.rating} />

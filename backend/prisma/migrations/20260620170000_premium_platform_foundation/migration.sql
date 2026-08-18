@@ -1,0 +1,1 @@
+-- Migration premium_platform_foundation was applied directly to database

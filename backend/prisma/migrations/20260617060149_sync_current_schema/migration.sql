@@ -1,0 +1,1 @@
+-- Migration sync_current_schema was applied directly to database

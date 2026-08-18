@@ -1,11 +1,22 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script>
+      (function () {
+        var theme = localStorage.getItem('uptoskills-theme');
+        var resolvedTheme = theme === 'light' ? 'light' : 'dark';
+        document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
+        document.documentElement.style.colorScheme = resolvedTheme;
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- TODO: Set the document title to the name of your application -->
     <title>UptoSkills LMS</title>
     <meta name="description" content="Learning Management System" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff6633' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10v6M2 10l10-5 10 5-10 5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></svg>" />
 
     <!-- TODO: Update og:title to match your application name -->

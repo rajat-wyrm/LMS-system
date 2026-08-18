@@ -3,13 +3,13 @@ const { prisma } = require('./src/config/db');
 
 async function createAdmin() {
   try {
-    const email = 'shubham3@gmail.com';
-    const password = 'shubham123';
+    const email = 'admin.amit@lms.com';
+    const password = 'password123';
     
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     
-    admin = await prisma.user.upsert({
+    const admin = await prisma.user.upsert({
       where: { email },
       update: {
         password: hashedPassword,

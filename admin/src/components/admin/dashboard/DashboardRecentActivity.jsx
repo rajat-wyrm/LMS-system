@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   MdPersonAdd,
@@ -11,12 +11,7 @@ import {
   MdLibraryBooks,
   MdSchool,
 } from 'react-icons/md';
-import { recentActivity, todayPlatformSummary } from './dashboardData';
-import { useDateRange } from '../../../context/DateRangeContext';
-import {
-  filterRecentActivity,
-  scalePlatformSummary,
-} from '../../../utils/dashboardDateFilter';
+import { apiFetch } from '../../../api/config';
 
 const ACTIVITY_ICONS = {
   enroll: MdPersonAdd,
@@ -127,15 +122,22 @@ const ActivityTimelineItem = ({ item, index, isLast }) => {
 };
 
 const DashboardRecentActivity = () => {
-  const { startDate, endDate } = useDateRange();
-  const activities = useMemo(
-    () => filterRecentActivity(recentActivity, startDate, endDate),
-    [startDate, endDate]
-  );
-  const platformSummary = useMemo(
-    () => scalePlatformSummary(todayPlatformSummary, startDate, endDate),
-    [startDate, endDate]
-  );
+  const [activities, setActivities] = useState([]);
+  const [platformSummary, setPlatformSummary] = useState([]);
+
+  const fetchActivity = useCallback(async () => {
+    try {
+      const { data } = await apiFetch('/admin/dashboard/recent-activity');
+      setActivities(data?.activities ?? []);
+      setPlatformSummary(data?.platformSummary ?? []);
+    } catch (error) {
+      console.error('Recent activity fetch failed:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchActivity();
+  }, [fetchActivity]);
 
   return (
   <motion.section
