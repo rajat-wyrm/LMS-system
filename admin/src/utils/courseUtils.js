@@ -46,10 +46,9 @@ export function normalizeCourse(c, index = 0) {
     teacher,
     revenue,
     thumbnail: merged.thumbnail ?? merged.avatar ?? null,
-    gradient: merged.gradient || 'from-blue-600 via-blue-500 to-cyan-400',
-    icon: merged.icon || '📚',
-    active: merged.active ?? (merged.status === 'approved' || merged.status === 'Published'),
-    status: merged.status || 'approved',
+    gradient: merged.gradient || seed.gradient,
+    icon: merged.icon || seed.icon,
+    active: merged.active ?? merged.status === 'approved',
   };
 }
 

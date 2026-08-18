@@ -33,7 +33,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit, teachers = [], ca
     category: 'Web Development',
     duration: '',
     language: 'English',
-    status: 'Published',
+    status: 'approved', // pending, approved, rejected
     teacher: '',
     price: '',
     discountPrice: '',
@@ -100,12 +100,11 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit, teachers = [], ca
         category: courseToEdit.category || '',
         duration: courseToEdit.hours || courseToEdit.duration || '',
         language: courseToEdit.language || 'English',
-        status: courseToEdit.status === 'approved' || courseToEdit.active ? 'Published' : 'Draft',
-        teacher: courseToEdit.teacher || courseToEdit.instructor?.name || '',
-        instructorId: courseToEdit.instructorId || courseToEdit.instructor?.id || '',
-        price: courseToEdit.price || '',
-        discountPrice: courseToEdit.discountPrice || '',
-        lessons: courseToEdit.lessons || '',
+       status: courseToEdit.status || (courseToEdit.active ? 'approved' : 'pending'),
+        teacher: courseToEdit.teacher || (courseToEdit.mentorName || 'Salman Khan'),
+        price: courseToEdit.price || '499',
+        discountPrice: courseToEdit.discountPrice || '299',
+        lessons: courseToEdit.lessons || '15',
         projects: courseToEdit.projects || '3',
         certificate: courseToEdit.certificate !== undefined ? courseToEdit.certificate : true,
         visibility: courseToEdit.visibility || 'Public',
@@ -123,9 +122,8 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit, teachers = [], ca
         category: '',
         duration: '',
         language: 'English',
-        status: 'Published',
-        teacher: '',
-        instructorId: '',
+        status: 'approved',
+        teacher: teachers[0]?.name || '',
         price: '',
         discountPrice: '',
         lessons: '',
@@ -273,7 +271,7 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit, teachers = [], ca
       hours: parseInt(form.duration, 10) || 0,
       language: form.language,
       status: submissionStatus,
-      active: submissionStatus === 'Published',
+      active: submissionStatus === 'approved',
       teacher: form.teacher,
       price: form.price || '499',
       discountPrice: form.discountPrice || '299',
@@ -682,14 +680,30 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit, teachers = [], ca
                   </div>
 
                   <div>
-                    <label className={labelCls}>Category</label>
-                    <select
-                      value={form.category}
-                      onChange={set('category')}
-                      className="w-full bg-[#111827] border border-white/10 rounded-xl py-3 px-3 text-sm text-white"
-                    >
-                      {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    </select>
+                    <label className={labelCls}>Publication Status</label>
+                    <div className="flex gap-3">
+                      {['pending', 'approved', 'rejected'].map(state => {
+                        const styleMap = {
+  pending: 'peer-checked:bg-yellow-500/20 peer-checked:border-yellow-500/50 peer-checked:text-yellow-300',
+  approved: 'peer-checked:bg-emerald-500/20 peer-checked:border-emerald-500/50 peer-checked:text-emerald-300',
+  rejected: 'peer-checked:bg-gray-500/20 peer-checked:border-gray-500/50 peer-checked:text-gray-300'
+};
+                        return (
+                          <button
+                            key={state}
+                            type="button"
+                            onClick={() => setForm(prev => ({ ...prev, status: state }))}
+                            className={`flex-1 py-3 rounded-xl border text-xs font-bold transition-all duration-300 ${
+                              form.status === state
+                                ? styleMap[state] + ' shadow-[0_0_12px_rgba(168,85,247,0.1)]'
+                                : 'bg-white/5 border-white/10 text-gray-400 hover:text-white hover:border-white/20'
+                            }`}
+                          >
+                            {state}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -708,15 +722,15 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit, teachers = [], ca
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  onClick={onClose}
-                  className="px-5 py-2.5 rounded-xl text-gray-400 text-xs font-semibold"
+                  onClick={() => handleSave('pending')}
+                  className="px-5 py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 text-amber-300 hover:text-white font-bold transition-all duration-300 text-xs shadow-md"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleSave('Published')}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white text-xs font-bold shadow-lg"
+                  onClick={() => handleSave('approved')}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white font-extrabold text-xs hover:shadow-[0_0_24px_rgba(139,92,246,0.6)] transition-all hover:-translate-y-0.5 active:scale-95 border border-white/20"
                 >
                   {courseToEdit ? 'Save Changes' : 'Publish Course'}
                 </button>
