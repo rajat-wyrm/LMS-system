@@ -99,6 +99,51 @@ model Lesson {
   completedBy Enrollment[] @relation("CompletedLessons")
 }
 
+model CourseResource {
+  id           String         @id @default(cuid())
+  courseId     String
+  lessonId     String?
+  fileName     String
+  originalName String
+  mimeType     String
+  size         Int            // bytes
+  storagePath  String         @unique
+  storageKey   String         @unique
+  resourceType ResourceType   @default(other)
+  status       ResourceStatus @default(active)
+  uploadedBy   String
+  metadata     Json?          @default("{}")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  course   Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lesson   Lesson? @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  uploader User    @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([lessonId])
+  @@index([uploadedBy])
+  @@index([resourceType])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ResourceType {
+  video
+  document
+  image
+  audio
+  archive
+  other
+}
+
+enum ResourceStatus {
+  active
+  archived
+  deleted
+}
+
+
 model Enrollment {
   id                  String           @id @default(cuid())
   userId              String

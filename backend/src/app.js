@@ -5,6 +5,7 @@ const rateLimit = require("express-rate-limit");
 const compression = require("compression");
 const pinoHttp = require("pino-http");
 const path = require("path");
+const resourceRoutesV1 = require("./routes/v1/resource.routes");
 
 const logger = require("./utils/logger");
 const { errorHandler } = require("./middlewares/error.middleware");
@@ -227,14 +228,16 @@ app.use((req, res, next) => {
 // ============================================================
 
 app.use(errorHandler);
+app.use("/api/notifications", notificationRoutesV1);
+app.use("/api/v1/resources", resourceRoutesV1);
+app.use("/api/resources", resourceRoutesV1);
 
 module.exports = app;
-```js
-app.use("/api/notifications", notificationRoutesV1);
 ```
-
-No other changes to `app.js` are required — CORS, auth, rate limiting, and the
+js
+No other changes to app.js are required — CORS, auth, rate limiting, and the
 error handler are all already shared by every route in the app, including this
-one. The admin broadcast endpoint lives under the existing `adminRoutesV1`
-router (see `admin.routes.patch.md`), so it is already mounted.
+one. The admin broadcast endpoint lives under the existing adminRoutesV1
+router (see admin.routes.patch.md), so it is already mounted.
+```
 
