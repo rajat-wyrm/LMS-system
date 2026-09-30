@@ -18,8 +18,9 @@ import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { getCourseImageUrl } from "@/utils/courseImage";
+import CourseDiscussion from "./CourseDiscussion";
 
-const tabs = ["About", "Outcomes", "Curriculum", "Instructors", "Timeline"] as const;
+const tabs = ["About", "Outcomes", "Curriculum", "Instructors", "Timeline", "Discussion"] as const;
 type Tab = typeof tabs[number];
 
 // ---------------------------------------------------------------------------
@@ -492,6 +493,9 @@ const CourseDetails = () => {
                   </div>
                 )}
               </div>
+            )}
+            {tab === "Discussion" && (
+            <CourseDiscussion />
             )}
             {tab === "Timeline" && (
               <div className="space-y-6">
