@@ -950,8 +950,26 @@ exports.completeLesson = async (req, res, next) => {
     next(error);
   }
 };
+// @desc   Get deleted courses
+// @route  GET /api/courses/deleted
+// @access Private (Admin)
+exports.getDeletedCourses = async (req, res, next) => {
+  try {
+    const courses = await prisma.course.findMany({
+      where: {
+        isDeleted: true,
+      },
+      orderBy: {
+        deletedAt: "desc",
+      },
+    });
 
-// @desc    Get course activity timeline
-// @route   GET /api/courses/:id/timeline
-// @access  Private
+    res.status(200).json({
+      success: true,
+      data: courses,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 

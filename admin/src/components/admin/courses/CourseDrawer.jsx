@@ -21,7 +21,7 @@ const DEFAULT_TEACHERS = [
   { id: 5, name: 'Katrina Kaif' }
 ];
 
-const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit }) => {
+ 
 const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit, teachers = [], categories = [] }) => {
   const panelRef = useFocusTrap(isOpen, onClose);
   const [form, setForm] = useState({
@@ -354,31 +354,37 @@ const CourseDrawer = ({ isOpen, onClose, onSave, courseToEdit, teachers = [], ca
                 <label className={labelCls}>Course Media / Attachment (Image, Video, PDF)</label>
                 <div className="relative w-full rounded-2xl border-2 border-dashed border-purple-500/30 hover:border-purple-500/60 bg-purple-500/5 p-4 flex flex-col items-center justify-center text-gray-400 transition-all">
                   
-                  {/* Uploading Progress State */}
+                {/* Uploading Progress State */}
                   {isUploading ? (
                     <div className="w-full py-4 px-2 flex flex-col items-center">
                       <div className="flex items-center justify-between w-full text-xs text-purple-300 font-semibold mb-2">
                         <span className="truncate max-w-[200px]">{uploadedFileName}</span>
                         <span>{uploadProgress}%</span>
                       </div>
+
                       {/* Progress Bar */}
                       <div className="w-full bg-white/10 rounded-full h-2.5 overflow-hidden">
-                        <div 
-                          className="bg-gradient-to-r from-purple-500 to-blue-500 h-2.5 rounded-full transition-all duration-200" 
+                        <div
+                          className="bg-gradient-to-r from-purple-500 to-blue-500 h-2.5 rounded-full transition-all duration-200"
                           style={{ width: `${uploadProgress}%` }}
-                    )}
-                    <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
-                  </label>
-                </motion.div>
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="py-4 flex flex-col items-center gap-2">
+                      <span className="text-sm">Click to upload course media</span>
+                      <span className="text-xs">Image, video, or PDF</span>
+                    </div>
+                  )}
 
-                {/* ── SECTION 2: BASIC INFORMATION ── */}
-                <motion.div 
-                  variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
-                  className="space-y-5"
-                >
-                  <h4 className="text-xs font-extrabold text-purple-400 uppercase tracking-widest border-b border-white/5 pb-2">
-                    1. Basic Information
-                  </h4>
+                  <input
+                    type="file"
+                    accept="image/*,video/*,application/pdf"
+                    onChange={handleFileUpload}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
+                </div>
+              </div>
 
                   {/* Course Name */}
                   <div>

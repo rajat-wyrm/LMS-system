@@ -81,11 +81,7 @@ const deriveLastActive = (student) => student.lastActive || '—';
 const deriveCertificates = (student) => Number(student.certificates || 0);
 const deriveStreak = (student) => student.streak ?? '—';
 
-const deriveCertificates = (student) =>
-  student.certificates ?? Math.max(0, Math.floor((student.progress ?? 0) / 25));
 
-const deriveStreak = (student) =>
-  student.streak ?? Math.max(1, Math.floor((student.progress ?? 0) / 12));
 
 const StudentTable = ({ students = [], onViewProfile, onNotify, onEdit, onDelete }) => {
   const [activeDropdownId, setActiveDropdownId] = useState(null);

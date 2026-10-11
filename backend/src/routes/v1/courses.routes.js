@@ -8,6 +8,7 @@ const {
   updateCourse,
   deleteCourse,
   restoreCourse,
+  getDeletedCourses,
   addLesson,
   deleteLesson,
   getInstructorStats,
@@ -20,7 +21,7 @@ const { protect, authorize } = require("../../middlewares/auth.middleware");
 
 const { validate } = require("../../middlewares/validate.middleware");
 
-const {
+ const {
   courseSchema,
   lessonSchema,
 } = require("../../validations/course.validation");
@@ -32,7 +33,10 @@ const router = express.Router();
 // ===============================
 // Courses
 // ===============================
-
+// Get deleted courses (Recycle Bin)
+router
+.route("/deleted")
+  .get(protect, authorize("admin"), getDeletedCourses);
 router
   .route("/")
 

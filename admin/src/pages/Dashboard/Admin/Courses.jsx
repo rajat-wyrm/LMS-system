@@ -133,8 +133,6 @@ const Courses = () => {
       showNotice('Unable to save course.');
     }
   };
-const handleClone = (course) => {
-  const copyTitle = `${course.title} (Copy)`;
 
 const handleClone = async (course) => {
   try {

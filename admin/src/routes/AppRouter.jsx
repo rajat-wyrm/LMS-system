@@ -8,6 +8,7 @@ import AdminDashboard from '../pages/Dashboard/Admin/Dashboard';
 import AdminUsers from '../pages/Dashboard/Admin/Users';
 import AdminStudents from '../pages/Dashboard/Admin/Students';
 import AdminCourses from '../pages/Dashboard/Admin/Courses';
+import RecycleBin from '../pages/Dashboard/Admin/RecycleBin';
 import AdminTeachers from '../pages/Dashboard/Admin/Teachers';
 import AdminAnalytics from '../pages/Dashboard/Admin/Analytics';
 import AdminReviews from '../pages/Dashboard/Admin/Reviews';
@@ -32,6 +33,7 @@ const AppRouter = () => {
             <Route path="/dashboard/admin/users" element={<AdminUsers />} />
             <Route path="/dashboard/admin/students" element={<AdminStudents />} />
             <Route path="/dashboard/admin/courses" element={<AdminCourses />} />
+            <Route path="/dashboard/admin/recycle-bin" element={<RecycleBin />} />
             <Route path="/dashboard/admin/teachers" element={<AdminTeachers />} />
             <Route path="/dashboard/admin/analytics" element={<AdminAnalytics />} />
             <Route path="/dashboard/admin/reviews" element={<AdminReviews />} />
