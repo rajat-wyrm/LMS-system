@@ -1,108 +1,165 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
-import { ArrowLeft, PlayCircle, FileText, CheckCircle, Loader2, ChevronRight, Lock, Award, Check, Clock, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import {
+  ArrowLeft,
+  PlayCircle,
+  FileText,
+  CheckCircle,
+  Loader2,
+  Lock,
+  Award,
+  Check,
+  Clock,
+  RefreshCw,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
+
 import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { toast } from "sonner";
-import { getSyncQueue, saveSyncQueue, clearSyncQueue, mergeLocalAndServerEnrollment } from "@/utils/progressSync";
+
+import useAudioAnalyser from "@/hooks/useAudioAnalyser";
+import TutorAvatar from "@/components/tutor/TutorAvatar";
+
+import {
+  getSyncQueue,
+  saveSyncQueue,
+  clearSyncQueue,
+  mergeLocalAndServerEnrollment,
+} from "@/utils/progressSync";
 
 export default function CoursePlayer() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
-  
+
+  const [videoElement, setVideoElement] =
+    useState<HTMLVideoElement | null>(null);
+
+  const { volume, isAudioAvailable } =
+    useAudioAnalyser(videoElement);
+
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+
   const [course, setCourse] = useState<any>(null);
   const [enrollment, setEnrollment] = useState<any>(null);
+
   const [isLoading, setIsLoading] = useState(true);
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
+
   const [activeLessonIndex, setActiveLessonIndex] = useState(0);
-  
-  // To check if they are actually enrolled
   const [isEnrolled, setIsEnrolled] = useState(false);
 
-  // Sync state
-  const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'offline'>(
-    navigator.onLine ? 'synced' : 'offline'
-  );
+  const [syncStatus, setSyncStatus] = useState<
+    "synced" | "syncing" | "offline"
+  >(navigator.onLine ? "synced" : "offline");
+
   const [hasResumed, setHasResumed] = useState(false);
+
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Sync queue to backend
+  // Sync progress with backend
   const syncProgress = async (retryCount = 0) => {
     if (!navigator.onLine || !id) {
-      setSyncStatus('offline');
+      setSyncStatus("offline");
       return;
     }
 
     const queue = getSyncQueue(id);
+
     if (
       queue.completedLessonIds.length === 0 &&
       !queue.lastWatchedLessonId &&
       Object.keys(queue.playbackPositions || {}).length === 0
     ) {
-      setSyncStatus('synced');
+      setSyncStatus("synced");
       return;
     }
 
-    setSyncStatus('syncing');
+    setSyncStatus("syncing");
 
     try {
       const res = await courseApi.syncProgress(id, queue);
+
       if (res.data.success) {
         const updated = res.data.data;
-        setEnrollment((prev: any) => prev ? ({
-          ...prev,
-          progress: updated.progress,
-          status: updated.status,
-          completedLessons: updated.completedLessons,
-          lastWatchedLessonId: updated.lastWatchedLessonId,
-          playbackPositions: updated.playbackPositions,
-        }) : null);
+
+        setEnrollment((prev: any) =>
+          prev
+            ? {
+                ...prev,
+                progress: updated.progress,
+                status: updated.status,
+                completedLessons: updated.completedLessons,
+                lastWatchedLessonId: updated.lastWatchedLessonId,
+                playbackPositions: updated.playbackPositions,
+              }
+            : null
+        );
+
         clearSyncQueue(id);
-        setSyncStatus('synced');
+        setSyncStatus("synced");
       } else {
         throw new Error("Sync failed");
       }
     } catch (err) {
       console.error("Sync progress failed", err);
-      setSyncStatus('offline');
+
+      setSyncStatus("offline");
+
       if (retryCount < 3) {
         const delay = Math.pow(2, retryCount) * 1000;
+
         setTimeout(() => syncProgress(retryCount + 1), delay);
       }
     }
   };
 
+  // Fetch enrollment
   const fetchEnrollment = async (lessonsCount?: number) => {
     try {
       const res = await courseApi.getEnrollmentByCourse(id!);
+
       const fetched = res.data.data;
-      
-      // Conflict Resolution: merge local unsynced pending changes
+
       const queue = getSyncQueue(id);
-      const count = lessonsCount || course?.lessons?.length || 0;
-      const merged = mergeLocalAndServerEnrollment(fetched, queue, count);
-      
+
+      const count =
+        lessonsCount || course?.lessons?.length || 0;
+
+      const merged = mergeLocalAndServerEnrollment(
+        fetched,
+        queue,
+        count
+      );
+
       setEnrollment(merged);
+
       return merged;
     } catch (e) {
       return null;
     }
   };
 
+  // Fetch course and enrollment
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch course details
         const courseRes = await courseApi.getCourseById(id!);
+
         const c = courseRes.data.data;
-        c.lessons = [...(c.lessons || [])].sort((a: any, b: any) => a.order - b.order);
+
+        c.lessons = [...(c.lessons || [])].sort(
+          (a: any, b: any) => a.order - b.order
+        );
+
         setCourse(c);
 
-        // Fetch enrollments to verify access
         if (user?.role === "admin") {
           setIsEnrolled(true);
         } else {
           const enr = await fetchEnrollment(c.lessons.length);
+
           setIsEnrolled(!!enr);
         }
       } catch (err) {
@@ -111,28 +168,28 @@ export default function CoursePlayer() {
         setIsLoading(false);
       }
     };
-    
+
     if (id) fetchData();
   }, [id, user]);
 
-  // Sync listeners
+  // Online/offline listeners
   useEffect(() => {
     const handleOnlineStatus = () => {
       if (navigator.onLine) {
         syncProgress();
       } else {
-        setSyncStatus('offline');
+        setSyncStatus("offline");
       }
     };
 
-    window.addEventListener('online', handleOnlineStatus);
-    window.addEventListener('offline', handleOnlineStatus);
+    window.addEventListener("online", handleOnlineStatus);
+    window.addEventListener("offline", handleOnlineStatus);
 
     handleOnlineStatus();
 
     return () => {
-      window.removeEventListener('online', handleOnlineStatus);
-      window.removeEventListener('offline', handleOnlineStatus);
+      window.removeEventListener("online", handleOnlineStatus);
+      window.removeEventListener("offline", handleOnlineStatus);
     };
   }, []);
 
@@ -140,82 +197,133 @@ export default function CoursePlayer() {
   useEffect(() => {
     if (course && enrollment && !hasResumed) {
       const lastId = enrollment.lastWatchedLessonId;
+
       if (lastId) {
-        const idx = course.lessons.findIndex((l: any) => l.id === lastId);
+        const idx = course.lessons.findIndex(
+          (l: any) => l.id === lastId
+        );
+
         if (idx !== -1) {
           setActiveLessonIndex(idx);
         }
       }
+
       setHasResumed(true);
     }
   }, [course, enrollment, hasResumed]);
+
+  // Current active lesson
+  const activeLesson = course?.lessons?.[activeLessonIndex];
 
   // Track active lesson change
   useEffect(() => {
     if (activeLesson && enrollment) {
       const queue = getSyncQueue(id);
+
       queue.lastWatchedLessonId = activeLesson.id;
       queue.lastWatchedAt = new Date().toISOString();
+
       saveSyncQueue(id, queue);
 
-      setEnrollment((prev: any) => prev ? ({
-        ...prev,
-        lastWatchedLessonId: activeLesson.id,
-      }) : null);
+      setEnrollment((prev: any) =>
+        prev
+          ? {
+              ...prev,
+              lastWatchedLessonId: activeLesson.id,
+            }
+          : null
+      );
 
       syncProgress();
     }
   }, [activeLessonIndex]);
 
+  // Mark lesson complete
   const handleMarkComplete = async () => {
     if (!enrollment || !activeLesson) return;
-    
-    // Optimistic UI updates
-    const updatedCompletedLessons = [...(enrollment.completedLessons || [])];
-    if (!updatedCompletedLessons.some((l: any) => l.id === activeLesson.id)) {
-      updatedCompletedLessons.push({ id: activeLesson.id });
+
+    const updatedCompletedLessons = [
+      ...(enrollment.completedLessons || []),
+    ];
+
+    if (
+      !updatedCompletedLessons.some(
+        (l: any) => l.id === activeLesson.id
+      )
+    ) {
+      updatedCompletedLessons.push({
+        id: activeLesson.id,
+      });
     }
-    
+
     const totalLessons = course.lessons.length;
-    const localProgress = totalLessons > 0 ? Math.round((updatedCompletedLessons.length / totalLessons) * 100) : 0;
-    
-    setEnrollment((prev: any) => prev ? ({
-      ...prev,
-      completedLessons: updatedCompletedLessons,
-      progress: localProgress > 100 ? 100 : localProgress,
-    }) : null);
+
+    const localProgress =
+      totalLessons > 0
+        ? Math.round(
+            (updatedCompletedLessons.length / totalLessons) * 100
+          )
+        : 0;
+
+    setEnrollment((prev: any) =>
+      prev
+        ? {
+            ...prev,
+            completedLessons: updatedCompletedLessons,
+            progress: Math.min(localProgress, 100),
+          }
+        : null
+    );
 
     const queue = getSyncQueue(id);
+
     if (!queue.completedLessonIds.includes(activeLesson.id)) {
       queue.completedLessonIds.push(activeLesson.id);
     }
+
     saveSyncQueue(id, queue);
 
     toast.success("Progress saved locally.");
+
     syncProgress();
-    
+
     if (activeLessonIndex < course.lessons.length - 1) {
-      setActiveLessonIndex(prev => prev + 1);
+      setActiveLessonIndex((prev) => prev + 1);
     }
   };
 
+  // Track video playback position
   const handleTimeUpdate = () => {
     if (!videoRef.current || !activeLesson) return;
-    const currentTime = Math.floor(videoRef.current.currentTime);
+
+    const currentTime = Math.floor(
+      videoRef.current.currentTime
+    );
 
     const queue = getSyncQueue(id);
-    const prevPos = queue.playbackPositions[activeLesson.id] || 0;
+
+    const prevPos =
+      queue.playbackPositions[activeLesson.id] || 0;
+
     if (Math.abs(currentTime - prevPos) >= 3) {
       queue.playbackPositions[activeLesson.id] = currentTime;
+
       saveSyncQueue(id, queue);
 
       setEnrollment((prev: any) => {
         if (!prev) return null;
-        const positions = prev.playbackPositions && typeof prev.playbackPositions === 'object' ? { ...prev.playbackPositions } : {};
+
+        const positions =
+          prev.playbackPositions &&
+          typeof prev.playbackPositions === "object"
+            ? { ...prev.playbackPositions }
+            : {};
+
         positions[activeLesson.id] = currentTime;
+
         return {
           ...prev,
-          playbackPositions: positions
+          playbackPositions: positions,
         };
       });
 
@@ -223,20 +331,35 @@ export default function CoursePlayer() {
     }
   };
 
+  // Resume video from saved position
   const handleLoadedMetadata = () => {
-    if (!videoRef.current || !activeLesson || !enrollment) return;
+    if (!videoRef.current || !activeLesson || !enrollment) {
+      return;
+    }
 
     const queue = getSyncQueue(id);
-    const localPos = queue.playbackPositions[activeLesson.id];
+
+    const localPos =
+      queue.playbackPositions[activeLesson.id];
+
     const dbPositions = enrollment.playbackPositions || {};
-    const resumeTime = localPos !== undefined ? localPos : (dbPositions[activeLesson.id] || 0);
+
+    const resumeTime =
+      localPos !== undefined
+        ? localPos
+        : dbPositions[activeLesson.id] || 0;
 
     if (resumeTime > 0) {
       videoRef.current.currentTime = resumeTime;
-      toast.info(`Resumed video at ${Math.floor(resumeTime / 60)}m ${Math.floor(resumeTime % 60)}s`);
+
+      toast.info(
+        `Resumed video at ${Math.floor(
+          resumeTime / 60
+        )}m ${Math.floor(resumeTime % 60)}s`
+      );
     }
   };
-
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -245,60 +368,101 @@ export default function CoursePlayer() {
     );
   }
 
-  if (!course) return <Navigate to="/dashboard" replace />;
+  if (!course) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   if (!isEnrolled) {
     return (
       <div className="container py-20 text-center">
         <Lock className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-        <h2 className="font-display font-bold text-2xl mb-2">Access Denied</h2>
-        <p className="text-muted-foreground mb-6">You must be enrolled to view this course's content.</p>
-        <Link to={`/courses/${id}`} className="btn-primary inline-flex items-center gap-2">
+
+        <h2 className="font-display font-bold text-2xl mb-2">
+          Access Denied
+        </h2>
+
+        <p className="text-muted-foreground mb-6">
+          You must be enrolled to view this course's content.
+        </p>
+
+        <Link
+          to={`/courses/${id}`}
+          className="btn-primary inline-flex items-center gap-2"
+        >
           View Course Details
         </Link>
       </div>
     );
   }
 
-  const activeLesson = course.lessons[activeLessonIndex];
-  const completedLessonIds = new Set(enrollment?.completedLessons?.map((l: any) => l.id) || []);
-  const isCurrentCompleted = completedLessonIds.has(activeLesson?.id);
+  const completedLessonIds = new Set(
+    enrollment?.completedLessons?.map((l: any) => l.id) || []
+  );
+
+  const isCurrentCompleted = completedLessonIds.has(
+    activeLesson?.id
+  );
+
   const isFullyCompleted = enrollment?.progress === 100;
-  
-  // Helper to figure out how to render the video URL
+
+  // Tutor Avatar state
+  const tutorState =
+    isVideoPlaying &&
+    (!isAudioAvailable || volume > 0.04)
+      ? "speaking"
+      : "idle";
+
+  const useFallbackAnimation =
+    isVideoPlaying && !isAudioAvailable;
+
+  // Render video according to URL
   const renderVideo = (url?: string) => {
     if (!url) return null;
-    
-    if (url.toLowerCase().endsWith(".mp4") || url.toLowerCase().endsWith(".webm") || url.toLowerCase().endsWith(".ogg")) {
+
+    if (
+      url.toLowerCase().endsWith(".mp4") ||
+      url.toLowerCase().endsWith(".webm") ||
+      url.toLowerCase().endsWith(".ogg")
+    ) {
       return (
-        <video 
-          ref={videoRef}
-          controls 
-          className="w-full h-full bg-black" 
+        <video
+          ref={(element) => {
+            videoRef.current = element;
+            setVideoElement(element);
+          }}
+          controls
+          className="w-full h-full bg-black"
           src={url}
           onTimeUpdate={handleTimeUpdate}
           onLoadedMetadata={handleLoadedMetadata}
+          onPlay={() => setIsVideoPlaying(true)}
+          onPause={() => setIsVideoPlaying(false)}
+          onEnded={() => setIsVideoPlaying(false)}
         >
           Your browser does not support the video tag.
         </video>
       );
     }
-    
+
     let embedUrl = url;
+
     if (url.includes("youtube.com/watch?v=")) {
       embedUrl = url.replace("watch?v=", "embed/");
     } else if (url.includes("youtu.be/")) {
-      embedUrl = url.replace("youtu.be/", "youtube.com/embed/");
+      embedUrl = url.replace(
+        "youtu.be/",
+        "youtube.com/embed/"
+      );
     }
-    
+
     return (
-      <iframe 
+      <iframe
         className="w-full h-full bg-black"
-        src={embedUrl} 
-        title="Video Player" 
-        frameBorder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowFullScreen 
+        src={embedUrl}
+        title="Video Player"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
       />
     );
   };
@@ -307,37 +471,53 @@ export default function CoursePlayer() {
     <div className="flex flex-col min-h-screen bg-background border-t border-border">
       {/* Top Bar */}
       <div className="h-16 border-b border-border flex items-center px-6 shrink-0 bg-muted/10">
-        <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors mr-4">
+        <Link
+          to="/dashboard"
+          className="text-muted-foreground hover:text-foreground transition-colors mr-4"
+        >
           <ArrowLeft className="w-5 h-5" />
         </Link>
+
         <div className="h-6 w-px bg-border mx-2 mr-4" />
-        <h1 className="font-display font-semibold truncate flex-1">{course.title}</h1>
-        
+
+        <h1 className="font-display font-semibold truncate flex-1">
+          {course.title}
+        </h1>
+
         {enrollment && (
           <div className="flex items-center gap-4">
             <div className="text-sm font-medium flex items-center gap-3">
               <span>
-                Progress: <span className="text-primary">{enrollment.progress}%</span>
+                Progress:{" "}
+                <span className="text-primary">
+                  {enrollment.progress}%
+                </span>
               </span>
-              
-              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
-                syncStatus === 'synced' ? 'bg-green-500/10 text-green-500 border-green-500/20' :
-                syncStatus === 'syncing' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'
-              }`}>
-                {syncStatus === 'synced' && (
+
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${
+                  syncStatus === "synced"
+                    ? "bg-green-500/10 text-green-500 border-green-500/20"
+                    : syncStatus === "syncing"
+                    ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                    : "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+                }`}
+              >
+                {syncStatus === "synced" && (
                   <>
                     <Wifi className="w-3.5 h-3.5 text-green-500" />
                     Synced
                   </>
                 )}
-                {syncStatus === 'syncing' && (
+
+                {syncStatus === "syncing" && (
                   <>
                     <RefreshCw className="w-3.5 h-3.5 text-blue-500 animate-spin" />
                     Syncing...
                   </>
                 )}
-                {syncStatus === 'offline' && (
+
+                {syncStatus === "offline" && (
                   <>
                     <WifiOff className="w-3.5 h-3.5 text-yellow-500" />
                     Offline (Saved Local)
@@ -345,14 +525,21 @@ export default function CoursePlayer() {
                 )}
               </span>
             </div>
+
             {isFullyCompleted && enrollment.certificateApproved && (
-              <Link to={`/certificate/${id}`} className="btn-primary !py-1.5 !px-3 text-sm flex items-center gap-2">
-                <Award className="w-4 h-4" /> View Certificate
+              <Link
+                to={`/certificate/${id}`}
+                className="btn-primary !py-1.5 !px-3 text-sm flex items-center gap-2"
+              >
+                <Award className="w-4 h-4" />
+                View Certificate
               </Link>
             )}
+
             {isFullyCompleted && !enrollment.certificateApproved && (
               <div className="bg-muted/50 border border-border text-muted-foreground px-3 py-1.5 rounded-lg text-sm flex items-center gap-2">
-                <Clock className="w-4 h-4" /> Pending Approval
+                <Clock className="w-4 h-4" />
+                Pending Approval
               </div>
             )}
           </div>
@@ -369,49 +556,63 @@ export default function CoursePlayer() {
             ) : (
               <div className="text-center text-muted-foreground">
                 <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
+
                 <p>No video available for this lesson.</p>
-                <p className="text-xs mt-1 opacity-70">Please read the content below.</p>
+
+                <p className="text-xs mt-1 opacity-70">
+                  Please read the content below.
+                </p>
               </div>
             )}
           </div>
-          
+
           {/* Lesson Content */}
           <div className="p-6 lg:p-10 max-w-4xl mx-auto w-full flex-1 mb-20">
             <div className="flex items-start justify-between gap-4 mb-6">
               <div>
                 <h2 className="font-display font-bold text-2xl md:text-3xl mb-2 flex items-center gap-3">
-                  {activeLesson?.order}. {activeLesson?.title || "Welcome"}
+                  {activeLesson?.order}.{" "}
+                  {activeLesson?.title || "Welcome"}
+
                   {isCurrentCompleted && (
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-500/20 text-green-500" title="Completed">
+                    <span
+                      className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-500/20 text-green-500"
+                      title="Completed"
+                    >
                       <Check className="w-4 h-4" />
                     </span>
                   )}
                 </h2>
               </div>
             </div>
-            
+
             <div className="prose prose-invert max-w-none text-muted-foreground">
               {activeLesson?.content ? (
-                <div className="whitespace-pre-wrap">{activeLesson.content}</div>
+                <div className="whitespace-pre-wrap">
+                  {activeLesson.content}
+                </div>
               ) : (
-                <p className="italic opacity-50">No additional notes provided for this lesson.</p>
+                <p className="italic opacity-50">
+                  No additional notes provided for this lesson.
+                </p>
               )}
             </div>
           </div>
-          
+
           {/* Action Footer */}
           {enrollment && activeLesson && (
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border flex justify-between items-center shadow-lg">
               <div className="text-sm text-muted-foreground">
-                Lesson {activeLessonIndex + 1} of {course.lessons.length}
+                Lesson {activeLessonIndex + 1} of{" "}
+                {course.lessons.length}
               </div>
-              
-              <button 
+
+              <button
                 onClick={handleMarkComplete}
                 disabled={isCurrentCompleted || isMarkingComplete}
                 className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all ${
-                  isCurrentCompleted 
-                    ? "bg-green-500/10 text-green-500 border border-green-500/20 cursor-default" 
+                  isCurrentCompleted
+                    ? "bg-green-500/10 text-green-500 border border-green-500/20 cursor-default"
                     : "btn-primary shadow-md hover:shadow-lg"
                 }`}
               >
@@ -420,7 +621,10 @@ export default function CoursePlayer() {
                 ) : isCurrentCompleted ? (
                   <Check className="w-4 h-4" />
                 ) : null}
-                {isCurrentCompleted ? "Completed" : "Mark as Complete"}
+
+                {isCurrentCompleted
+                  ? "Completed"
+                  : "Mark as Complete"}
               </button>
             </div>
           )}
@@ -430,26 +634,49 @@ export default function CoursePlayer() {
         <div className="w-full lg:w-[350px] border-l border-border bg-muted/5 flex flex-col shrink-0 h-full">
           {course?.instructor?.name ? (
             <div className="p-5 border-b border-border shrink-0 bg-primary/5">
-              <h4 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">Course Instructor</h4>
+              <h4 className="text-xs font-semibold text-secondary uppercase tracking-wider mb-2">
+                Course Instructor
+              </h4>
+
               <div className="flex items-center gap-3">
                 <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(course.instructor.name)}&background=8B5CF6&color=fff&bold=true`}
+                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    course.instructor.name
+                  )}&background=8B5CF6&color=fff&bold=true`}
                   alt={course.instructor.name}
                   className="w-10 h-10 rounded-full object-cover border-2 border-secondary"
                 />
+
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate text-foreground">{course.instructor.name}</p>
-                  <p className="text-xs text-muted-foreground">Assigned from the database</p>
+                  <p className="text-sm font-semibold truncate text-foreground">
+                    {course.instructor.name}
+                  </p>
+
+                  <p className="text-xs text-muted-foreground">
+                    Assigned from the database
+                  </p>
                 </div>
+
+                <TutorAvatar
+                  state={tutorState}
+                  mouthLevel={volume}
+                  fallbackAnimation={useFallbackAnimation}
+                  name={enrollment?.mentor || "Virtual Mentor"}
+                />
               </div>
             </div>
           ) : null}
 
           <div className="p-5 border-b border-border shrink-0">
-            <h3 className="font-display font-bold text-lg mb-1">Course Content</h3>
-            <p className="text-xs text-muted-foreground">{course.lessons.length} lessons</p>
+            <h3 className="font-display font-bold text-lg mb-1">
+              Course Content
+            </h3>
+
+            <p className="text-xs text-muted-foreground">
+              {course.lessons.length} lessons
+            </p>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {course.lessons.length === 0 ? (
               <div className="text-center p-6 text-sm text-muted-foreground">
@@ -458,14 +685,19 @@ export default function CoursePlayer() {
             ) : (
               course.lessons.map((lesson: any, i: number) => {
                 const isActive = activeLessonIndex === i;
-                const isCompleted = completedLessonIds.has(lesson.id);
-                
+
+                const isCompleted = completedLessonIds.has(
+                  lesson.id
+                );
+
                 return (
                   <button
                     key={lesson.id}
                     onClick={() => setActiveLessonIndex(i)}
                     className={`w-full flex items-start gap-3 p-3 rounded-lg text-left transition-colors ${
-                      isActive ? "bg-primary/10 border border-primary/30" : "hover:bg-muted/40 border border-transparent"
+                      isActive
+                        ? "bg-primary/10 border border-primary/30"
+                        : "hover:bg-muted/40 border border-transparent"
                     }`}
                   >
                     <div className="mt-0.5 shrink-0">
@@ -477,12 +709,20 @@ export default function CoursePlayer() {
                         <CheckCircle className="w-4 h-4 text-muted-foreground/30" />
                       )}
                     </div>
+
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium leading-tight mb-1 ${
-                        isActive ? "text-primary" : isCompleted ? "text-foreground" : "text-muted-foreground"
-                      }`}>
+                      <p
+                        className={`text-sm font-medium leading-tight mb-1 ${
+                          isActive
+                            ? "text-primary"
+                            : isCompleted
+                            ? "text-foreground"
+                            : "text-muted-foreground"
+                        }`}
+                      >
                         {lesson.order}. {lesson.title}
                       </p>
+
                       <p className="text-xs text-muted-foreground line-clamp-1">
                         {lesson.videoUrl ? "Video" : "Article"}
                       </p>
