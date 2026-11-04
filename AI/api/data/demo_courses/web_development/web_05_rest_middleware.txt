@@ -1,0 +1,52 @@
+Course: Web Development
+Course ID: demo_course_web_301
+Lesson 5: REST APIs and Middleware
+Lesson ID: demo_lesson_web_05
+Source File: web_05_rest_middleware.txt
+
+Overview:
+Representational State Transfer (REST) is an architectural style governing distributed hypermedia systems. Middleware constitutes the backbone of Express applications, providing a pipeline pattern to intercept, process, validate, and authenticate HTTP requests before reaching terminal route handlers.
+
+REST Architectural Principles:
+1. Client-Server Separation: Decouples user interface concerns from data storage and business logic.
+2. Statelessness: Every HTTP request from client to server must contain all information required to understand and process the request. No client context is stored on the server between requests.
+3. Uniform Interface: Resources are identified by stable URIs (e.g., /api/v1/courses). Standard HTTP methods correspond to CRUD actions:
+  - GET: Retrieve resource representation (idempotent and safe).
+  - POST: Create a new resource (non-idempotent).
+  - PUT: Completely replace an existing resource (idempotent).
+  - PATCH: Partially update an existing resource (non-idempotent).
+  - DELETE: Remove a resource (idempotent).
+4. Standard HTTP Status Codes:
+  - 200 OK: Successful request.
+  - 201 Created: New resource successfully instantiated.
+  - 400 Bad Request: Malformed payload or validation error.
+  - 401 Unauthorized: Missing or invalid authentication token.
+  - 403 Forbidden: Authenticated user lacks permission.
+  - 404 Not Found: Target resource does not exist.
+  - 500 Internal Server Error: Unhandled backend execution failure.
+
+Express Middleware Pipeline:
+Middleware functions are functions that have access to the request object (req), the response object (res), and the next middleware function in the application's request-response cycle (next).
+
+Middleware Signature:
+  const loggingMiddleware = (req, res, next) => {
+    console.log(`${req.method} ${req.url} at ${new Date().toISOString()}`);
+    next(); // Pass control to the next handler
+  };
+
+Categories of Middleware:
+1. Application-Level Middleware: Bound to an instance of the app object using app.use() (e.g., cors(), helmet(), compression()).
+2. Router-Level Middleware: Bound to express.Router() instances for modular route structuring.
+3. Authentication / Authorization Middleware: Intercepts requests, validates Bearer JWT tokens in the Authorization header, decodes the user payload, and attaches req.user:
+  const protect = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Not authorized' });
+    try {
+      req.user = jwt.verify(token, process.env.JWT_SECRET);
+      next();
+    } catch (err) {
+      return res.status(401).json({ error: 'Token invalid' });
+    }
+  };
+4. Error-Handling Middleware: Defined with four arguments: (err, req, res, next). Express detects the four-argument signature and routes errors invoked via next(error) directly to this handler.
+

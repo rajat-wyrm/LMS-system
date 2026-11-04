@@ -1,0 +1,32 @@
+Course: Machine Learning Foundations
+Course ID: demo_course_ml_201
+Lesson 1: Introduction to Machine Learning
+Lesson ID: demo_lesson_ml_01
+Source File: ml_01_intro.txt
+
+Overview:
+Machine Learning (ML) is an engineering discipline and subfield of artificial intelligence focused on building mathematical algorithms and statistical models that learn patterns and decision boundaries directly from empirical data without being explicitly programmed with deterministic rules.
+
+Historical Definition:
+Arthur Samuel (1959) characterized machine learning as the field of study that gives computers the ability to learn without being explicitly programmed. Tom Mitchell (1997) provided the formal operational definition: "A computer program is said to learn from experience E with respect to some class of tasks T and performance measure P, if its performance at tasks in T, as measured by P, improves with experience E."
+
+Paradigm Shift (Traditional vs. ML):
+- Traditional Programming: Data + Rules (Handcrafted Code) => Answers / Outputs.
+- Machine Learning: Data + Answers (Historical Examples) => Rules / Learned Model.
+
+Core Terminology:
+1. Features (Independent Variables): Measurable properties or attributes of observed phenomena, typically formatted as a numerical feature vector X = [x_1, x_2, ..., x_d].
+2. Target / Label (Dependent Variable): The ground-truth outcome y that the model aims to predict.
+3. Training Instance (Sample): A single observation pair (X_i, y_i) in the dataset.
+4. Model Parameters: Internal variables learned directly from training data (e.g., weights w and bias b in linear models or neural network layers).
+5. Hyperparameters: External configuration settings established prior to model training that govern the optimization procedure (e.g., learning rate alpha, number of epochs, regularization strength lambda, tree maximum depth).
+
+Standard ML Pipeline Lifecycle:
+1. Problem Formulation & Task Identification.
+2. Data Collection and Curation.
+3. Exploratory Data Analysis (EDA) and Preprocessing (handling missing values, encoding categoricals, scaling features).
+4. Feature Engineering and Selection.
+5. Model Training and Hyperparameter Tuning.
+6. Validation and Generalization Evaluation.
+7. Deployment, Monitoring, and Model Drift Tracking.
+

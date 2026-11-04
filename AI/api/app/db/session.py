@@ -37,6 +37,11 @@ def create_db_and_tables():
                 cursor.execute("ALTER TABLE notebook ADD COLUMN chunk_overlap INTEGER DEFAULT 100")
                 print("Migration: Added 'chunk_overlap' column to 'notebook' table.")
                 
+            if "course_id" not in columns:
+                cursor.execute("ALTER TABLE notebook ADD COLUMN course_id VARCHAR")
+                cursor.execute("CREATE INDEX IF NOT EXISTS ix_notebook_course_id ON notebook(course_id)")
+                print("Migration: Added 'course_id' column to 'notebook' table.")
+                
             if "updated_at" not in columns:
                 cursor.execute("ALTER TABLE notebook ADD COLUMN updated_at DATETIME")
                 cursor.execute("UPDATE notebook SET updated_at = created_at WHERE updated_at IS NULL")

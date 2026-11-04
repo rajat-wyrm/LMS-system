@@ -1,0 +1,42 @@
+Course: Web Development
+Course ID: demo_course_web_301
+Lesson 1: HTML, CSS and JavaScript Fundamentals
+Lesson ID: demo_lesson_web_01
+Source File: web_01_html_css_js.txt
+
+Overview:
+The World Wide Web is built on three foundational technologies: HTML (structure and content), CSS (presentation and aesthetics), and JavaScript (behavior and interactivity).
+
+1. HTML5 (HyperText Markup Language):
+HTML provides the semantic skeleton of web documents. Modern HTML5 emphasizes semantic elements that communicate document structure to web browsers, screen readers, and search engines:
+- Semantic Layout Tags: <header>, <nav>, <main>, <article>, <section>, <aside>, <footer>.
+- Accessibility (a11y): ARIA attributes (e.g., aria-label, role), descriptive alt attributes on images, and native form elements (<input type="email">, <button>) ensure universal usability.
+- Document Object Model (DOM): When a browser parses HTML, it constructs an in-memory hierarchical tree of nodes representing elements, attributes, and text nodes.
+
+2. CSS3 (Cascading Style Sheets):
+CSS defines the visual presentation, color schemes, typography, and spatial positioning of HTML elements.
+- The CSS Box Model: Every element is rendered as a rectangular box comprising four concentric layers:
+  1. Content: The actual text or media.
+  2. Padding: Transparent interior spacing clearing area around the content.
+  3. Border: A stroke surrounding the padding.
+  4. Margin: Transparent exterior clearance separating the element from neighbors.
+- Modern CSS Layouts:
+  - Flexbox (display: flex): One-dimensional layout module for aligning items along a main axis or cross axis with justify-content, align-items, and flex-wrap.
+  - CSS Grid (display: grid): Two-dimensional layout system dividing space into rows and columns with grid-template-columns and grid-gap.
+- Responsive Design: Adapts styling across mobile, tablet, and desktop screens using Media Queries (e.g., @media (max-width: 768px)) and fluid sizing units (rem, em, vw, vh, %).
+
+3. Modern JavaScript (ES6+):
+JavaScript is an interpreted, single-threaded, event-driven language executing within the browser engine (e.g., Google Chrome V8, Mozilla SpiderMonkey).
+- Variables: let (mutable block-scoped), const (immutable assignment block-scoped), avoiding legacy function-scoped var.
+- Arrow Functions: Concise syntax (const add = (a, b) => a + b) with lexical 'this' binding.
+- Asynchronous Programming: Handled via the JavaScript Event Loop, Promises, and async/await syntax:
+  async function fetchUser(id) {
+    try {
+      const response = await fetch(`/api/users/${id}`);
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error("Fetch failed", err);
+    }
+  }
+

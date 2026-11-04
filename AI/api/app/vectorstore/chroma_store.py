@@ -23,18 +23,22 @@ class ChromaStore:
             embedding_function=self.embedding_function
         )
 
-    def add_documents(self, chunks: list[Document], notebook_id: str):
-        # Add notebook_id and normalize source to filename
+    def add_documents(self, chunks: list[Document], notebook_id: str, course_id: str = None):
+        """
+        Adds document chunks to ChromaDB, tagging each chunk with notebook_id,
+        course_id, filename, and composite chunk ID for strict retrieval isolation.
+        """
         for chunk in chunks:
             chunk.metadata["notebook_id"] = notebook_id
+            if course_id:
+                chunk.metadata["course_id"] = course_id
             if "source" in chunk.metadata:
                 chunk.metadata["source"] = os.path.basename(chunk.metadata["source"])
+                chunk.metadata["filename"] = chunk.metadata["source"]
         
         db = self.get_db()
         chunks_with_ids = self._calculate_chunk_ids(chunks)
         
-        # We don't necessarily need to check existing IDs globally if we use notebook_id as filter
-        # but let's keep the logic for deduplication
         existing_items = db.get(include=[])
         existing_ids = set(existing_items["ids"])
         new_chunks = [c for c in chunks_with_ids if c.metadata["id"] not in existing_ids]
@@ -44,11 +48,21 @@ class ChromaStore:
             return True
         return False
 
-    def query(self, query_text: str, notebook_id: str, k=5, source_names: list[str] = None):
+    def query(self, query_text: str, notebook_id: str = None, course_id: str = None, k=5, source_names: list[str] = None):
+        """
+        Queries ChromaDB enforcing notebook_id and/or course_id isolation filtering.
+        """
         db = self.get_db()
         
         # Build filter list
-        filters = [{"notebook_id": notebook_id}]
+        filters = []
+        if notebook_id:
+            filters.append({"notebook_id": notebook_id})
+        if course_id:
+            filters.append({"course_id": course_id})
+            
+        if not filters:
+            raise ValueError("Query requires either notebook_id or course_id for isolation filtering.")
         
         if source_names and len(source_names) > 0:
             if len(source_names) == 1:
