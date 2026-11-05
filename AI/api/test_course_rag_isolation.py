@@ -137,16 +137,37 @@ def test_course_mapping_persistence(setup_ingested_courses):
             assert notebook.id == f"nb_course_{course_id}"
 
 def test_mapping_idempotency():
-    """Verifies that attempting to map an already-mapped course returns the existing notebook without duplicates."""
+    """Verifies that attempting to map an already-mapped course returns the existing notebook without duplicates, and refreshes title."""
     with Session(engine) as session:
-        nb1 = get_or_create_course_notebook(session, "demo_course_python_101")
-        nb2 = get_or_create_course_notebook(session, "demo_course_python_101")
+        nb1 = get_or_create_course_notebook(session, "demo_course_python_101", title="Initial Title")
+        nb2 = get_or_create_course_notebook(session, "demo_course_python_101", title="Updated Title")
         assert nb1.id == nb2.id
+        assert nb2.title == "Updated Title"
         
         # Verify only 1 notebook exists for this course
         statement = select(Notebook).where(Notebook.course_id == "demo_course_python_101")
         all_nbs = session.exec(statement).all()
         assert len(all_nbs) == 1
+
+def test_mapping_conflict_rejection():
+    """Verifies that attempting to map a deterministic notebook ID belonging to another course raises a conflict error."""
+    with Session(engine) as session:
+        # Create an existing notebook manually with a deterministic ID for Course A
+        conflict_id = "nb_course_test_conflict_999"
+        existing = session.get(Notebook, conflict_id)
+        if not existing:
+            conflict_nb = Notebook(
+                id=conflict_id,
+                course_id="original_course_alpha",
+                title="Alpha Notebook"
+            )
+            session.add(conflict_nb)
+            session.commit()
+
+        # Attempting to map Course Beta to the same deterministic ID must fail
+        with pytest.raises(ValueError) as excinfo:
+            get_or_create_course_notebook(session, "test_conflict_999")
+        assert "Notebook ID conflict" in str(excinfo.value)
 
 def test_document_and_chunk_counts(setup_ingested_courses):
     """Verifies each course has exactly 5 documents indexed in SQLite."""
@@ -222,6 +243,77 @@ def test_cross_course_negative_isolation(setup_ingested_courses):
     for doc, _score in web_results:
         assert doc.metadata.get("course_id") == "demo_course_web_301"
         assert "python_05_oop.txt" != doc.metadata.get("source")
+
+def test_document_reingestion_updates_chunks():
+    """
+    Verifies that re-ingesting an updated document:
+    1. Does not create duplicate chunks with identical IDs.
+    2. Correctly updates chunks in ChromaDB.
+    3. Removes obsolete chunks when the new version has fewer chunks.
+    """
+    from langchain_core.documents import Document as LCDocument
+
+    chroma_store = ChromaStore(model_name="test-embeddings")
+    test_nb_id = "nb_test_reingest_notebook"
+    test_source = "test_doc_versioned.txt"
+
+    # Version 1: 3 chunks
+    v1_chunks = [
+        LCDocument(page_content=f"Initial content chunk {i} for version 1", metadata={"source": test_source, "page": 0})
+        for i in range(3)
+    ]
+    chroma_store.add_documents(v1_chunks, notebook_id=test_nb_id, course_id="test_course_reingest")
+
+    # Verify 3 chunks exist
+    results_v1 = chroma_store.query("Initial content", notebook_id=test_nb_id, k=10)
+    assert len(results_v1) == 3
+
+    # Version 2: Only 1 chunk (reduced content)
+    v2_chunks = [
+        LCDocument(page_content="Updated content chunk 0 for version 2", metadata={"source": test_source, "page": 0})
+    ]
+    chroma_store.add_documents(v2_chunks, notebook_id=test_nb_id, course_id="test_course_reingest")
+
+    # Verify only 1 chunk exists now (obsolete chunks removed, no duplicates)
+    results_v2 = chroma_store.query("Updated content", notebook_id=test_nb_id, k=10)
+    assert len(results_v2) == 1
+    assert "version 2" in results_v2[0][0].page_content
+
+    # Clean up test notebook data
+    chroma_store.delete_notebook_data(test_nb_id)
+
+def test_missing_document_handling():
+    """
+    Verifies that when a document cannot be found, ingestion records the missing file,
+    reports partial status, and preserves successful documents.
+    """
+    # Create a spec containing a non-existent document
+    bad_spec = [
+        {
+            "id": "demo_course_test_missing",
+            "title": "Missing Doc Test Course",
+            "description": "Test description",
+            "lessons": [
+                {
+                    "id": "lesson_missing_01",
+                    "title": "Non-existent Lesson",
+                    "order": 1,
+                    "sourceDocument": "file_that_does_not_exist_9999.txt"
+                }
+            ]
+        }
+    ]
+    import ingest_demo_courses as idc
+    orig_load = idc.load_demo_courses_spec
+    idc.load_demo_courses_spec = lambda: bad_spec
+
+    try:
+        summary = idc.ingest_demo_courses(embedding_model="test-embeddings", verbose=False)
+        assert summary["status"] == "partial"
+        assert len(summary["missing_documents"]) == 1
+        assert "file_that_does_not_exist_9999.txt" in summary["missing_documents"][0]
+    finally:
+        idc.load_demo_courses_spec = orig_load
 
 def run_benchmark_evaluation():
     """

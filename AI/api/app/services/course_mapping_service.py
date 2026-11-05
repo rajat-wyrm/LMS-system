@@ -21,28 +21,53 @@ def get_or_create_course_notebook(
     """
     Retrieves the existing Notebook mapped to course_id, or creates a new one
     with deterministic ID conventions and uniqueness constraints.
-    Prevents duplicate or conflicting mappings.
+    Prevents duplicate or conflicting mappings, refreshes title/description if provided,
+    and rejects conflicts where a deterministic notebook ID belongs to another course.
     """
     if not course_id:
         raise ValueError("course_id must not be empty")
 
     now_utc = datetime.now(timezone.utc)
+    deterministic_id = f"nb_course_{course_id}"
 
-    # 1. Query for existing mapped notebook
+    # 1. Query for existing notebook mapped to this course_id
     statement = select(Notebook).where(Notebook.course_id == course_id)
     existing_nb = session.exec(statement).first()
     if existing_nb:
+        # Refresh metadata if title or description was explicitly provided
+        updated = False
+        if title and existing_nb.title != title:
+            existing_nb.title = title
+            updated = True
+        if description and existing_nb.description != description:
+            existing_nb.description = description
+            updated = True
+        if updated:
+            existing_nb.updated_at = now_utc
+            session.add(existing_nb)
+            session.commit()
+            session.refresh(existing_nb)
         return existing_nb
 
-    # 2. Also check if a notebook with deterministic ID exists (in case course_id was unset)
-    deterministic_id = f"nb_course_{course_id}"
+    # 2. Check if a notebook with deterministic_id already exists
     nb_by_id = session.get(Notebook, deterministic_id)
     if nb_by_id:
-        if not nb_by_id.course_id:
-            nb_by_id.course_id = course_id
-            session.add(nb_by_id)
-            session.commit()
-            session.refresh(nb_by_id)
+        # If it belongs to a different course, reject the conflict explicitly
+        if nb_by_id.course_id and nb_by_id.course_id != course_id:
+            raise ValueError(
+                f"Notebook ID conflict: '{deterministic_id}' is already mapped to course '{nb_by_id.course_id}', "
+                f"cannot map to '{course_id}'."
+            )
+        # If it had no course_id assigned yet, link it to this course
+        nb_by_id.course_id = course_id
+        if title:
+            nb_by_id.title = title
+        if description:
+            nb_by_id.description = description
+        nb_by_id.updated_at = now_utc
+        session.add(nb_by_id)
+        session.commit()
+        session.refresh(nb_by_id)
         return nb_by_id
 
     # 3. Ensure a valid user exists for foreign key constraint

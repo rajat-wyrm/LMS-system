@@ -65,6 +65,9 @@ def ingest_demo_courses(embedding_model="nomic-embed-text", verbose=True):
         "notebooks_mapped": 0,
         "documents_ingested": 0,
         "chunks_indexed": 0,
+        "status": "complete",  # "complete" or "partial"
+        "missing_documents": [],
+        "errors": [],
         "course_details": []
     }
 
@@ -99,54 +102,84 @@ def ingest_demo_courses(embedding_model="nomic-embed-text", verbose=True):
                 doc_path = DATA_DIR / subdir / doc_filename
 
                 if not doc_path.exists():
+                    msg = f"Document not found: {doc_path} for lesson {lesson['id']} in course {c_id}"
+                    summary["missing_documents"].append(msg)
+                    summary["status"] = "partial"
                     if verbose:
-                        print(f"   [Warning] Document not found: {doc_path}")
+                        print(f"   [Error] {msg}")
+                    # Mark or record document record as error in SQLite if requested
+                    existing_doc = session.exec(
+                        select(Document).where(Document.notebook_id == notebook.id).where(Document.name == doc_filename)
+                    ).first()
+                    if not existing_doc:
+                        err_doc = Document(
+                            name=doc_filename,
+                            file_url=str(doc_path),
+                            status="error",
+                            notebook_id=notebook.id
+                        )
+                        session.add(err_doc)
+                    else:
+                        existing_doc.status = "error"
+                        session.add(existing_doc)
+                    session.commit()
                     continue
 
-                # Load raw text using FileProcessor
-                raw_docs = processor.load_txt(str(doc_path))
-                if not raw_docs:
-                    continue
+                try:
+                    # Load raw text using FileProcessor
+                    raw_docs = processor.load_txt(str(doc_path))
+                    if not raw_docs:
+                        msg = f"Empty or unreadable document: {doc_path}"
+                        summary["errors"].append(msg)
+                        summary["status"] = "partial"
+                        continue
 
-                # Split into semantic chunks
-                chunks = processor.split_documents(raw_docs)
+                    # Split into semantic chunks
+                    chunks = processor.split_documents(raw_docs)
 
-                # Attach rich course, lesson, and source traceability metadata
-                for chunk in chunks:
-                    chunk.metadata["course_id"] = c_id
-                    chunk.metadata["notebook_id"] = notebook.id
-                    chunk.metadata["lesson_id"] = lesson["id"]
-                    chunk.metadata["lesson_title"] = lesson["title"]
-                    chunk.metadata["lesson_order"] = lesson["order"]
-                    chunk.metadata["source"] = doc_filename
-                    chunk.metadata["filename"] = doc_filename
+                    # Attach rich course, lesson, and source traceability metadata
+                    for chunk in chunks:
+                        chunk.metadata["course_id"] = c_id
+                        chunk.metadata["notebook_id"] = notebook.id
+                        chunk.metadata["lesson_id"] = lesson["id"]
+                        chunk.metadata["lesson_title"] = lesson["title"]
+                        chunk.metadata["lesson_order"] = lesson["order"]
+                        chunk.metadata["source"] = doc_filename
+                        chunk.metadata["filename"] = doc_filename
 
-                # Index chunks into ChromaDB
-                chroma_store.add_documents(chunks, notebook_id=notebook.id, course_id=c_id)
+                    # Index chunks into ChromaDB (safely adds/replaces chunks)
+                    chroma_store.add_documents(chunks, notebook_id=notebook.id, course_id=c_id)
 
-                # Persist or update Document record in SQLite
-                existing_doc = session.exec(
-                    select(Document).where(Document.notebook_id == notebook.id).where(Document.name == doc_filename)
-                ).first()
+                    # Persist or update Document record in SQLite
+                    existing_doc = session.exec(
+                        select(Document).where(Document.notebook_id == notebook.id).where(Document.name == doc_filename)
+                    ).first()
 
-                if not existing_doc:
-                    db_doc = Document(
-                        name=doc_filename,
-                        file_url=str(doc_path),
-                        status="indexed",
-                        notebook_id=notebook.id
-                    )
-                    session.add(db_doc)
-                else:
-                    existing_doc.status = "indexed"
-                    session.add(existing_doc)
+                    if not existing_doc:
+                        db_doc = Document(
+                            name=doc_filename,
+                            file_url=str(doc_path),
+                            status="indexed",
+                            notebook_id=notebook.id
+                        )
+                        session.add(db_doc)
+                    else:
+                        existing_doc.status = "indexed"
+                        session.add(existing_doc)
 
-                session.commit()
+                    session.commit()
 
-                course_docs += 1
-                course_chunks += len(chunks)
-                if verbose:
-                    print(f"   [Ingested] Lesson {lesson['order']}: {doc_filename} ({len(chunks)} chunks)")
+                    course_docs += 1
+                    course_chunks += len(chunks)
+                    if verbose:
+                        print(f"   [Ingested] Lesson {lesson['order']}: {doc_filename} ({len(chunks)} chunks)")
+
+                except Exception as doc_err:
+                    err_msg = f"Error processing document {doc_filename}: {str(doc_err)}"
+                    summary["errors"].append(err_msg)
+                    summary["status"] = "partial"
+                    if verbose:
+                        print(f"   [Error] {err_msg}")
 
             summary["courses_processed"] += 1
             summary["documents_ingested"] += course_docs
@@ -162,10 +195,19 @@ def ingest_demo_courses(embedding_model="nomic-embed-text", verbose=True):
     if verbose:
         print("\n" + "=" * 70)
         print("Ingestion Summary:")
+        print(f" - Status:            {summary['status'].upper()}")
         print(f" - Courses processed: {summary['courses_processed']}")
         print(f" - Notebooks mapped:  {summary['notebooks_mapped']}")
         print(f" - Documents indexed: {summary['documents_ingested']}")
         print(f" - Total vector chunks: {summary['chunks_indexed']}")
+        if summary["missing_documents"]:
+            print(f" - Missing documents: {len(summary['missing_documents'])}")
+            for m in summary["missing_documents"]:
+                print(f"   * {m}")
+        if summary["errors"]:
+            print(f" - Errors encountered: {len(summary['errors'])}")
+            for e in summary["errors"]:
+                print(f"   * {e}")
         print("=" * 70)
 
     return summary

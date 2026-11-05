@@ -36,7 +36,7 @@ async function seedDemoCourses() {
     await prisma.$connect();
     console.log('Connected to PostgreSQL database via Prisma.');
 
-    // Find or create default demo instructor
+    // Look for an existing suitable instructor or admin account
     let instructor = await prisma.user.findFirst({
       where: { role: 'instructor' }
     });
@@ -48,17 +48,14 @@ async function seedDemoCourses() {
     }
 
     if (!instructor) {
-      instructor = await prisma.user.create({
-        data: {
-          name: 'Demo Course Instructor',
-          email: 'demo.instructor@lms.local',
-          password: 'hashed_demo_password_123',
-          role: 'instructor',
-          status: 'approved'
-        }
-      });
-      console.log(` Created default instructor: ${instructor.email} (${instructor.id})`);
+      // Do not silently create an account with a hardcoded plain text password.
+      // Report the requirement clearly so a secure administrator or instructor is configured.
+      throw new Error(
+        'No existing instructor or admin account found in database. ' +
+        'Please create an instructor account via createAdmin.js or signup before seeding demo courses.'
+      );
     }
+    console.log(`Using existing account: ${instructor.email} (${instructor.role}) for demo courses.`);
 
     for (const c of DEMO_COURSES) {
       const courseRecord = await prisma.course.upsert({
@@ -115,8 +112,12 @@ async function seedDemoCourses() {
 
     console.log(' Successfully persisted all demo courses and lessons to PostgreSQL.');
   } catch (err) {
-    console.log(`\n[Database Notice] PostgreSQL persistence bypassed (${err.message}).`);
-    console.log('Structured demo courses are available via backend/scripts/demoCoursesData.json for offline/mock environments.');
+    console.error(`\n[Database Error / Notice] PostgreSQL persistence failed: ${err.message}`);
+    // If running in strict production or database mode, propagate error
+    if (process.env.STRICT_DB === 'true' || process.env.NODE_ENV === 'production') {
+      throw err;
+    }
+    console.log('[Notice] Running in offline / mock mode: Structured demo courses are available via demoCoursesData.json.');
   } finally {
     if (prisma) {
       await prisma.$disconnect();
