@@ -1,0 +1,225 @@
+[
+  {
+    "id": "QA_IN_PY_01",
+    "type": "in_scope",
+    "course_id": "demo_course_python_101",
+    "notebook_id": "nb_course_demo_course_python_101",
+    "lesson_id": "demo_lesson_py_01",
+    "question": "Who created Python and what are the foundational principles described in The Zen of Python?",
+    "expected_source": "python_01_intro.txt",
+    "expected_answer_facts": [
+      "Conceived in late 1980s by Guido van Rossum at CWI and released in 1991",
+      "Emphasizes code readability and significant indentation",
+      "The Zen of Python (PEP 20): Beautiful is better than ugly, Explicit is better than implicit, Simple is better than complex"
+    ],
+    "expected_retrieval_behavior": "Must retrieve chunks from python_01_intro.txt within the Python Fundamentals notebook context.",
+    "expected_fallback_behavior": null
+  },
+  {
+    "id": "QA_IN_PY_02",
+    "type": "in_scope",
+    "course_id": "demo_course_python_101",
+    "notebook_id": "nb_course_demo_course_python_101",
+    "lesson_id": "demo_lesson_py_02",
+    "question": "What is the difference between mutable and immutable data types in Python with examples?",
+    "expected_source": "python_02_variables_types.txt",
+    "expected_answer_facts": [
+      "Immutable types cannot be modified in place after creation; examples: int, float, bool, str, tuple, frozenset",
+      "Mutable types allow in-place modification; examples: list, dict, set",
+      "Modifying an immutable object creates a new object in memory with a distinct id()"
+    ],
+    "expected_retrieval_behavior": "Must retrieve chunks from python_02_variables_types.txt within the Python Fundamentals notebook context.",
+    "expected_fallback_behavior": null
+  },
+  {
+    "id": "QA_IN_PY_03",
+    "type": "in_scope",
+    "course_id": "demo_course_python_101",
+    "notebook_id": "nb_course_demo_course_python_101",
+    "lesson_id": "demo_lesson_py_04",
+    "question": "What is the order of execution in Python try-except-else-finally exception handling blocks?",
+    "expected_source": "python_04_functions_exceptions.txt",
+    "expected_answer_facts": [
+      "try block runs the guarded code",
+      "except block catches and handles matching exceptions",
+      "else block executes only if no exception was raised in try",
+      "finally block always executes regardless of whether an exception occurred or was handled"
+    ],
+    "expected_retrieval_behavior": "Must retrieve chunks from python_04_functions_exceptions.txt within the Python Fundamentals notebook context.",
+    "expected_fallback_behavior": null
+  },
+  {
+    "id": "QA_IN_PY_04",
+    "type": "in_scope",
+    "course_id": "demo_course_python_101",
+    "notebook_id": "nb_course_demo_course_python_101",
+    "lesson_id": "demo_lesson_py_05",
+    "question": "How does inheritance work in Python classes using super() and what is the role of __init__?",
+    "expected_source": "python_05_oop.txt",
+    "expected_answer_facts": [
+      "__init__ is the initializer constructor method called when an instance is instantiated",
+      "super() delegates method calls to parent or sibling classes according to Method Resolution Order (MRO)",
+      "Enables code reuse and polymorphic behavior in class hierarchies"
+    ],
+    "expected_retrieval_behavior": "Must retrieve chunks from python_05_oop.txt within the Python Fundamentals notebook context.",
+    "expected_fallback_behavior": null
+  },
+  {
+    "id": "QA_IN_ML_01",
+    "type": "in_scope",
+    "course_id": "demo_course_ml_201",
+    "notebook_id": "nb_course_demo_course_ml_201",
+    "lesson_id": "demo_lesson_ml_01",
+    "question": "What is Tom Mitchell's formal operational definition of Machine Learning?",
+    "expected_source": "ml_01_intro.txt",
+    "expected_answer_facts": [
+      "A computer program learns from experience E",
+      "With respect to some class of tasks T",
+      "And performance measure P",
+      "If its performance at tasks in T, as measured by P, improves with experience E"
+    ],
+    "expected_retrieval_behavior": "Must retrieve chunks from ml_01_intro.txt within the Machine Learning Foundations notebook context.",
+    "expected_fallback_behavior": null
+  },
+  {
+    "id": "QA_IN_ML_02",
+    "type": "in_scope",
+    "course_id": "demo_course_ml_201",
+    "notebook_id": "nb_course_demo_course_ml_201",
+    "lesson_id": "demo_lesson_ml_02",
+    "question": "What is the difference between supervised and unsupervised learning, and between regression and classification?",
+    "expected_source": "ml_02_supervised_unsupervised.txt",
+    "expected_answer_facts": [
+      "Supervised learning trains on labeled data pairs (input features and ground-truth targets)",
+      "Unsupervised learning discovers latent patterns from unlabeled data without target guidance",
+      "Regression predicts continuous quantitative values",
+      "Classification predicts discrete categorical class labels"
+    ],
+    "expected_retrieval_behavior": "Must retrieve chunks from ml_02_supervised_unsupervised.txt within the Machine Learning Foundations notebook context.",
+    "expected_fallback_behavior": null
+  },
+  {
+    "id": "QA_IN_ML_03",
+    "type": "in_scope",
+    "course_id": "demo_course_ml_201",
+    "notebook_id": "nb_course_demo_course_ml_201",
+    "lesson_id": "demo_lesson_ml_05",
+    "question": "How does L1 Lasso regularization differ from L2 Ridge regularization regarding feature weights?",
+    "expected_source": "ml_05_regularization.txt",
+    "expected_answer_facts": [
+      "L1 Lasso adds penalty proportional to absolute magnitude of coefficients (|w|), driving weights to exact zero for automatic feature selection",
+      "L2 Ridge adds penalty proportional to squared magnitude of coefficients (w^2), shrinking weights toward zero without forcing exact zero",
+      "ElasticNet combines both L1 and L2 penalties"
+    ],
+    "expected_retrieval_behavior": "Must retrieve chunks from ml_05_regularization.txt within the Machine Learning Foundations notebook context.",
+    "expected_fallback_behavior": null
+  },
+  {
+    "id": "QA_IN_WEB_01",
+    "type": "in_scope",
+    "course_id": "demo_course_web_301",
+    "notebook_id": "nb_course_demo_course_web_301",
+    "lesson_id": "demo_lesson_web_01",
+    "question": "What are the three core layers of the web, and how does the CSS box model work?",
+    "expected_source": "web_01_html_css_js.txt",
+    "expected_answer_facts": [
+      "Three core layers: HTML (structure and content), CSS (presentation and style), and JavaScript (behavior and interactivity)",
+      "CSS box model consists of content, padding, border, and margin",
+      "box-sizing: border-box includes padding and border within the declared width and height"
+    ],
+    "expected_retrieval_behavior": "Must retrieve chunks from web_01_html_css_js.txt within the Web Development notebook context.",
+    "expected_fallback_behavior": null
+  },
+  {
+    "id": "QA_IN_WEB_02",
+    "type": "in_scope",
+    "course_id": "demo_course_web_301",
+    "notebook_id": "nb_course_demo_course_web_301",
+    "lesson_id": "demo_lesson_web_02",
+    "question": "What is the Virtual DOM in React and how does reconciliation diffing optimize browser DOM mutations?",
+    "expected_source": "web_02_intro_react.txt",
+    "expected_answer_facts": [
+      "Virtual DOM is an in-memory lightweight representation of the actual DOM",
+      "When state changes, a new Virtual DOM tree is created and diffed against the previous tree",
+      "React calculates minimal set of mutations and batches updates to the real browser DOM"
+    ],
+    "expected_retrieval_behavior": "Must retrieve chunks from web_02_intro_react.txt within the Web Development notebook context.",
+    "expected_fallback_behavior": null
+  },
+  {
+    "id": "QA_IN_WEB_03",
+    "type": "in_scope",
+    "course_id": "demo_course_web_301",
+    "notebook_id": "nb_course_demo_course_web_301",
+    "lesson_id": "demo_lesson_web_05",
+    "question": "What is the middleware function signature in Express and what happens when next() is called?",
+    "expected_source": "web_05_rest_middleware.txt",
+    "expected_answer_facts": [
+      "Middleware signature: (req, res, next) with access to request, response, and the next middleware function",
+      "Calling next() passes control to the next middleware or route handler in the pipeline",
+      "Calling next(err) with an argument bypasses remaining handlers and invokes error-handling middleware (err, req, res, next)"
+    ],
+    "expected_retrieval_behavior": "Must retrieve chunks from web_05_rest_middleware.txt within the Web Development notebook context.",
+    "expected_fallback_behavior": null
+  },
+  {
+    "id": "QA_OUT_01",
+    "type": "out_of_scope",
+    "course_id": null,
+    "notebook_id": null,
+    "lesson_id": null,
+    "question": "How do you configure an Apache Cassandra multi-datacenter cluster with replication strategy across AWS and GCP?",
+    "expected_source": null,
+    "expected_answer_facts": [],
+    "expected_retrieval_behavior": "No relevant course document exists. Retrieval score must fall below confidence threshold or return no matching chunks.",
+    "expected_fallback_behavior": "Polite refusal or fallback: AI Tutor should indicate that this topic is not covered in the enrolled course curriculum and suggest asking about course topics."
+  },
+  {
+    "id": "QA_OUT_02",
+    "type": "out_of_scope",
+    "course_id": null,
+    "notebook_id": null,
+    "lesson_id": null,
+    "question": "What are the rules and pieces for playing chess, including how the knight moves in an L-shape?",
+    "expected_source": null,
+    "expected_answer_facts": [],
+    "expected_retrieval_behavior": "No relevant course document exists. Retrieval must not hallucinate a course document citation.",
+    "expected_fallback_behavior": "Refusal or fallback indicating that chess rules are outside the course learning material."
+  },
+  {
+    "id": "QA_OUT_03",
+    "type": "out_of_scope",
+    "course_id": null,
+    "notebook_id": null,
+    "lesson_id": null,
+    "question": "Can you provide the chemical equation and Gibbs free energy change for photosynthesis in C4 plants?",
+    "expected_source": null,
+    "expected_answer_facts": [],
+    "expected_retrieval_behavior": "No relevant course document exists. Retrieval score must be low or empty.",
+    "expected_fallback_behavior": "Refusal indicating plant biology and chemistry are outside the scope of the LMS computer science and engineering courses."
+  },
+  {
+    "id": "QA_OUT_04",
+    "type": "out_of_scope",
+    "course_id": null,
+    "notebook_id": null,
+    "lesson_id": null,
+    "question": "Write a legal non-disclosure agreement (NDA) template compliant with California employment law.",
+    "expected_source": null,
+    "expected_answer_facts": [],
+    "expected_retrieval_behavior": "No relevant course document exists. Must not match any course syllabus chunks.",
+    "expected_fallback_behavior": "Polite refusal explaining that legal contracts are outside course learning materials."
+  },
+  {
+    "id": "QA_OUT_05",
+    "type": "out_of_scope",
+    "course_id": null,
+    "notebook_id": null,
+    "lesson_id": null,
+    "question": "What is the recommended itinerary and flight connection for a three-day weekend trip to Tokyo?",
+    "expected_source": null,
+    "expected_answer_facts": [],
+    "expected_retrieval_behavior": "No relevant course document exists. Must return zero matching lesson citations.",
+    "expected_fallback_behavior": "Polite refusal indicating travel planning is unrelated to the course curriculum."
+  }
+]
