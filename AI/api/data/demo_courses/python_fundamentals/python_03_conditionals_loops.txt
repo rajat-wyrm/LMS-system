@@ -1,0 +1,52 @@
+Course: Python Fundamentals
+Course ID: demo_course_python_101
+Lesson 3: Conditional Statements and Loops
+Lesson ID: demo_lesson_py_03
+Source File: python_03_conditionals_loops.txt
+
+Overview:
+Control flow structures direct the execution order of statements based on computational logic, boolean evaluations, and iterative sequences.
+
+Conditional Statements:
+Python evaluates conditions using if, elif, and else keywords:
+- if condition: Executes the indented block if the condition evaluates to truthy.
+- elif condition: Short for 'else if', evaluated sequentially if preceding conditions evaluate to falsy.
+- else: Executes if all preceding conditions are falsy.
+
+Truth Value Testing (Truthy and Falsy):
+In Python, the following values evaluate to falsy in boolean contexts: None, False, numeric zeros (0, 0.0, 0j), empty sequences and collections ('', (), [], {}, set(), range(0)). All other values evaluate to truthy.
+
+Logical Operators:
+Python uses keyword-based logical operators:
+- and: Logical conjunction with short-circuit evaluation.
+- or: Logical disjunction with short-circuit evaluation.
+- not: Logical negation.
+
+Looping Constructs:
+1. While Loops:
+Repeatedly executes a block of code as long as a specified condition remains True.
+Syntax:
+  while condition:
+      statements
+The break statement terminates the loop immediately, while continue skips the remainder of the current iteration and advances to the next cycle.
+
+2. For Loops:
+Python for loops iterate over elements of any iterable sequence (such as lists, strings, dictionaries, or ranges).
+Syntax:
+  for item in iterable:
+      process(item)
+
+The range() Function:
+The built-in range(start, stop[, step]) produces a sequence of integers from start up to (but not including) stop.
+
+Loop Else Clauses:
+Both for and while loops support an optional else clause. The loop else block executes only if the loop terminates normally without encountering a break statement.
+
+List Comprehensions:
+A list comprehension offers a concise syntax to generate lists from iterables.
+General syntax:
+  [expression for item in iterable if condition]
+Example:
+  squares = [x**2 for x in range(10) if x % 2 == 0]
+This produces the squared values of even integers from 0 to 9, resulting in [0, 4, 16, 36, 64].
+

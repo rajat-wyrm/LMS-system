@@ -3,11 +3,16 @@ from sqlmodel import Session, select
 from typing import List, Optional
 from pydantic import BaseModel
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from app.db.models import Notebook, User
 from app.db.session import get_session
 from app.vectorstore.chroma_store import ChromaStore
 from app.services.rag_service import RAGService
+from app.services.course_mapping_service import (
+    get_or_create_course_notebook,
+    get_notebook_by_course,
+    list_all_course_mappings
+)
 
 router = APIRouter()
 chroma_store = ChromaStore()
@@ -16,6 +21,12 @@ rag_service = RAGService(chroma_store)
 class TitleGenerateRequest(BaseModel):
     description: str
 
+class CourseMappingRequest(BaseModel):
+    course_id: str
+    title: Optional[str] = None
+    description: Optional[str] = None
+    embedding_model: Optional[str] = "nomic-embed-text"
+
 class NotebookUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
@@ -23,11 +34,16 @@ class NotebookUpdate(BaseModel):
     use_reranking: Optional[bool] = None
     chunk_size: Optional[int] = None
     chunk_overlap: Optional[int] = None
+    course_id: Optional[str] = None
 
 @router.post("", response_model=Notebook)
 def create_notebook(notebook_in: Notebook, session: Session = Depends(get_session)):
-    # For now, we assume a default user exists or we create one if not provided
-    # In a real app, this would come from auth
+    # Check if a course mapping was requested and already exists
+    if notebook_in.course_id:
+        existing = session.exec(select(Notebook).where(Notebook.course_id == notebook_in.course_id)).first()
+        if existing:
+            return existing
+
     user = session.exec(select(User)).first()
     if not user:
         user = User(name="Default User", email="user@example.com")
@@ -46,6 +62,30 @@ def list_notebooks(session: Session = Depends(get_session)):
     statement = select(Notebook).order_by(Notebook.updated_at.desc())
     return session.exec(statement).all()
 
+@router.post("/map-course", response_model=Notebook)
+def map_course_endpoint(req: CourseMappingRequest, session: Session = Depends(get_session)):
+    """Maps an LMS course_id to an AI notebook, creating one if not exists."""
+    return get_or_create_course_notebook(
+        session=session,
+        course_id=req.course_id,
+        title=req.title,
+        description=req.description,
+        embedding_model=req.embedding_model or "nomic-embed-text"
+    )
+
+@router.get("/mappings/all")
+def get_all_mappings_endpoint(session: Session = Depends(get_session)):
+    """Lists all active course_id -> notebook_id mappings."""
+    return list_all_course_mappings(session)
+
+@router.get("/course/{course_id}", response_model=Notebook)
+def get_notebook_by_course_endpoint(course_id: str, session: Session = Depends(get_session)):
+    """Retrieves the notebook associated with an LMS course_id."""
+    nb = get_notebook_by_course(session, course_id)
+    if not nb:
+        raise HTTPException(status_code=404, detail=f"No notebook mapped to course_id: {course_id}")
+    return nb
+
 @router.get("/{id}", response_model=Notebook)
 def get_notebook(id: str, session: Session = Depends(get_session)):
     notebook = session.get(Notebook, id)
@@ -53,7 +93,7 @@ def get_notebook(id: str, session: Session = Depends(get_session)):
         raise HTTPException(status_code=404, detail="Notebook not found")
     
     # Update last opened/accessed time
-    notebook.updated_at = datetime.utcnow()
+    notebook.updated_at = datetime.now(timezone.utc)
     session.add(notebook)
     session.commit()
     session.refresh(notebook)
@@ -78,6 +118,8 @@ def update_notebook(id: str, notebook_update: NotebookUpdate, session: Session =
         notebook.chunk_size = notebook_update.chunk_size
     if notebook_update.chunk_overlap is not None:
         notebook.chunk_overlap = notebook_update.chunk_overlap
+    if notebook_update.course_id is not None:
+        notebook.course_id = notebook_update.course_id
         
     session.add(notebook)
     session.commit()

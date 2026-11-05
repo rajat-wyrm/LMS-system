@@ -1,0 +1,165 @@
+[
+  {
+    "question_id": "Q1_PY_SYNTAX",
+    "question": "What is Python's execution architecture and what is the role of CPython and bytecode?",
+    "target_course": "demo_course_python_101",
+    "notebook_id": "nb_course_demo_course_python_101",
+    "is_cross_course": false,
+    "expected_source": "python_01_intro.txt",
+    "forbidden_source": null,
+    "retrieved_sources": [
+      "python_01_intro.txt",
+      "python_01_intro.txt",
+      "python_01_intro.txt"
+    ],
+    "status": "PASS",
+    "notes": "Correctly retrieved from python_01_intro.txt"
+  },
+  {
+    "question_id": "Q2_PY_COMPREHENSION",
+    "question": "What is the syntax for a list comprehension and how does it filter elements with conditions?",
+    "target_course": "demo_course_python_101",
+    "notebook_id": "nb_course_demo_course_python_101",
+    "is_cross_course": false,
+    "expected_source": [
+      "python_03_conditionals_loops.txt",
+      "python_02_variables_types.txt"
+    ],
+    "forbidden_source": null,
+    "retrieved_sources": [
+      "python_02_variables_types.txt",
+      "python_05_oop.txt",
+      "python_02_variables_types.txt"
+    ],
+    "status": "PASS",
+    "notes": "Correctly retrieved from python_02_variables_types.txt"
+  },
+  {
+    "question_id": "Q3_PY_OOP",
+    "question": "How does inheritance work in Python using super() and what is the role of __init__?",
+    "target_course": "demo_course_python_101",
+    "notebook_id": "nb_course_demo_course_python_101",
+    "is_cross_course": false,
+    "expected_source": "python_05_oop.txt",
+    "forbidden_source": null,
+    "retrieved_sources": [
+      "python_05_oop.txt",
+      "python_01_intro.txt",
+      "python_01_intro.txt"
+    ],
+    "status": "PASS",
+    "notes": "Correctly retrieved from python_05_oop.txt"
+  },
+  {
+    "question_id": "Q4_ML_SUPERVISED",
+    "question": "What is the difference between regression and classification in supervised learning?",
+    "target_course": "demo_course_ml_201",
+    "notebook_id": "nb_course_demo_course_ml_201",
+    "is_cross_course": false,
+    "expected_source": "ml_02_supervised_unsupervised.txt",
+    "forbidden_source": null,
+    "retrieved_sources": [
+      "ml_02_supervised_unsupervised.txt",
+      "ml_03_datasets.txt",
+      "ml_01_intro.txt"
+    ],
+    "status": "PASS",
+    "notes": "Correctly retrieved from ml_02_supervised_unsupervised.txt"
+  },
+  {
+    "question_id": "Q5_ML_REGULARIZATION",
+    "question": "How does L1 Lasso regularization differ from L2 Ridge regularization regarding feature weights?",
+    "target_course": "demo_course_ml_201",
+    "notebook_id": "nb_course_demo_course_ml_201",
+    "is_cross_course": false,
+    "expected_source": "ml_05_regularization.txt",
+    "forbidden_source": null,
+    "retrieved_sources": [
+      "ml_05_regularization.txt",
+      "ml_05_regularization.txt",
+      "ml_04_evaluation.txt"
+    ],
+    "status": "PASS",
+    "notes": "Correctly retrieved from ml_05_regularization.txt"
+  },
+  {
+    "question_id": "Q6_WEB_REACT_VDOM",
+    "question": "How does the Virtual DOM reconciliation algorithm optimize browser DOM mutations?",
+    "target_course": "demo_course_web_301",
+    "notebook_id": "nb_course_demo_course_web_301",
+    "is_cross_course": false,
+    "expected_source": "web_02_intro_react.txt",
+    "forbidden_source": null,
+    "retrieved_sources": [
+      "web_02_intro_react.txt",
+      "web_02_intro_react.txt",
+      "web_03_components_state.txt"
+    ],
+    "status": "PASS",
+    "notes": "Correctly retrieved from web_02_intro_react.txt"
+  },
+  {
+    "question_id": "Q7_WEB_EXPRESS_MIDDLEWARE",
+    "question": "What is the middleware function signature in Express and how does next() pass control?",
+    "target_course": "demo_course_web_301",
+    "notebook_id": "nb_course_demo_course_web_301",
+    "is_cross_course": false,
+    "expected_source": "web_05_rest_middleware.txt",
+    "forbidden_source": null,
+    "retrieved_sources": [
+      "web_05_rest_middleware.txt",
+      "web_05_rest_middleware.txt",
+      "web_03_components_state.txt"
+    ],
+    "status": "PASS",
+    "notes": "Correctly retrieved from web_05_rest_middleware.txt"
+  },
+  {
+    "question_id": "Q8_CROSS_ML_IN_PYTHON",
+    "question": "What mathematical penalty does L1 Lasso regularization add to the loss function?",
+    "target_course": "demo_course_python_101",
+    "notebook_id": "nb_course_demo_course_python_101",
+    "is_cross_course": true,
+    "expected_source": null,
+    "forbidden_source": "ml_05_regularization.txt",
+    "retrieved_sources": [
+      "python_02_variables_types.txt",
+      "python_05_oop.txt",
+      "python_04_functions_exceptions.txt"
+    ],
+    "status": "PASS",
+    "notes": "Strict isolation maintained: ml_05_regularization.txt was completely excluded."
+  },
+  {
+    "question_id": "Q9_CROSS_WEB_IN_ML",
+    "question": "How does Express handle router-level and application-level middleware?",
+    "target_course": "demo_course_ml_201",
+    "notebook_id": "nb_course_demo_course_ml_201",
+    "is_cross_course": true,
+    "expected_source": null,
+    "forbidden_source": "web_05_rest_middleware.txt",
+    "retrieved_sources": [
+      "ml_01_intro.txt",
+      "ml_04_evaluation.txt",
+      "ml_04_evaluation.txt"
+    ],
+    "status": "PASS",
+    "notes": "Strict isolation maintained: web_05_rest_middleware.txt was completely excluded."
+  },
+  {
+    "question_id": "Q10_CROSS_PYTHON_IN_WEB",
+    "question": "What is the LEGB rule for Python variable scope and namespace resolution?",
+    "target_course": "demo_course_web_301",
+    "notebook_id": "nb_course_demo_course_web_301",
+    "is_cross_course": true,
+    "expected_source": null,
+    "forbidden_source": "python_04_functions_exceptions.txt",
+    "retrieved_sources": [
+      "web_04_nodejs_express.txt",
+      "web_02_intro_react.txt",
+      "web_05_rest_middleware.txt"
+    ],
+    "status": "PASS",
+    "notes": "Strict isolation maintained: python_04_functions_exceptions.txt was completely excluded."
+  }
+]

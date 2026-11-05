@@ -1,0 +1,24 @@
+Course: Python Fundamentals
+Course ID: demo_course_python_101
+Lesson 2: Variables and Data Types
+Lesson ID: demo_lesson_py_02
+Source File: python_02_variables_types.txt
+
+Overview:
+In Python, variables are symbolic names that serve as references or pointers to objects in memory. Variables do not require explicit type declarations; the Python interpreter dynamically infers the data type based on the value assigned at runtime.
+
+Primitive Data Types:
+1. Integer (int): Represents positive or negative whole numbers with arbitrary precision. Python integers automatically expand in memory to accommodate arbitrarily large numbers without overflow errors.
+2. Floating Point (float): Represents double-precision 64-bit IEEE 754 floating-point numbers. Special float constants include inf (infinity) and nan (Not a Number).
+3. Boolean (bool): Represents truth values with two literal constants: True and False. The bool type is a subclass of int, where True evaluates numerically to 1 and False evaluates to 0.
+4. String (str): Represents immutable sequences of Unicode characters. Strings can be enclosed in single quotes ('...'), double quotes ("..."), or triple quotes ('''...''' or """...""") for multiline strings. String interpolation is typically performed using f-strings (formatted string literals), introduced in Python 3.6 (e.g., f"Score: {score}").
+
+Collection Data Types:
+1. Lists: Mutable, ordered sequences of heterogeneous elements enclosed in square brackets []. Elements can be accessed, modified, appended with list.append(), or sliced using the syntax list[start:stop:step].
+2. Tuples: Immutable, ordered sequences of elements enclosed in parentheses (). Once created, elements in a tuple cannot be reassigned, added, or removed, making tuples suitable for write-protected data and dictionary keys.
+3. Dictionaries (dict): Mutable collections of key-value pairs enclosed in curly braces {key: value}. Keys must be immutable and hashable (e.g., strings, numbers, tuples). Dictionaries are implemented using hash tables, providing O(1) average time complexity for lookups, insertions, and deletions.
+4. Sets: Mutable, unordered collections of unique, hashable elements enclosed in curly braces {item1, item2} or created via set(). Sets automatically eliminate duplicates and support mathematical set operations such as union (|), intersection (&), and difference (-).
+
+Type Casting and Introspection:
+The built-in function type(obj) inspects the object type, isinstance(obj, class_info) verifies inheritance, and functions like int(), float(), str(), list(), and dict() perform explicit type conversion.
+
