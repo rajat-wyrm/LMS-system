@@ -136,6 +136,7 @@ const reviewRoutesV1 = require("./routes/v1/review.routes");
 
 const analyticsRoutes = require("./analytics/analytics.routes");
 const auditRoutes = require("./routes/v1/audit.routes");
+const tutorRoutesV1 = require("./routes/v1/tutor.routes");
 
 // ============================================================
 // V1 API Routes
@@ -153,6 +154,7 @@ app.use("/api/v1/categories", categoryRoutesV1);
 app.use("/api/v1/reviews", reviewRoutesV1);
 app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/audit-logs", auditRoutes);
+app.use("/api/v1/tutor", tutorRoutesV1);
 
 // ============================================================
 // BACKWARD COMPATIBILITY ROUTES
