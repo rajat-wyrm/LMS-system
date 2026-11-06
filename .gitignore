@@ -1,59 +1,19 @@
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
+# Python cache
+__pycache__/
+*.pyc
 
-# Build outputs
-dist/
-build/
-.next/
-out/
-.vite/
+# Virtual environment
+.venv/
+venv/
 
-# Environment
+# Environment variables
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*.env
-!.env.example
+
+# VS Code settings
+.vscode/
 
 # Logs
-logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
 
-# Runtime / cache
-.cache/
-.tmp/
-.turbo/
-.parcel-cache/
-
-# Coverage
-coverage/
-*.lcov
-.nyc_output
-
-# Editors
-.vscode/
-.idea/
-*.swp
-*.swo
-.DS_Store
-Thumbs.db
-
-# Misc
-bun.lockb
-*.tsbuildinfo
-
-# Uploads (runtime)
-backend/uploads/
-backend/uploads/*
-
-# Prisma local
-backend/prisma/*.db
-backend/prisma/*.db-journal
+# Generated database
+chroma_db/
