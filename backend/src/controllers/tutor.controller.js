@@ -7,12 +7,13 @@ const tutorService = require('../services/tutor.service');
  */
 const askQuestion = async (req, res, next) => {
   try {
-    const { courseId, question } = req.body;
+    const { courseId, question, chatId } = req.body;
     const userId = req.user ? req.user.id : null;
 
     const result = await tutorService.askTutor({
       courseId,
       question,
+      chatId,
       userId,
     });
 
@@ -23,6 +24,7 @@ const askQuestion = async (req, res, next) => {
         sources: result.sources,
         courseId: result.courseId,
         notebookId: result.notebookId,
+        chatId: result.chatId,
       },
     });
   } catch (error) {
