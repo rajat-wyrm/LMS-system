@@ -57,3 +57,7 @@ backend/uploads/*
 # Prisma local
 backend/prisma/*.db
 backend/prisma/*.db-journal
+
+# Local AI runtime data
+/chroma/
+/database.db

@@ -1,0 +1,33 @@
+Course: Web Development
+Course ID: demo_course_web_301
+Lesson 2: Introduction to React
+Lesson ID: demo_lesson_web_02
+Source File: web_02_intro_react.txt
+
+Overview:
+React is an open-source, declarative, component-based JavaScript library developed by Meta (formerly Facebook) in 2013 for engineering modern Single-Page Applications (SPAs) and dynamic user interfaces.
+
+Core Concepts and Architecture:
+1. Component-Based Architecture:
+User interfaces in React are decomposed into isolated, self-contained, and reusable components. Components encapsulate their own markup, styling, and interactivity, and can be composed hierarchically to construct complex enterprise applications.
+
+2. Declarative UI Paradigm:
+Instead of writing imperative DOM manipulation code (e.g., document.getElementById('btn').classList.add('active')), React developers describe what the UI should look like for a given state. When underlying application state updates, React automatically recalculates and updates the rendered output.
+
+3. JSX (JavaScript XML):
+JSX is a syntax extension for JavaScript that allows developers to write HTML-like tag structures directly within JavaScript code. Transpilers like Babel or SWC transform JSX expressions into React.createElement() method calls:
+  const element = <h1 className="title">Hello, World!</h1>;
+  // Transpiles into:
+  const element = React.createElement('h1', { className: 'title' }, 'Hello, World!');
+JSX requires class attributes to be written as className, enforces self-closing tags (<img />), and embeds JavaScript expressions inside curly braces {expression}.
+
+4. Virtual DOM and Reconciliation:
+Direct manipulation of the browser's native Document Object Model (DOM) is computationally expensive because layout recalculations and repaints consume CPU cycles. React addresses this through the Virtual DOM (VDOM):
+- The Virtual DOM is a lightweight JavaScript object representation of the real DOM maintained in memory.
+- When component state changes, React constructs a new Virtual DOM tree.
+- React's Diffing Algorithm compares the new Virtual DOM tree against the previous Virtual DOM snapshot.
+- Reconciliation: React computes the minimal batch of mutations required and applies only the specific differences to the actual native browser DOM in a single optimized pass.
+
+5. Unidirectional Data Flow:
+Data in React flows strictly downward from parent components to child components via read-only 'props' (properties). Child components cannot mutate props directly; instead, they trigger state updates in parent components by invoking callback functions passed down as props.
+

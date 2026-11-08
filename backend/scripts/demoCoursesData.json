@@ -1,0 +1,168 @@
+[
+  {
+    "id": "demo_course_python_101",
+    "title": "Python Fundamentals",
+    "description": "A comprehensive introduction to Python programming, covering foundational syntax, control structures, functional programming, error handling, and object-oriented principles.",
+    "category": "Computer Science",
+    "level": "Beginner",
+    "status": "approved",
+    "price": 0,
+    "rating": 4.9,
+    "duration": "100 Mins",
+    "outcomes": [
+      "Understand Python execution architecture and syntax",
+      "Master primitive and collection data types",
+      "Control program flow with loops and conditionals",
+      "Write modular functions with robust exception handling",
+      "Build object-oriented software with classes and inheritance"
+    ],
+    "lessons": [
+      {
+        "id": "demo_lesson_py_01",
+        "title": "Introduction to Python",
+        "order": 1,
+        "content": "Python is a high-level interpreted programming language emphasizing readability, clean syntax, and significant indentation.",
+        "sourceDocument": "python_01_intro.txt"
+      },
+      {
+        "id": "demo_lesson_py_02",
+        "title": "Variables and Data Types",
+        "order": 2,
+        "content": "Dynamic typing in Python, primitive types (int, float, bool, str), and collections (lists, tuples, dicts, sets).",
+        "sourceDocument": "python_02_variables_types.txt"
+      },
+      {
+        "id": "demo_lesson_py_03",
+        "title": "Conditional Statements and Loops",
+        "order": 3,
+        "content": "Boolean logic, if-elif-else branching, while loops, for loops with range, loop-else constructs, and list comprehensions.",
+        "sourceDocument": "python_03_conditionals_loops.txt"
+      },
+      {
+        "id": "demo_lesson_py_04",
+        "title": "Functions and Exception Handling",
+        "order": 4,
+        "content": "Function definition with def, positional and keyword arguments, *args/**kwargs, try-except-else-finally blocks, and raising exceptions.",
+        "sourceDocument": "python_04_functions_exceptions.txt"
+      },
+      {
+        "id": "demo_lesson_py_05",
+        "title": "Object-Oriented Programming",
+        "order": 5,
+        "content": "Classes and instances, constructor __init__, self parameter, encapsulation, inheritance, polymorphism, and dunder methods.",
+        "sourceDocument": "python_05_oop.txt"
+      }
+    ]
+  },
+  {
+    "id": "demo_course_ml_201",
+    "title": "Machine Learning Foundations",
+    "description": "Essential principles of modern machine learning, spanning supervised and unsupervised learning paradigms, training and validation methodologies, loss functions, evaluation metrics, and regularization.",
+    "category": "Artificial Intelligence",
+    "level": "Intermediate",
+    "status": "approved",
+    "price": 0,
+    "rating": 4.95,
+    "duration": "120 Mins",
+    "outcomes": [
+      "Distinguish machine learning from deterministic rule-based systems",
+      "Identify regression, classification, clustering, and dimensionality reduction tasks",
+      "Implement robust train-test splits and cross-validation strategies",
+      "Evaluate models using MSE, RMSE, R-squared, Precision, Recall, and F1-score",
+      "Mitigate overfitting using L1 Lasso, L2 Ridge, and ElasticNet regularization"
+    ],
+    "lessons": [
+      {
+        "id": "demo_lesson_ml_01",
+        "title": "Introduction to Machine Learning",
+        "order": 1,
+        "content": "Definitions of machine learning, features vs targets, model parameters vs hyperparameters, and the standard ML lifecycle.",
+        "sourceDocument": "ml_01_intro.txt"
+      },
+      {
+        "id": "demo_lesson_ml_02",
+        "title": "Supervised and Unsupervised Learning",
+        "order": 2,
+        "content": "Supervised regression and classification versus unsupervised clustering (K-Means, DBSCAN) and dimensionality reduction (PCA).",
+        "sourceDocument": "ml_02_supervised_unsupervised.txt"
+      },
+      {
+        "id": "demo_lesson_ml_03",
+        "title": "Training and Testing Datasets",
+        "order": 3,
+        "content": "Train-test splitting, validation sets, K-fold cross-validation, stratified sampling, and avoiding data leakage.",
+        "sourceDocument": "ml_03_datasets.txt"
+      },
+      {
+        "id": "demo_lesson_ml_04",
+        "title": "Model Evaluation",
+        "order": 4,
+        "content": "Quantitative evaluation metrics: MAE, MSE, RMSE, R-squared for regression; Confusion matrix, Accuracy, Precision, Recall, F1, and ROC-AUC for classification.",
+        "sourceDocument": "ml_04_evaluation.txt"
+      },
+      {
+        "id": "demo_lesson_ml_05",
+        "title": "Overfitting and Regularization",
+        "order": 5,
+        "content": "Bias-variance tradeoff, overfitting diagnostics, L1 Lasso weight sparsity, L2 Ridge shrinkage, and ElasticNet regularization.",
+        "sourceDocument": "ml_05_regularization.txt"
+      }
+    ]
+  },
+  {
+    "id": "demo_course_web_301",
+    "title": "Web Development",
+    "description": "Modern full-stack web engineering, from foundational HTML5, CSS3, and ES6+ JavaScript to reactive component architectures with React, backend services with Node.js and Express, and robust RESTful API design.",
+    "category": "Web Development",
+    "level": "Beginner",
+    "status": "approved",
+    "price": 0,
+    "rating": 4.88,
+    "duration": "110 Mins",
+    "outcomes": [
+      "Construct accessible semantic layouts with HTML5 and CSS3 box model",
+      "Write modern asynchronous JavaScript with Promises and async/await",
+      "Build single-page web applications using React components and JSX",
+      "Manage component state and lifecycle using React Hooks",
+      "Develop HTTP server routes and middleware pipelines with Node.js and Express"
+    ],
+    "lessons": [
+      {
+        "id": "demo_lesson_web_01",
+        "title": "HTML, CSS and JavaScript Fundamentals",
+        "order": 1,
+        "content": "Semantic HTML5, CSS box model, Flexbox, Grid, and modern ES6+ JavaScript (let/const, arrow functions, promises, async/await).",
+        "sourceDocument": "web_01_html_css_js.txt"
+      },
+      {
+        "id": "demo_lesson_web_02",
+        "title": "Introduction to React",
+        "order": 2,
+        "content": "Single Page Applications, declarative UI, JSX transpilation, Virtual DOM diffing, reconciliation, and unidirectional data flow.",
+        "sourceDocument": "web_02_intro_react.txt"
+      },
+      {
+        "id": "demo_lesson_web_03",
+        "title": "Components and State Management",
+        "order": 3,
+        "content": "Functional components, React Hooks (useState, useEffect, useRef), lifting state up, and Context API.",
+        "sourceDocument": "web_03_components_state.txt"
+      },
+      {
+        "id": "demo_lesson_web_04",
+        "title": "Node.js and Express",
+        "order": 4,
+        "content": "Node.js V8 runtime, event loop, libuv thread pool, Express HTTP servers, route handlers, and request/response lifecycle.",
+        "sourceDocument": "web_04_nodejs_express.txt"
+      },
+      {
+        "id": "demo_lesson_web_05",
+        "title": "REST APIs and Middleware",
+        "order": 5,
+        "content": "REST architectural principles, HTTP methods, status codes, Express middleware pipelines (req, res, next), authentication, and error handling.",
+        "sourceDocument": "web_05_rest_middleware.txt"
+      }
+    ]
+  }
+]
+
