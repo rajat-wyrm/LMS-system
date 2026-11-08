@@ -1,5 +1,4 @@
 import API from "./client";
-
 export interface CourseData {
   id?: string;
   title: string;
@@ -23,7 +22,6 @@ export interface CourseData {
   };
   generateAI?: boolean;
 }
-
 export const courseApi = {
   getAllCourses: (config?: object) => API.get("/courses", config),
   getTrendingCourses: () => API.get("/courses/trending"),
@@ -34,7 +32,6 @@ export const courseApi = {
   generateLessonsAI: (courseId: string) => API.post(`/courses/${courseId}/generate-lessons`),
   updateCourse: (id: string, data: Partial<CourseData>) => API.put(`/courses/${id}`, data),
   deleteCourse: (id: string) => API.delete(`/courses/${id}`),
-
   // Enrollment
   enrollInCourse: (courseId: string, data?: { mentor: string }) => API.post(`/enrollments/${courseId}`, data),
   unenrollFromCourse: (courseId: string) => API.delete(`/enrollments/${courseId}`),
@@ -48,15 +45,15 @@ export const courseApi = {
     lastWatchedAt?: string;
     playbackPositions?: Record<string, number>;
   }) => API.put(`/enrollments/${courseId}/sync`, data),
-
   // Lessons
   addLesson: (courseId: string, data: { title: string; content: string; videoUrl?: string; order: number }) => API.post(`/courses/${courseId}/lessons`, data),
   deleteLesson: (courseId: string, lessonId: string) => API.delete(`/courses/${courseId}/lessons/${lessonId}`),
-
 // Stats
    getInstructorStats: () => API.get("/courses/instructor/stats"),
   getInstructorCourseAnalytics: () => API.get("/courses/instructor/course-analytics"),
-
   // Timeline
   getCourseTimeline: (id: string) => API.get(`/courses/${id}/timeline`),
+  // AI Tutor
+  askCourseTutor: (courseId: string, question: string) =>
+    API.post(`/v1/tutor/courses/${courseId}/ask`, { question }),
 };
