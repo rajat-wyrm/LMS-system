@@ -5,7 +5,7 @@ import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { toast } from "sonner";
 import { getSyncQueue, saveSyncQueue, clearSyncQueue, mergeLocalAndServerEnrollment } from "@/utils/progressSync";
-
+import AITutorDock from "@/components/tutor/AITutorDock";
 export default function CoursePlayer() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
@@ -493,6 +493,7 @@ export default function CoursePlayer() {
             )}
           </div>
         </div>
+        <AITutorDock />
       </div>
     </div>
   );
