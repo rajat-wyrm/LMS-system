@@ -58,6 +58,13 @@ backend/uploads/*
 backend/prisma/*.db
 backend/prisma/*.db-journal
 
+
 # Local AI runtime data
 /chroma/
+=======
+# TTS generated audio (runtime)
+AI/api/data/audio/*.mp3
+
+# Local database
+
 /database.db
