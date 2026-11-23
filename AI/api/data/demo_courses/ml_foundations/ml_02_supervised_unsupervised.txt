@@ -1,0 +1,39 @@
+Course: Machine Learning Foundations
+Course ID: demo_course_ml_201
+Lesson 2: Supervised and Unsupervised Learning
+Lesson ID: demo_lesson_ml_02
+Source File: ml_02_supervised_unsupervised.txt
+
+Overview:
+Machine learning methodologies are categorized according to the nature of the learning feedback and supervision signal provided during training. The primary paradigms are Supervised Learning and Unsupervised Learning.
+
+1. Supervised Learning:
+In supervised learning, the training algorithm is provided with pairs of input features X and corresponding target labels y. The objective is to learn a mapping function f: X -> y that accurately generalizes to unseen test instances.
+
+Supervised Tasks:
+A. Regression:
+The target variable y is continuous and real-valued.
+Examples: Predicting housing prices, stock valuations, ambient temperature, battery life.
+Algorithms: Ordinary Least Squares (OLS) Linear Regression, Ridge/Lasso Regression, Support Vector Regression (SVR), Random Forest Regressor, Gradient Boosting (XGBoost, LightGBM).
+
+B. Classification:
+The target variable y is discrete and categorical.
+Subtypes: Binary classification (two classes: positive/negative, spam/ham) and Multi-class classification (predicting one of K mutually exclusive categories, e.g., handwritten digit recognition 0-9).
+Algorithms: Logistic Regression (uses sigmoid activation sigma(z) = 1 / (1 + e^(-z))), Decision Trees (CART), k-Nearest Neighbors (k-NN), Naive Bayes, Support Vector Machines (SVM).
+
+2. Unsupervised Learning:
+In unsupervised learning, the training dataset consists exclusively of input features X without corresponding outcome labels y. The algorithm must autonomously uncover latent structures, intrinsic groupings, or underlying statistical distributions.
+
+Unsupervised Tasks:
+A. Clustering:
+Partitioning unlabelled observations into homogeneous clusters such that intra-cluster similarity is maximized and inter-cluster similarity is minimized.
+Algorithms: K-Means (iterative centroid recalculation based on Euclidean distance), Hierarchical Agglomerative Clustering (dendrogram-based), DBSCAN (Density-Based Spatial Clustering of Applications with Noise, capable of identifying arbitrary cluster geometries).
+
+B. Dimensionality Reduction:
+Compressing high-dimensional feature spaces into lower-dimensional representations while preserving maximal variance or topological relationships.
+Algorithms: Principal Component Analysis (PCA - orthogonal linear projection onto eigenvectors of covariance matrix), t-Distributed Stochastic Neighbor Embedding (t-SNE), UMAP (Uniform Manifold Approximation and Projection).
+
+C. Anomaly / Outlier Detection:
+Identifying rare data points that diverge significantly from standard behavioral patterns (e.g., credit card fraud, industrial sensor failures).
+Algorithms: Isolation Forests, One-Class SVM.
+

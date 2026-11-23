@@ -1,0 +1,40 @@
+Course: Web Development
+Course ID: demo_course_web_301
+Lesson 3: Components and State Management
+Lesson ID: demo_lesson_web_03
+Source File: web_03_components_state.txt
+
+Overview:
+React applications rely on components as modular building blocks. While functional components represent UI rendering logic, state management determines how data evolves over time in response to user actions, network events, and lifecycle stages.
+
+Functional Components and React Hooks:
+Modern React utilizes functional components enhanced with Hooks (introduced in React 16.8), enabling state and lifecycle capabilities without ES6 classes.
+
+Essential React Hooks:
+1. useState:
+Declares a local state variable inside a functional component.
+Syntax:
+  const [count, setCount] = useState(0);
+- count: The current state value.
+- setCount: The dispatcher function that schedules a state update and triggers component re-rendering.
+- Functional updates: When new state depends on previous state, pass an updater callback: setCount(prev => prev + 1).
+
+2. useEffect:
+Manages side effects such as data fetching, browser subscriptions, timers, and manual DOM manipulation.
+Syntax:
+  useEffect(() => {
+    const timer = setInterval(() => tick(), 1000);
+    return () => clearInterval(timer); // Cleanup function
+  }, [dependencies]);
+- No dependency array: Executes after every single render.
+- Empty array ([]): Executes exactly once upon component mounting, cleanup runs on unmounting.
+- Array with dependencies ([id]): Executes upon mounting and whenever any specified dependency value changes.
+
+3. useRef:
+Creates a mutable reference object whose .current property persists across re-renders without triggering a re-render when mutated. Commonly used to hold direct references to DOM nodes (e.g., inputRef.current.focus()) or store persistent mutable instance variables (e.g., timer IDs).
+
+4. State Sharing Strategies:
+- Lifting State Up: When two sibling components need to synchronize data, their shared state is hoisted up to their closest common ancestor component.
+- Context API (createContext, useContext): Provides a mechanism to share values (such as current user, theme, localization) globally across the component tree without manually passing props down through intermediary components (avoiding 'prop drilling').
+- External State Management Libraries: For complex enterprise state graphs with asynchronous workflows, applications utilize Redux Toolkit, Zustand, or TanStack Query (React Query) for server state caching.
+

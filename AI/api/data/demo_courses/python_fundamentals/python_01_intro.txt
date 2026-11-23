@@ -1,0 +1,26 @@
+Course: Python Fundamentals
+Course ID: demo_course_python_101
+Lesson 1: Introduction to Python
+Lesson ID: demo_lesson_py_01
+Source File: python_01_intro.txt
+
+Overview:
+Python is a high-level, interpreted, general-purpose programming language conceived in the late 1980s by Guido van Rossum at Centrum Wiskunde & Informatica (CWI) in the Netherlands and released in 1991. The language emphasizes code readability with its distinctive use of significant indentation. Python is dynamically typed and garbage-collected. It supports multiple programming paradigms, including structured (particularly procedural), object-oriented, and functional programming.
+
+Key Principles and Design Philosophy:
+The core philosophy of the language is summarized in "The Zen of Python" (PEP 20):
+- Beautiful is better than ugly.
+- Explicit is better than implicit.
+- Simple is better than complex.
+- Complex is better than complicated.
+- Readability counts.
+
+Execution Architecture:
+Python source code is stored in files with the .py extension. When executed, Python code is compiled into an intermediate bytecode format (.pyc files stored in __pycache__), which is then interpreted by the Python Virtual Machine (PVM). The reference implementation of Python is CPython, written in C. Other implementations include PyPy (which uses JIT compilation for speed), Jython (for the Java Virtual Machine), and IronPython (.NET integration).
+
+Interactive Shell (REPL):
+Python provides an interactive Read-Eval-Print Loop (REPL), accessible by typing 'python' in the terminal. The primary prompt is denoted by three greater-than signs (>>>), while the secondary continuation prompt is indicated by three dots (...).
+
+Indentation Syntax:
+Unlike C, C++, or Java, which use curly braces {} to delineate code blocks, Python uses whitespace indentation. A standard block is indented with 4 spaces. Mixing tabs and spaces is prohibited in Python 3 and raises an IndentationError or TabError.
+

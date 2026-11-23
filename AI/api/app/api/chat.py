@@ -22,6 +22,12 @@ class QuestionResponse(BaseModel):
     answer: str
     sources: List[dict]
 
+class CourseQuestionResponse(BaseModel):
+    course_id: str
+    notebook_id: str
+    answer: str
+    sources: List[dict]
+
 @router.post("/notebooks/{id}/chats", response_model=Chat)
 def create_chat(id: str, chat_in: ChatCreate, session: Session = Depends(get_session)):
     notebook = session.get(Notebook, id)
@@ -73,7 +79,8 @@ def ask_question(chat_id: str, req: QuestionRequest, session: Session = Depends(
     
     answer, sources = dyn_rag_service.get_response(
         req.question, 
-        notebook_id=chat.notebook_id, 
+        notebook_id=chat.notebook_id,
+        course_id=getattr(notebook, "course_id", None),
         chat_history=history,
         source_names=req.source_names,
         use_reranking=notebook.use_reranking
@@ -87,3 +94,30 @@ def ask_question(chat_id: str, req: QuestionRequest, session: Session = Depends(
     session.commit()
     
     return QuestionResponse(answer=answer, sources=sources)
+
+@router.post("/courses/{course_id}/ask", response_model=CourseQuestionResponse)
+def ask_course_question(course_id: str, req: QuestionRequest, session: Session = Depends(get_session)):
+    """Direct RAG query for a course, automatically isolating to the mapped course notebook."""
+    from app.services.course_mapping_service import get_notebook_by_course
+    notebook = get_notebook_by_course(session, course_id)
+    if not notebook:
+        raise HTTPException(status_code=404, detail=f"No notebook mapped to course_id: {course_id}")
+
+    dyn_chroma_store = ChromaStore(model_name=notebook.embedding_model)
+    dyn_rag_service = RAGService(dyn_chroma_store)
+
+    answer, sources = dyn_rag_service.get_response(
+        req.question,
+        notebook_id=notebook.id,
+        course_id=course_id,
+        chat_history=[],
+        source_names=req.source_names,
+        use_reranking=notebook.use_reranking
+    )
+
+    return CourseQuestionResponse(
+        course_id=course_id,
+        notebook_id=notebook.id,
+        answer=answer,
+        sources=sources
+    )

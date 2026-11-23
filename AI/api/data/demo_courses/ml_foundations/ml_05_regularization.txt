@@ -1,0 +1,43 @@
+Course: Machine Learning Foundations
+Course ID: demo_course_ml_201
+Lesson 5: Overfitting and Regularization
+Lesson ID: demo_lesson_ml_05
+Source File: ml_05_regularization.txt
+
+Overview:
+The fundamental challenge in machine learning optimization is balancing model capacity against generalization error, encapsulated in the Bias-Variance Tradeoff.
+
+The Bias-Variance Tradeoff:
+- Bias (Underfitting): Error arising from erroneous simplifying assumptions in the learning algorithm. High bias models (e.g., simple linear regression on non-linear data) underfit, failing to capture underlying patterns, resulting in high error on both training and validation sets.
+- Variance (Overfitting): Error arising from excessive sensitivity to small fluctuations and noise in the training set. High variance models (e.g., unconstrained deep decision trees or high-degree polynomials) overfit, memorizing training noise, yielding near-zero training error but catastrophic validation error.
+- Irreducible Error: Intrinsic noise in the data generating process sigma^2 that cannot be reduced by any model.
+Total Expected Error = Bias^2 + Variance + Irreducible Error.
+
+Signs and Diagnostics of Overfitting:
+A model is overfitting when training loss continues to monotonically decrease while validation loss reaches a minimum and subsequently diverges upward. Learning curves demonstrate a widening generalization gap between training and validation accuracy.
+
+Regularization Techniques:
+Regularization introduces an explicit penalty term to the model objective loss function J(w) to discourage excessive complexity and constrain coefficient magnitudes.
+
+1. L1 Regularization (Lasso Regression):
+Applies a penalty proportional to the absolute values of the weight coefficients:
+  Loss_L1 = J_0(w) + lambda * sum(|w_i|)
+Effect:
+Due to the sharp geometric corners of the L1 ball (diamond shape in parameter space), optimization with L1 penalty drives unimportant feature coefficients strictly to zero (w_i = 0). Consequently, Lasso produces sparse models and performs automatic feature selection.
+
+2. L2 Regularization (Ridge Regression):
+Applies a penalty proportional to the square of the weight coefficients:
+  Loss_L2 = J_0(w) + lambda * sum(w_i^2)
+Effect:
+L2 regularization shrinks all weight coefficients toward zero uniformly, preventing any single feature from dominating predictions, but does not drive weights to absolute zero. It handles multicollinearity among features effectively.
+
+3. ElasticNet Regularization:
+Combines both L1 and L2 penalty terms through convex combination:
+  Loss_ElasticNet = J_0(w) + r * lambda * sum(|w_i|) + ((1 - r)/2) * lambda * sum(w_i^2)
+where r is the mixing ratio (0 <= r <= 1). Useful when multiple features are correlated.
+
+4. Other Regularization Methods:
+- Early Stopping: Halting gradient descent iterations when validation loss ceases to improve.
+- Dropout: Randomly deactivating a fraction p of hidden units during training passes in neural networks to prevent feature co-adaptation.
+- Data Augmentation: Synthetically expanding the training dataset with transformations (rotations, cropping, noise injection).
+

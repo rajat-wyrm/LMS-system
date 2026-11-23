@@ -1,0 +1,58 @@
+Course: Machine Learning Foundations
+Course ID: demo_course_ml_201
+Lesson 4: Model Evaluation
+Lesson ID: demo_lesson_ml_04
+Source File: ml_04_evaluation.txt
+
+Overview:
+Model evaluation quantitatively assesses how effectively a trained predictive model accomplishes its designated task using standardized statistical metrics tailored to regression or classification objectives.
+
+Regression Evaluation Metrics:
+1. Mean Absolute Error (MAE):
+Measures the average magnitude of the absolute prediction errors:
+  MAE = (1/n) * sum(|y_i - y_hat_i|)
+MAE is linear and robust to outliers.
+
+2. Mean Squared Error (MSE):
+Measures the average squared difference between actual and predicted values:
+  MSE = (1/n) * sum((y_i - y_hat_i)^2)
+Because errors are squared, MSE heavily penalizes large errors.
+
+3. Root Mean Squared Error (RMSE):
+The square root of MSE:
+  RMSE = sqrt(MSE)
+RMSE returns the error metric to the original scale and units of the target variable y.
+
+4. Coefficient of Determination (R^2 Score):
+Represents the proportion of variance in the dependent variable explained by the independent features:
+  R^2 = 1 - (SS_res / SS_tot) = 1 - (sum((y_i - y_hat_i)^2) / sum((y_i - y_bar)^2))
+An R^2 of 1.0 indicates perfect prediction, 0.0 indicates performance identical to predicting the sample mean, and negative values indicate performance worse than the sample mean.
+
+Classification Evaluation Metrics:
+Confusion Matrix Elements:
+- True Positive (TP): Correctly identified positive instances.
+- False Positive (FP): Type I error; negative instances incorrectly labeled as positive.
+- True Negative (TN): Correctly identified negative instances.
+- False Negative (FN): Type II error; positive instances incorrectly labeled as negative.
+
+Classification Formulas:
+1. Accuracy: Proportion of total predictions that are correct:
+  Accuracy = (TP + TN) / (TP + TN + FP + FN)
+Misleading on imbalanced datasets.
+
+2. Precision (Positive Predictive Value):
+  Precision = TP / (TP + FP)
+Measures the fraction of positive predictions that were truly correct. Critical in applications like spam filtering or false arrest avoidance.
+
+3. Recall (Sensitivity / True Positive Rate):
+  Recall = TP / (TP + FN)
+Measures the fraction of actual positive instances correctly captured. Critical in cancer detection or fraud identification.
+
+4. F1-Score:
+The harmonic mean of precision and recall:
+  F1 = 2 * (Precision * Recall) / (Precision + Recall)
+Balances the trade-off between precision and recall, especially in skewed class distributions.
+
+5. ROC-AUC (Receiver Operating Characteristic - Area Under Curve):
+Plots the True Positive Rate (Recall) against the False Positive Rate (FPR = FP / (FP + TN)) across varying classification probability thresholds. An AUC of 1.0 represents a perfect classifier; 0.5 denotes random guessing.
+
