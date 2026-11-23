@@ -57,3 +57,8 @@ backend/uploads/*
 # Prisma local
 backend/prisma/*.db
 backend/prisma/*.db-journal
+# TTS generated audio (runtime)
+AI/api/data/audio/*.mp3
+
+# Local database
+/database.db
