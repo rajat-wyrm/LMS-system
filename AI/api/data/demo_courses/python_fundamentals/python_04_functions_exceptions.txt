@@ -1,0 +1,49 @@
+Course: Python Fundamentals
+Course ID: demo_course_python_101
+Lesson 4: Functions and Exception Handling
+Lesson ID: demo_lesson_py_04
+Source File: python_04_functions_exceptions.txt
+
+Overview:
+Functions provide modularity, code reuse, and encapsulation of business logic. Exception handling provides robust mechanisms to intercept runtime anomalies without terminating the application abnormally.
+
+Function Definition and Parameters:
+Functions are declared using the def keyword, followed by the function name, parameter list, and an indented body:
+  def calculate_area(width, height=1.0):
+      """Calculates the rectangular area given width and height."""
+      return width * height
+
+Parameter Types:
+1. Positional Arguments: Mapped in the order they appear.
+2. Keyword Arguments: Passed explicitly using parameter names (e.g., height=5.0).
+3. Default Parameters: Pre-assigned fallback values used when arguments are omitted during invocation.
+4. Arbitrary Arguments (*args): Collects surplus positional arguments into a tuple.
+5. Keyword Arguments (**kwargs): Collects surplus keyword arguments into a dictionary.
+
+Scope and Lifetime:
+Variables defined inside a function belong to the local namespace. Python resolves variable lookups using the LEGB rule (Local, Enclosing, Global, Built-in). The global keyword allows modifying module-level variables from within a local scope.
+
+Exception Handling Mechanism:
+Exceptions represent runtime errors that disrupt the normal flow of instructions. Python handles exceptions using try, except, else, and finally blocks:
+
+Structure:
+  try:
+      result = numerator / denominator
+  except ZeroDivisionError as err:
+      print(f"Cannot divide by zero: {err}")
+  except (TypeError, ValueError) as err:
+      print(f"Invalid operand input: {err}")
+  else:
+      print(f"Operation succeeded with result: {result}")
+  finally:
+      print("Cleanup block: always executes regardless of exceptions.")
+
+Block Semantics:
+- try: Encloses code that may potentially raise an exception.
+- except: Catches and handles specific exception classes.
+- else: Executes if and only if no exception was raised in the try block.
+- finally: Always executes under all circumstances, typically utilized for releasing resources, closing file handles, or disconnecting network sockets.
+
+Raising Exceptions:
+Developers trigger exceptions manually using the raise keyword (e.g., raise ValueError("Age must be positive")). Custom exception classes inherit from the built-in Exception base class.
+

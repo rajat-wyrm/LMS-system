@@ -1,0 +1,48 @@
+Course: Web Development
+Course ID: demo_course_web_301
+Lesson 4: Node.js and Express
+Lesson ID: demo_lesson_web_04
+Source File: web_04_nodejs_express.txt
+
+Overview:
+Node.js is an open-source, cross-platform, back-end JavaScript runtime environment built on the Google Chrome V8 JavaScript engine. Express is the de facto standard minimalist web application framework for Node.js, providing robust tooling for HTTP server construction and API design.
+
+Node.js Architecture and Concurrency:
+1. Event-Driven, Non-Blocking I/O:
+Traditional multi-threaded web servers (like Apache) allocate a dedicated operating system thread per client connection, consuming significant memory. In contrast, Node.js operates on a single execution thread powered by an event loop.
+2. The Libuv Library:
+Libuv is a multi-platform C library that handles the Node.js event loop, asynchronous DNS resolution, file system operations, and network sockets. Intensive blocking operations (such as file I/O or cryptographic hashing) are delegated to an internal Libuv worker thread pool (default 4 threads), preventing the main JavaScript execution thread from blocking.
+3. Node Package Manager (NPM):
+The ecosystem repository and dependency manager for JavaScript libraries, configured via package.json.
+
+Express.js Fundamentals:
+Express simplifies building web servers on top of Node's low-level http module.
+
+Basic Express Server Setup:
+  const express = require('express');
+  const app = express();
+  const PORT = process.env.PORT || 5000;
+
+  // Built-in JSON body parser middleware
+  app.use(express.json());
+
+  // Basic Route Definition
+  app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
+  });
+
+  app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+  });
+
+Express Request and Response Lifecycle:
+- req (IncomingRequest): Encapsulates incoming HTTP request data, including:
+  - req.params: Named route parameters (e.g., /api/courses/:id => req.params.id).
+  - req.query: URL query string parameters (e.g., ?page=1&limit=10 => req.query.page).
+  - req.body: Parsed payload submitted in POST/PUT/PATCH requests.
+  - req.headers: HTTP headers (e.g., authorization, content-type).
+- res (ServerResponse): Controls the outbound HTTP response:
+  - res.status(code): Sets the HTTP response status code (e.g., 200, 201, 400, 404, 500).
+  - res.json(data): Serializes a JavaScript object into a JSON response with 'Content-Type: application/json'.
+  - res.send(body): Transmits plain text or HTML strings.
+

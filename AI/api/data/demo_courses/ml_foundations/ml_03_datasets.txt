@@ -1,0 +1,33 @@
+Course: Machine Learning Foundations
+Course ID: demo_course_ml_201
+Lesson 3: Training and Testing Datasets
+Lesson ID: demo_lesson_ml_03
+Source File: ml_03_datasets.txt
+
+Overview:
+The primary benchmark of a successful machine learning model is its generalization capability—the capacity to deliver accurate predictions on novel, previously unseen data samples. Evaluating a model on the same data used to train its parameters introduces severe optimism bias and masks overfitting.
+
+Data Partitioning Strategies:
+1. Train-Test Split:
+The dataset D is divided into two disjoint subsets:
+- Training Set (typically 70% to 80%): Used exclusively by the learning algorithm to fit internal parameters (weights, coefficients, tree split thresholds).
+- Test Set (typically 20% to 30%): Held out strictly until final model assessment to obtain an unbiased estimate of real-world generalization performance.
+
+2. Validation Set:
+When iterating over candidate model architectures and tuning hyperparameters, evaluating multiple configurations directly on the test set causes test set leakage (overfitting to the test set). To prevent this, data is divided into three partitions:
+- Training Set: Fits model parameters.
+- Validation Set: Evaluates candidate models, tunes hyperparameters, and guides early stopping.
+- Test Set: Final unbiased performance evaluation.
+
+3. K-Fold Cross-Validation:
+K-Fold Cross-Validation minimizes evaluation variance on moderate-sized datasets:
+- The complete dataset is partitioned randomly into K equal-sized folds (typically K = 5 or K = 10).
+- The model is trained K successive times. In each iteration i, fold i is reserved as the validation set, while the remaining K - 1 folds are pooled as the training set.
+- The overall cross-validation score is the arithmetic mean of the performance scores across all K iterations: Score_cv = (1/K) * sum(Score_i).
+
+4. Stratified K-Fold:
+In classification tasks featuring imbalanced class frequencies (e.g., medical diagnoses where positive cases represent 2% of the dataset), standard random partitioning may yield folds with no positive cases. Stratified K-Fold enforces that every fold preserves the exact class proportion present in the complete dataset.
+
+Data Leakage Pitfalls:
+Data leakage occurs when information from outside the training dataset contaminates model training. Common causes include performing feature scaling (StandardScaler, MinMaxScaler) or imputation on the entire dataset prior to splitting, rather than fitting transformers solely on the training partition and applying them to validation/test partitions.
+

@@ -16,7 +16,7 @@ for env_path in [".env", "../.env", os.path.join(os.path.dirname(os.path.dirname
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.session import create_db_and_tables
-from app.api import notebook, document, chat, quiz, assignment
+from app.api import notebook, document, chat, quiz, assignment, tts
 
 app = FastAPI(title="Notebook-based Learning Platform API")
 
@@ -38,6 +38,7 @@ app.include_router(document.router, prefix="/api", tags=["Documents"])
 app.include_router(chat.router, prefix="/api", tags=["Chats"])
 app.include_router(quiz.router, prefix="/api", tags=["Quizzes"])
 app.include_router(assignment.router, prefix="/api", tags=["Assignments"])
+app.include_router(tts.router, prefix="/api", tags=["TTS"])
 
 @app.get("/")
 def read_root():

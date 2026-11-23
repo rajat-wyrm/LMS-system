@@ -23,32 +23,69 @@ class ChromaStore:
             embedding_function=self.embedding_function
         )
 
-    def add_documents(self, chunks: list[Document], notebook_id: str):
-        # Add notebook_id and normalize source to filename
+    def add_documents(self, chunks: list[Document], notebook_id: str, course_id: str = None):
+        """
+        Adds document chunks to ChromaDB, tagging each chunk with notebook_id,
+        course_id, filename, and composite chunk ID for strict retrieval isolation.
+        Safely supports re-ingestion and document updates without deleting old
+        chunks prematurely or duplicating chunks.
+        """
+        if not chunks:
+            return False
+
         for chunk in chunks:
             chunk.metadata["notebook_id"] = notebook_id
+            if course_id:
+                chunk.metadata["course_id"] = course_id
             if "source" in chunk.metadata:
                 chunk.metadata["source"] = os.path.basename(chunk.metadata["source"])
+                chunk.metadata["filename"] = chunk.metadata["source"]
         
         db = self.get_db()
         chunks_with_ids = self._calculate_chunk_ids(chunks)
+        new_ids = [c.metadata["id"] for c in chunks_with_ids]
         
-        # We don't necessarily need to check existing IDs globally if we use notebook_id as filter
-        # but let's keep the logic for deduplication
-        existing_items = db.get(include=[])
-        existing_ids = set(existing_items["ids"])
-        new_chunks = [c for c in chunks_with_ids if c.metadata["id"] not in existing_ids]
+        # Determine source names present in these chunks
+        source_names = list({c.metadata.get("source") for c in chunks if c.metadata.get("source")})
 
-        if new_chunks:
-            db.add_documents(new_chunks, ids=[c.metadata["id"] for c in new_chunks])
-            return True
-        return False
+        # Query existing chunks for these specific sources within this notebook
+        existing_doc_chunk_ids = set()
+        for src in source_names:
+            existing = db.get(
+                where={"$and": [{"notebook_id": notebook_id}, {"source": src}]},
+                include=[]
+            )
+            if existing and existing.get("ids"):
+                existing_doc_chunk_ids.update(existing["ids"])
 
-    def query(self, query_text: str, notebook_id: str, k=5, source_names: list[str] = None):
+        # Step 1: Add/upsert new chunks first to ensure no data loss
+        # Note: db.add_documents with explicit IDs in Chroma performs an upsert / insert
+        db.add_documents(chunks_with_ids, ids=new_ids)
+
+        # Step 2: Now that replacement chunks are written and verified, remove any obsolete chunks
+        # (e.g. if updated document has fewer chunks than before)
+        new_id_set = set(new_ids)
+        obsolete_ids = [cid for cid in existing_doc_chunk_ids if cid not in new_id_set]
+        if obsolete_ids:
+            db.delete(ids=obsolete_ids)
+
+        return True
+
+    def query(self, query_text: str, notebook_id: str = None, course_id: str = None, k=5, source_names: list[str] = None):
+        """
+        Queries ChromaDB enforcing notebook_id and/or course_id isolation filtering.
+        """
         db = self.get_db()
         
         # Build filter list
-        filters = [{"notebook_id": notebook_id}]
+        filters = []
+        if notebook_id:
+            filters.append({"notebook_id": notebook_id})
+        if course_id:
+            filters.append({"course_id": course_id})
+            
+        if not filters:
+            raise ValueError("Query requires either notebook_id or course_id for isolation filtering.")
         
         if source_names and len(source_names) > 0:
             if len(source_names) == 1:
