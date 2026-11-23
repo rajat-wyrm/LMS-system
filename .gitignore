@@ -1,3 +1,24 @@
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# VS Code settings
+.vscode/
+
+# Logs
+*.log
+
+# Generated database
+chroma_db/
+=======
 # Dependencies
 node_modules/
 .pnp
@@ -58,6 +79,13 @@ backend/uploads/*
 backend/prisma/*.db
 backend/prisma/*.db-journal
 
+
 # Local AI runtime data
 /chroma/
+=======
+# TTS generated audio (runtime)
+AI/api/data/audio/*.mp3
+
+# Local database
+
 /database.db
