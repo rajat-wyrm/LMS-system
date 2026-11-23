@@ -1,3 +1,24 @@
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# VS Code settings
+.vscode/
+
+# Logs
+*.log
+
+# Generated database
+chroma_db/
+=======
 # Dependencies
 node_modules/
 .pnp
