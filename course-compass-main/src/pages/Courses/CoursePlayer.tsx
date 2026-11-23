@@ -19,6 +19,12 @@ import { courseApi } from "@/api/course.api";
 import { useAuth } from "@/store/AuthContext";
 import { toast } from "sonner";
 
+import { getSyncQueue, saveSyncQueue, clearSyncQueue, mergeLocalAndServerEnrollment } from "@/utils/progressSync";
+export default function CoursePlayer() {
+  const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+=======
+
 import useAudioAnalyser from "@/hooks/useAudioAnalyser";
 import TutorAvatar from "@/components/tutor/TutorAvatar";
 
@@ -48,6 +54,14 @@ export default function CoursePlayer() {
   const [isMarkingComplete, setIsMarkingComplete] = useState(false);
 
   const [activeLessonIndex, setActiveLessonIndex] = useState(0);
+
+  // To check if they are actually enrolled
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  // Sync state
+  const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'offline'>(
+    navigator.onLine ? 'synced' : 'offline'
+  );
+
   const [isEnrolled, setIsEnrolled] = useState(false);
 
   const [syncStatus, setSyncStatus] = useState<
@@ -58,13 +72,19 @@ export default function CoursePlayer() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const [question, setQuestion] = useState("");
+  const [aiAnswer, setAiAnswer] = useState("");
+  const [isAskingAI, setIsAskingAI] = useState(false);
+  // Sync queue to backend
+
+
   // Sync progress with backend
+
   const syncProgress = async (retryCount = 0) => {
     if (!navigator.onLine || !id) {
       setSyncStatus("offline");
       return;
     }
-
     const queue = getSyncQueue(id);
 
     if (
@@ -76,7 +96,11 @@ export default function CoursePlayer() {
       return;
     }
 
+    setSyncStatus('syncing');
+
+
     setSyncStatus("syncing");
+
 
     try {
       const res = await courseApi.syncProgress(id, queue);
@@ -115,12 +139,20 @@ export default function CoursePlayer() {
     }
   };
 
+
   // Fetch enrollment
+
   const fetchEnrollment = async (lessonsCount?: number) => {
     try {
       const res = await courseApi.getEnrollmentByCourse(id!);
 
       const fetched = res.data.data;
+
+      // Conflict Resolution: merge local unsynced pending changes
+      const queue = getSyncQueue(id);
+      const count = lessonsCount || course?.lessons?.length || 0;
+      const merged = mergeLocalAndServerEnrollment(fetched, queue, count);
+
 
       const queue = getSyncQueue(id);
 
@@ -133,6 +165,7 @@ export default function CoursePlayer() {
         count
       );
 
+
       setEnrollment(merged);
 
       return merged;
@@ -141,7 +174,7 @@ export default function CoursePlayer() {
     }
   };
 
-  // Fetch course and enrollment
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -168,11 +201,16 @@ export default function CoursePlayer() {
         setIsLoading(false);
       }
     };
+    if (id) fetchData();
+  }, [id, user]);
+  // Sync listeners
+
 
     if (id) fetchData();
   }, [id, user]);
 
   // Online/offline listeners
+
   useEffect(() => {
     const handleOnlineStatus = () => {
       if (navigator.onLine) {
@@ -186,13 +224,11 @@ export default function CoursePlayer() {
     window.addEventListener("offline", handleOnlineStatus);
 
     handleOnlineStatus();
-
     return () => {
       window.removeEventListener("online", handleOnlineStatus);
       window.removeEventListener("offline", handleOnlineStatus);
     };
   }, []);
-
   // Resume playback on load
   useEffect(() => {
     if (course && enrollment && !hasResumed) {
@@ -282,7 +318,6 @@ export default function CoursePlayer() {
     }
 
     saveSyncQueue(id, queue);
-
     toast.success("Progress saved locally.");
 
     syncProgress();
@@ -309,7 +344,6 @@ export default function CoursePlayer() {
       queue.playbackPositions[activeLesson.id] = currentTime;
 
       saveSyncQueue(id, queue);
-
       setEnrollment((prev: any) => {
         if (!prev) return null;
 
@@ -326,7 +360,6 @@ export default function CoursePlayer() {
           playbackPositions: positions,
         };
       });
-
       syncProgress();
     }
   };
@@ -466,7 +499,6 @@ export default function CoursePlayer() {
       />
     );
   };
-
   return (
     <div className="flex flex-col min-h-screen bg-background border-t border-border">
       {/* Top Bar */}
@@ -545,7 +577,6 @@ export default function CoursePlayer() {
           </div>
         )}
       </div>
-
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden h-[calc(100vh-130px)]">
         {/* Left: Player Area */}
         <div className="flex-1 overflow-y-auto flex flex-col bg-black/5 relative pb-20">
@@ -598,7 +629,32 @@ export default function CoursePlayer() {
               )}
             </div>
           </div>
-
+          {/* AI Tutor */}
+          <div className="p-6 lg:p-10 max-w-4xl mx-auto w-full border-t border-border">
+            <h3 className="text-xl font-bold mb-3">AI Course Tutor</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Ask questions about this course and get help from your AI Tutor.
+            </p>
+            <textarea
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="Ask something about this course..."
+              className="w-full min-h-24 p-3 rounded-lg border border-border bg-background"
+            />
+            <button
+              onClick={handleAskAI}
+              disabled={!question.trim() || isAskingAI}
+              className="btn-primary mt-3 px-5 py-2 rounded-lg disabled:opacity-50"
+            >
+              {isAskingAI ? "Thinking..." : "Ask AI"}
+            </button>
+            {aiAnswer && (
+              <div className="mt-5 p-4 rounded-lg border border-border bg-muted/30">
+                <h4 className="font-semibold mb-2">AI Tutor's Answer</h4>
+                <p className="whitespace-pre-wrap text-sm">{aiAnswer}</p>
+              </div>
+            )}
+          </div>
           {/* Action Footer */}
           {enrollment && activeLesson && (
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t border-border flex justify-between items-center shadow-lg">
@@ -606,8 +662,7 @@ export default function CoursePlayer() {
                 Lesson {activeLessonIndex + 1} of{" "}
                 {course.lessons.length}
               </div>
-
-              <button
+              <button 
                 onClick={handleMarkComplete}
                 disabled={isCurrentCompleted || isMarkingComplete}
                 className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all ${
@@ -629,7 +684,6 @@ export default function CoursePlayer() {
             </div>
           )}
         </div>
-
         {/* Right: Sidebar Syllabus */}
         <div className="w-full lg:w-[350px] border-l border-border bg-muted/5 flex flex-col shrink-0 h-full">
           {course?.instructor?.name ? (
@@ -666,7 +720,6 @@ export default function CoursePlayer() {
               </div>
             </div>
           ) : null}
-
           <div className="p-5 border-b border-border shrink-0">
             <h3 className="font-display font-bold text-lg mb-1">
               Course Content
@@ -676,7 +729,6 @@ export default function CoursePlayer() {
               {course.lessons.length} lessons
             </p>
           </div>
-
           <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {course.lessons.length === 0 ? (
               <div className="text-center p-6 text-sm text-muted-foreground">
@@ -685,11 +737,7 @@ export default function CoursePlayer() {
             ) : (
               course.lessons.map((lesson: any, i: number) => {
                 const isActive = activeLessonIndex === i;
-
-                const isCompleted = completedLessonIds.has(
-                  lesson.id
-                );
-
+                const isCompleted = completedLessonIds.has(lesson.id);
                 return (
                   <button
                     key={lesson.id}

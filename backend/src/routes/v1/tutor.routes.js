@@ -1,3 +1,15 @@
+
+
+const express = require("express");
+
+const { protect } = require("../../middlewares/auth.middleware");
+const { askCourseTutor } = require("../../controllers/tutor.controller");
+
+const router = express.Router();
+
+// Ask a question about an enrolled course
+router.post("/courses/:courseId/ask", protect, askCourseTutor);
+=======
 const express = require('express');
 const router = express.Router();
 
@@ -10,5 +22,6 @@ const { askQuestion } = require('../../controllers/tutor.controller');
 // @desc    Ask a question to the AI Tutor for a specific course
 // @access  Private (Authenticated users only)
 router.post('/ask', protect, validate(askQuestionSchema), askQuestion);
+
 
 module.exports = router;
