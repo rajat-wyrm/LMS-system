@@ -69,12 +69,12 @@ class RAGService:
         # Limit to top k
         return reranked_results[:k]
 
-    def get_response(self, query_text: str, notebook_id: str, chat_history=None, source_names=None, use_reranking=False):
+    def get_response(self, query_text: str, notebook_id: str = None, course_id: str = None, chat_history=None, source_names=None, use_reranking=False):
         if chat_history is None:
             chat_history = []
             
         k_query = 15 if use_reranking else 5
-        results = self.chroma_store.query(query_text, notebook_id=notebook_id, k=k_query, source_names=source_names)
+        results = self.chroma_store.query(query_text, notebook_id=notebook_id, course_id=course_id, k=k_query, source_names=source_names)
         
         if use_reranking:
             results = self._rerank(query_text, results, k=5)

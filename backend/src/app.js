@@ -12,6 +12,7 @@ const setupSwagger = require("./docs/swagger");
 const redisClient = require("./services/redis.service");
 const { prisma } = require("./config/db");
 const requestLogger = require("./middlewares/requestLogger");
+const tutorRoutesV1 = require("./routes/v1/tutor.routes");
 
 // Background Cron Jobs
 const { initScheduledCoursePublisher } = require("./jobs/coursePublisher");
@@ -136,6 +137,7 @@ const reviewRoutesV1 = require("./routes/v1/review.routes");
 
 const analyticsRoutes = require("./analytics/analytics.routes");
 const auditRoutes = require("./routes/v1/audit.routes");
+const tutorRoutesV1 = require("./routes/v1/tutor.routes");
 
 // ============================================================
 // V1 API Routes
@@ -153,6 +155,7 @@ app.use("/api/v1/categories", categoryRoutesV1);
 app.use("/api/v1/reviews", reviewRoutesV1);
 app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/audit-logs", auditRoutes);
+app.use("/api/v1/tutor", tutorRoutesV1);
 
 // ============================================================
 // BACKWARD COMPATIBILITY ROUTES
@@ -205,7 +208,7 @@ app.get("/health", async (req, res) => {
     });
   }
 });
-
+app.use("/api/v1/tutor", tutorRoutesV1);
 // ============================================================
 // 404 HANDLER
 // ============================================================
@@ -233,8 +236,8 @@ module.exports = app;
 app.use("/api/notifications", notificationRoutesV1);
 ```
 
-No other changes to `app.js` are required — CORS, auth, rate limiting, and the
-error handler are all already shared by every route in the app, including this
-one. The admin broadcast endpoint lives under the existing `adminRoutesV1`
-router (see `admin.routes.patch.md`), so it is already mounted.
+//No other changes to `app.js` are required — CORS, auth, rate limiting, and the
+//error handler are all already shared by every route in the app, including this
+//one. The admin broadcast endpoint lives under the existing `adminRoutesV1`
+//router (see `admin.routes.patch.md`), so it is already mounted.
 

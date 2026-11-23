@@ -1,0 +1,132 @@
+.tutor-avatar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 150px;
+  padding: 12px;
+  border-radius: 18px;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  transition: box-shadow 0.3s ease;
+}
+
+.tutor-avatar__illustration {
+  width: 125px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tutor-avatar__svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.tutor-avatar__info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+}
+
+.tutor-avatar__info strong {
+  font-size: 13px;
+  color: hsl(var(--foreground));
+}
+
+.tutor-avatar__info span {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+}
+
+.tutor-avatar--idle .tutor-avatar__illustration {
+  animation: tutor-float 3s ease-in-out infinite;
+}
+
+.tutor-avatar--listening {
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+.tutor-avatar--listening .tutor-avatar__illustration {
+  animation: tutor-listen 1.5s ease-in-out infinite;
+}
+
+.tutor-avatar--thinking .tutor-avatar__illustration {
+  animation: tutor-think 2s ease-in-out infinite;
+}
+
+.tutor-avatar--speaking {
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+}
+
+.tutor-avatar__mouth {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.tutor-avatar--fallback .tutor-avatar__mouth {
+  animation: tutor-mouth 0.45s ease-in-out infinite alternate;
+}
+
+.tutor-avatar__thinking {
+  position: absolute;
+  top: 12px;
+  right: 10px;
+  display: flex;
+  gap: 4px;
+}
+
+.tutor-avatar__thinking span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  animation: tutor-dots 1s infinite ease-in-out;
+}
+
+.tutor-avatar__thinking span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.tutor-avatar__thinking span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes tutor-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes tutor-listen {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+@keyframes tutor-think {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes tutor-mouth {
+  from { transform: scaleY(0.5); }
+  to { transform: scaleY(1.5); }
+}
+
+@keyframes tutor-dots {
+  0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tutor-avatar *,
+  .tutor-avatar *::before,
+  .tutor-avatar *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

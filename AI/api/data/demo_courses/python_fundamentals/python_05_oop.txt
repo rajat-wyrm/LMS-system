@@ -1,0 +1,44 @@
+Course: Python Fundamentals
+Course ID: demo_course_python_101
+Lesson 5: Object-Oriented Programming
+Lesson ID: demo_lesson_py_05
+Source File: python_05_oop.txt
+
+Overview:
+Object-Oriented Programming (OOP) is a paradigm based on the concept of 'objects', which package data in the form of attributes and behaviors in the form of methods. Python is fully object-oriented; everything in Python is an object, including numbers, functions, and modules.
+
+Classes and Instances:
+A class serves as a blueprint or template from which individual object instances are constructed.
+The __init__ method is the class constructor or initializer, invoked automatically when a new instance is instantiated. The 'self' parameter represents the reference to the current instance being manipulated.
+
+Example:
+  class Student:
+      species = "Homo sapiens"  # Class attribute shared across all instances
+      
+      def __init__(self, name: str, student_id: int):
+          self.name = name          # Public instance attribute
+          self.student_id = student_id
+          self.__grades = []       # Private attribute with name mangling
+
+Core OOP Principles:
+1. Encapsulation:
+Bundling data attributes and associated methods within a single unit while restricting direct external access to internal state. In Python, encapsulation is conventional: single underscore prefixes (_var) signify protected attributes intended for internal use, while double underscores (__var) trigger name mangling to prevent accidental namespace collisions in subclasses.
+
+2. Inheritance:
+Enables a child class to inherit attributes and methods from a parent (base) class, promoting code reuse:
+  class GraduateStudent(Student):
+      def __init__(self, name: str, student_id: int, thesis_topic: str):
+          super().__init__(name, student_id)
+          self.thesis_topic = thesis_topic
+The super() built-in function returns a proxy object delegating method calls to a parent or sibling class according to the Method Resolution Order (MRO).
+
+3. Polymorphism:
+Allows uniform interfaces to operate across different underlying types. Different classes can implement methods with identical names, enabling calling code to execute actions without knowing the exact concrete type.
+
+Special Dunder (Double Underscore) Methods:
+Python classes utilize operator overloading and protocol compliance through dunder methods:
+- __str__(self): Returns a user-friendly string representation (used by str() and print()).
+- __repr__(self): Returns an unambiguous, developer-oriented string representation.
+- __len__(self): Defines custom length returned by the len() function.
+- __eq__(self, other): Implements equality comparison (==).
+

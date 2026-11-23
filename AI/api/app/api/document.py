@@ -64,7 +64,7 @@ async def upload_document(id: str, file: UploadFile = File(...), session: Sessio
             raise Exception("Document splitting resulted in zero chunks.")
 
         dyn_chroma_store = ChromaStore(model_name=notebook.embedding_model)
-        dyn_chroma_store.add_documents(chunks, notebook_id=id)
+        dyn_chroma_store.add_documents(chunks, notebook_id=id, course_id=getattr(notebook, "course_id", None))
         
         db_doc.status = "indexed"
         session.add(db_doc)
