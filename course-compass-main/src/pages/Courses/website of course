@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LearnHub - Course Enrollment</title>
+<style>
+:root{--bg:#f4f6f3;--ink:#16231f;--muted:#5d6b66;--card:#fff;--line:#dbe2dd;--accent:#0f766e;--accent2:#b45309;--ok:#15803d;--bad:#b91c1c}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+h1,h2,h3{font-family:Georgia,serif;margin:0 0 .4em}
+button{font:inherit;cursor:pointer;border:0;border-radius:6px;padding:.55em 1em;background:var(--accent);color:#fff}
+button.alt{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+button.warn{background:var(--accent2)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+input,textarea{font:inherit;width:100%;padding:.6em .7em;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+input[readonly]{background:#eef1ee;color:var(--muted)}
+label{display:block;font-size:.9rem;margin:.8em 0 .25em;font-weight:600}
+.err{color:var(--bad);font-size:.9rem;min-height:1.2em;margin-top:.6em}
+.hide{display:none!important}
+/* auth */
+#auth{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+.side{background:var(--accent);color:#fff;padding:3rem;display:flex;flex-direction:column;justify-content:center}
+.side h1{font-size:2.6rem}
+.formwrap{display:flex;align-items:center;justify-content:center;padding:2rem}
+.box{width:100%;max-width:400px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.link{background:none;color:var(--accent);padding:0;text-decoration:underline}
+@media(max-width:760px){#auth{grid-template-columns:1fr}.side{padding:2rem}.side h1{font-size:2rem}}
+/* app */
+header{display:flex;justify-content:space-between;align-items:center;padding:.8rem 1.5rem;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+header h2{margin:0;color:var(--accent);cursor:pointer}
+.menu{position:relative}
+.menu>button{background:#fff;color:var(--ink);border:1px solid var(--line);display:flex;gap:.5rem;align-items:center}
+.av{width:28px;height:28px;border-radius:50%;background:var(--accent2);color:#fff;display:grid;place-items:center;font-size:.8rem}
+.drop{position:absolute;right:0;top:110%;background:#fff;border:1px solid var(--line);border-radius:8px;min-width:200px;padding:.3rem;box-shadow:0 8px 24px #0002}
+.drop button{display:block;width:100%;text-align:left;background:none;color:var(--ink);border-radius:4px}
+.drop button:hover{background:var(--bg)}
+main{max-width:1050px;margin:0 auto;padding:1.5rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:1.2rem}
+.course{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+.thumb{height:130px;display:flex;align-items:flex-end;padding:.8rem;color:#fff;font-family:Georgia,serif;font-size:1.3rem}
+.cb{padding:1rem;display:flex;flex-direction:column;gap:.5rem;flex:1}
+.cb p{margin:0;color:var(--muted);font-size:.92rem}
+.btns{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:auto;padding-top:.6rem}
+.tag{font-size:.8rem;padding:.15em .6em;border-radius:99px;background:#dcfce7;color:var(--ok);align-self:flex-start}
+.panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:1.4rem;max-width:520px}
+.item{background:#fff;border:1px solid var(--line);border-radius:8px;padding:.9rem 1rem;margin-bottom:.6rem;display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.msg{background:var(--bg);border-radius:8px;padding:.6rem .8rem;margin:.5rem 0;font-size:.93rem}
+.msg.reply{border-left:4px solid var(--accent);background:#e6f4f1;margin-left:1rem}
+.msg small{color:var(--muted)}
+/* modal */
+.modal{position:fixed;inset:0;background:#000a;display:flex;align-items:center;justify-content:center;padding:1rem;z-index:20}
+.mbox{background:#fff;border-radius:12px;padding:1.4rem;width:100%;max-width:720px;max-height:92vh;overflow:auto}
+.mbox iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:8px;background:#000}
+.q{margin:1rem 0}.q label.opt{display:flex;gap:.5rem;font-weight:400;margin:.3rem 0;align-items:center}
+.q input{width:auto}
+.good{color:var(--ok)}.bad{color:var(--bad)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN / REGISTER -->
+<section id="auth">
+  <div class="side">
+    <h1>LearnHub</h1>
+    <p>Pick a course, watch the lessons, take the quiz and ask your trainer when you are stuck.</p>
+  </div>
+  <div class="formwrap"><div class="box">
+    <div id="loginForm">
+      <h2>Log in</h2>
+      <label for="lEmail">Email</label><input id="lEmail" type="email" autocomplete="email">
+      <label for="lPass">Password</label><input id="lPass" type="password" autocomplete="current-password">
+      <div class="err" id="lErr"></div>
+      <button id="lBtn" style="width:100%">Log in</button>
+      <p>New here? <button class="link" id="toReg">Create an account</button></p>
+      <p style="font-size:.8rem;color:var(--muted)">Trainer demo login: trainer@demo.com / Trainer@123</p>
+    </div>
+    <div id="regForm" class="hide">
+      <h2>Create your account</h2>
+      <div class="row2">
+        <div><label for="rFirst">First name</label><input id="rFirst"></div>
+        <div><label for="rLast">Last name</label><input id="rLast"></div>
+      </div>
+      <label for="rEmail">Email</label><input id="rEmail" type="email">
+      <label for="rPhone">Phone number</label><input id="rPhone" type="tel" inputmode="numeric">
+      <label for="rPass">Password (at least 9 characters: letters, numbers or symbols)</label><input id="rPass" type="password">
+      <label for="rConf">Confirm password</label><input id="rConf" type="password">
+      <div class="err" id="rErr"></div>
+      <button id="rBtn" style="width:100%">Register</button>
+      <p>Already registered? <button class="link" id="toLogin">Log in</button></p>
+    </div>
+  </div></div>
+</section>
+
+<!-- APP -->
+<div id="app" class="hide">
+  <header>
+    <h2 id="home">LearnHub</h2>
+    <div class="menu">
+      <button id="menuBtn" aria-haspopup="true"><span class="av" id="av"></span><span id="uname"></span></button>
+      <div class="drop hide" id="drop">
+        <button data-v="profile">My profile</button>
+        <button data-v="enrolled">Enrolled courses</button>
+        <button data-v="completed">Completed courses</button>
+        <button id="logout">Log out</button>
+      </div>
+    </div>
+  </header>
+  <main id="view"></main>
+</div>
+
+<div id="modal" class="modal hide"><div class="mbox" id="mbox"></div></div>
+
+<script>
+/* ---------- Data ---------- */
+const COURSES=[
+ {id:1,title:"HTML & CSS Basics",trainer:"Asha Verma",color:"#0f766e",desc:"Build and style your first web pages.",video:"qz0aGYrrlhU",
+  quiz:[["What does HTML stand for?",["HyperText Markup Language","High Text Machine Language","Home Tool Markup Language"],0],["Which CSS property changes text colour?",["font-style","color","text-size"],1],["Which tag creates a link?",["<a>","<link>","<href>"],0]]},
+ {id:2,title:"JavaScript Essentials",trainer:"Ravi Kumar",color:"#b45309",desc:"Variables, functions, the DOM and events.",video:"PkZNo7MFNFg",
+  quiz:[["Which keyword declares a constant?",["var","let","const"],2],["Which method adds an item to the end of an array?",["push()","pop()","shift()"],0],["What does DOM stand for?",["Data Object Model","Document Object Model","Display Order Method"],1]]},
+ {id:3,title:"Python for Beginners",trainer:"Meera Nair",color:"#1d4ed8",desc:"Learn Python syntax, loops and functions.",video:"rfscVS0vtbw",
+  quiz:[["Which symbol starts a comment in Python?",["//","#","--"],1],["Which function prints output?",["echo()","print()","write()"],1],["Which is a list?",["(1,2)","{1,2}","[1,2]"],2]]},
+ {id:4,title:"Django Web Development",trainer:"Karthik Rao",color:"#7c3aed",desc:"Create database-backed websites with Django.",video:"F5mRW0jo-U4",
+  quiz:[["Django is written in?",["Java","Python","PHP"],1],["Which file holds URL routes?",["urls.py","views.html","routes.js"],0],["What command starts the dev server?",["python manage.py runserver","django start","npm start"],0]]},
+ {id:5,title:"SQL & Database Basics",trainer:"Neha Reddy",color:"#0369a1",desc:"Learn SQL queries, tables and database basics.",video:"HXV3zeQKqGY",
+  quiz:[["What does SQL stand for?",["Structured Query Language","Simple Query Language","System Query Language"],0],["Which command is used to retrieve data?",["INSERT","SELECT","DELETE"],1],["Which keyword is used to filter records?",["WHERE","FILTER","SEARCH"],0]]},
+ {id:6,title:"Java Programming",trainer:"Arjun Mehta",color:"#ea580c",desc:"Learn Java classes, objects and methods.",video:"eIrMbAQSU34",
+  quiz:[["Which keyword is used to create a class?",["class","object","newclass"],0],["Which method is the entry point of a Java program?",["start()","main()","run()"],1],["Which symbol ends a Java statement?",[".",":",";"],2]]},
+  {id:7,title:"Git & GitHub Basics",trainer:"Priya Singh",color:"#374151",desc:"Learn repositories, commits, branches and GitHub.",video:"RGOj5yH7evk",
+  quiz:[["Which command creates a new Git repository?",["git start","git init","git create"],1],["Which command records changes in Git?",["git commit","git save","git record"],0],["Which command sends commits to GitHub?",["git upload","git push","git send"],1]]},
+  {id:8,title:"Node.js & Express",trainer:"Vikram Rao",color:"#15803d",desc:"Build backend applications and APIs using Node.js.",video:"Oe421EPjeBE",
+  quiz:[["Node.js uses which JavaScript engine?",["V8","SpiderMonkey","Chakra"],0],["Which framework is commonly used with Node.js?",["Express","Django","Laravel"],0],["Which file stores Node.js project information?",["package.json","index.html","style.css"],0]]},
+  {id:9,title:"Data Structures & Algorithms",trainer:"Sneha Kapoor",color:"#9333ea",desc:"Learn arrays, stacks, queues and basic algorithms.",video:"BBpAmxU_NQo",
+  quiz:[["Which data structure follows LIFO?",["Queue","Stack","Array"],1],["Which data structure follows FIFO?",["Stack","Tree","Queue"],2],["Which data structure stores elements sequentially?",["Array","Graph","Tree"],0]]},
+  {id:10,title:"Machine Learning Basics",trainer:"Rahul Sharma",color:"#0891b2",desc:"Learn the fundamentals of machine learning and data.",video:"ukzFI9rgwfU",
+  quiz:[["What is commonly used to train a machine learning model?",["Data","HTML","CSS"],0],["Which is an example of supervised learning?",["Classification","Guessing","Data deletion"],0],["Which Python library is commonly used for machine learning?",["Scikit-learn","React","Express"],0]]},
+  {id:11,title:"C Programming Basics",trainer:"Anil Kumar",color:"#be123c",desc:"Learn variables, loops, functions and arrays in C.",video:"KJgsSFOSQv0",
+  quiz:[["Which function is the starting point of a C program?",["start()","main()","begin()"],1],["Which symbol ends a C statement?",[";",";",":"],0],["Which data type is used for whole numbers?",["int","float","char"],0]]},
+];
+const PASS_MARK=0.6;
+const $=id=>document.getElementById(id);
+const load=()=>{try{return JSON.parse(localStorage.getItem("learnhub"))||{}}catch(e){return{}}};
+let db=load();
+db.users=db.users||[];db.enroll=db.enroll||{};db.done=db.done||{};db.qa=db.qa||[];
+if(!db.users.find(u=>u.role==="trainer"))db.users.push({first:"Trainer",last:"Demo",email:"trainer@demo.com",phone:"",pass:"Trainer@123",role:"trainer"});
+const save=()=>{try{localStorage.setItem("learnhub",JSON.stringify(db))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+let me=null,view="courses";
+
+/* ---------- Auth ---------- */
+$("toReg").onclick=()=>{$("loginForm").classList.add("hide");$("regForm").classList.remove("hide");$("rEmail").value=$("lEmail").value};
+$("toLogin").onclick=()=>{$("regForm").classList.add("hide");$("loginForm").classList.remove("hide")};
+$("lBtn").onclick=()=>{
+  const email=$("lEmail").value.trim().toLowerCase(),pass=$("lPass").value;
+  if(!email||!pass){$("lErr").textContent="Enter your email and password.";return}
+  const u=db.users.find(x=>x.email===email);
+  if(!u){$("toReg").click();$("rErr").textContent="This email is new. Please register first.";return}
+  if(u.pass!==pass){$("lErr").textContent="Wrong password. Try again.";return}
+  start(u);
+};
+$("rBtn").onclick=()=>{
+  const f=$("rFirst").value.trim(),l=$("rLast").value.trim(),e=$("rEmail").value.trim().toLowerCase(),
+        p=$("rPhone").value.trim(),pw=$("rPass").value,c=$("rConf").value,er=$("rErr");
+  if(!f||!l||!e||!p||!pw||!c)return er.textContent="Fill in every field.";
+  if(!/^\S+@\S+\.\S+$/.test(e))return er.textContent="Enter a valid email address.";
+  if(!/^\+?[0-9]{10,13}$/.test(p))return er.textContent="Phone number must have 10 to 13 digits.";
+  if(pw.length<9)return er.textContent="Password must be at least 9 characters.";
+  if(pw!==c)return er.textContent="Passwords do not match.";
+  if(db.users.find(x=>x.email===e))return er.textContent="This email is already registered. Log in instead.";
+  const u={first:f,last:l,email:e,phone:p,pass:pw,role:"student"};
+  db.users.push(u);save();start(u);
+};
+function start(u){
+  me=u;$("auth").classList.add("hide");$("app").classList.remove("hide");
+  $("uname").textContent=u.first;$("av").textContent=u.first[0].toUpperCase();
+  show("courses");
+}
+$("logout").onclick=()=>{me=null;$("app").classList.add("hide");$("auth").classList.remove("hide");$("drop").classList.add("hide");$("lPass").value="";$("lErr").textContent=""};
+$("menuBtn").onclick=e=>{e.stopPropagation();$("drop").classList.toggle("hide")};
+document.addEventListener("click",()=>$("drop").classList.add("hide"));
+$("drop").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>show(b.dataset.v));
+$("home").onclick=()=>show("courses");
+
+/* ---------- Views ---------- */
+const enrolled=()=>db.enroll[me.email]||[];
+const doneList=()=>db.done[me.email]||[];
+function show(v){view=v;$("drop").classList.add("hide");
+  ({courses:vCourses,profile:vProfile,enrolled:()=>vList("Enrolled courses",enrolled().filter(i=>!doneList().includes(i)),"You have not enrolled in any course yet."),
+    completed:()=>vList("Completed courses",doneList(),"Finish a quiz or mark a video complete to see courses here.")})[v]();
+}
+function vCourses(){
+  const trainer=me.role==="trainer";
+  $("view").innerHTML=`<h1>${trainer?"Student questions":"Available courses"}</h1>`+(trainer?trainerQA():`<div class="grid">${COURSES.map(card).join("")}</div>`);
+  bind();
+}
+function card(c){
+  const en=enrolled().includes(c.id),dn=doneList().includes(c.id);
+  return `<article class="course"><div class="thumb" style="background:${c.color}">${esc(c.title)}</div>
+  <div class="cb"><h3>${esc(c.title)}</h3><p>Trainer: <b>${esc(c.trainer)}</b></p><p>${esc(c.desc)}</p>
+  ${dn?'<span class="tag">Completed</span>':en?'<span class="tag">Enrolled</span>':""}
+  <div class="btns">
+   ${en?"":`<button data-a="enroll" data-id="${c.id}">Enroll</button>`}
+   <button class="alt" data-a="video" data-id="${c.id}">See video</button>
+   <button class="alt" data-a="quiz" data-id="${c.id}">Take quiz</button>
+   <button class="warn" data-a="ask" data-id="${c.id}">Ask trainer</button>
+  </div></div></article>`;
+}
+function vList(title,ids,empty){
+  $("view").innerHTML=`<h1>${title}</h1>`+(ids.length?ids.map(i=>{const c=COURSES.find(x=>x.id===i);
+   return `<div class="item"><div><b>${esc(c.title)}</b><br><small>Trainer: ${esc(c.trainer)}</small></div>
+   <div class="btns" style="margin:0;padding:0"><button class="alt" data-a="video" data-id="${i}">See video</button><button class="warn" data-a="ask" data-id="${i}">Ask trainer</button></div></div>`}).join(""):`<p>${empty}</p>`);
+  bind();
+}
+function vProfile(){
+  $("view").innerHTML=`<h1>My profile</h1><div class="panel">
+  <label>First name</label><input id="pF" value="${esc(me.first)}">
+  <label>Last name</label><input id="pL" value="${esc(me.last)}">
+  <label>Email (cannot be changed)</label><input value="${esc(me.email)}" readonly>
+  <label>Phone number</label><input id="pP" value="${esc(me.phone)}">
+  <label>New password (leave blank to keep the current one)</label><input id="pW" type="password">
+  <div class="err" id="pE"></div><button id="pS">Save changes</button></div>`;
+  $("pS").onclick=()=>{
+    const f=$("pF").value.trim(),l=$("pL").value.trim(),p=$("pP").value.trim(),w=$("pW").value;
+    if(!f||!l)return $("pE").textContent="Names cannot be empty.";
+    if(!/^\+?[0-9]{10,13}$/.test(p))return $("pE").textContent="Phone number must have 10 to 13 digits.";
+    if(w&&w.length<9)return $("pE").textContent="Password must be at least 9 characters.";
+    Object.assign(me,{first:f,last:l,phone:p});if(w)me.pass=w;save();
+    $("uname").textContent=f;$("av").textContent=f[0].toUpperCase();
+    $("pE").style.color="var(--ok)";$("pE").textContent="Profile updated.";
+  };
+}
+function bind(){
+  document.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{
+    const id=+b.dataset.id,c=COURSES.find(x=>x.id===id);
+    ({enroll:()=>enroll(id),video:()=>video(c),quiz:()=>quiz(c),ask:()=>ask(c)})[b.dataset.a]();
+  });
+  document.querySelectorAll("[data-reply]").forEach(b=>b.onclick=()=>{
+    const q=db.qa.find(x=>x.id==b.dataset.reply),t=$("r"+q.id).value.trim();
+    if(!t)return;q.a=t;q.by=me.first;save();vCourses();
+  });
+}
+function enroll(id){
+  const l=enrolled();if(!l.includes(id))db.enroll[me.email]=[...l,id];save();show(view);
+}
+function complete(id){
+  enroll(id);if(!doneList().includes(id))db.done[me.email]=[...doneList(),id];save();
+}
+
+/* ---------- Modals ---------- */
+const open=h=>{$("mbox").innerHTML=h+`<div style="margin-top:1rem"><button class="alt" id="close">Close</button></div>`;$("modal").classList.remove("hide");$("close").onclick=closeM};
+const closeM=()=>{$("modal").classList.add("hide");$("mbox").innerHTML="";show(view)};
+$("modal").onclick=e=>{if(e.target.id==="modal")closeM()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("modal").classList.contains("hide"))closeM()});
+
+function video(c){
+  const dn=doneList().includes(c.id);
+  open(`<h2>${esc(c.title)}</h2><p>Trainer: ${esc(c.trainer)}</p>
+  <iframe src="https://www.youtube.com/embed/${c.video}" title="${esc(c.title)}" allowfullscreen></iframe>
+  <div style="margin-top:.8rem">${dn?'<span class="tag">Completed</span>':'<button id="mark">Mark as completed</button>'}</div>`);
+  if(!dn)$("mark").onclick=()=>{complete(c.id);$("mark").outerHTML='<span class="tag">Completed</span>'};
+}
+function quiz(c){
+  open(`<h2>${esc(c.title)} quiz</h2><div id="qz">${c.quiz.map((q,i)=>`<div class="q"><b>${i+1}. ${esc(q[0])}</b>${q[1].map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}"> ${esc(o)}</label>`).join("")}</div>`).join("")}
+  <button id="sub">Submit answers</button></div><div id="res"></div>`);
+  $("sub").onclick=()=>{
+    let s=0;c.quiz.forEach((q,i)=>{const a=document.querySelector(`input[name=q${i}]:checked`);if(a&&+a.value===q[2])s++});
+    const ok=s/c.quiz.length>=PASS_MARK;if(ok)complete(c.id);
+    $("res").innerHTML=`<p class="${ok?"good":"bad"}"><b>You scored ${s} out of ${c.quiz.length}.</b> ${ok?"You passed and this course is now marked completed.":"You need at least "+Math.ceil(PASS_MARK*c.quiz.length)+" correct answers. Watch the video and try again."}</p>`;
+  };
+}
+function thread(cid,email){
+  return db.qa.filter(x=>x.course===cid&&x.email===email).map(x=>`<div class="msg"><b>You:</b> ${esc(x.q)}</div>${x.a?`<div class="msg reply"><b>${esc(x.by||"Trainer")}:</b> ${esc(x.a)}</div>`:'<small>Waiting for the trainer to reply.</small>'}`).join("")||"<p><small>No questions yet.</small></p>";
+}
+function ask(c){
+  open(`<h2>Ask ${esc(c.trainer)}</h2><p>Course: ${esc(c.title)}</p>
+  <textarea id="qt" rows="3" placeholder="Type your question"></textarea>
+  <div style="margin-top:.5rem"><button id="send">Send question</button></div><h3 style="margin-top:1.2rem">Your questions</h3><div id="th">${thread(c.id,me.email)}</div>`);
+  $("send").onclick=()=>{const t=$("qt").value.trim();if(!t)return;
+    db.qa.push({id:Date.now(),course:c.id,email:me.email,name:me.first,q:t,a:"",by:""});save();$("qt").value="";$("th").innerHTML=thread(c.id,me.email)};
+}
+function trainerQA(){
+  if(!db.qa.length)return "<p>No student questions yet.</p>";
+  return db.qa.slice().reverse().map(x=>{const c=COURSES.find(k=>k.id===x.course);
+   return `<div class="item" style="display:block"><small>${esc(c.title)} - from ${esc(x.name)} (${esc(x.email)})</small>
+   <div class="msg"><b>Question:</b> ${esc(x.q)}</div>${x.a?`<div class="msg reply"><b>Your reply:</b> ${esc(x.a)}</div>`:""}
+   <textarea id="r${x.id}" rows="2" placeholder="Write a reply">${esc(x.a)}</textarea>
+   <div style="margin-top:.4rem"><button data-reply="${x.id}">${x.a?"Update reply":"Send reply"}</button></div></div>`}).join("");
+}
+</script>
+</body>
+</html>

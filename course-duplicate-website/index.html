@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CourseHub - Course Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="logo">Course<span>Hub</span></div>
+    <nav>
+      <a href="#dashboard">Dashboard</a>
+      <a href="#courses">Courses</a>
+      <button class="primary" onclick="openModal()">+ Add Course</button>
+    </nav>
+  </header>
+
+  <main id="dashboard">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">COURSE MANAGEMENT</p>
+        <h1>Create and manage courses faster.</h1>
+        <p class="subtitle">Duplicate an existing course, automatically generate a new slug, and save it as a draft.</p>
+      </div>
+      <div class="stats">
+        <div><strong id="totalCourses">3</strong><span>Total Courses</span></div>
+        <div><strong id="publishedCourses">2</strong><span>Published</span></div>
+        <div><strong id="draftCourses">1</strong><span>Drafts</span></div>
+      </div>
+    </section>
+
+    <section id="courses" class="courses-section">
+      <div class="section-title">
+        <div><h2>Your Courses</h2><p>Manage, edit or duplicate your courses.</p></div>
+        <input id="search" type="search" placeholder="Search courses..." oninput="renderCourses()">
+      </div>
+      <div id="courseGrid" class="course-grid"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-box">
+      <button class="close" onclick="closeModal()">×</button>
+      <h2>Add New Course</h2>
+      <p>Create a course manually or use Duplicate on an existing course.</p>
+      <label>Course title</label>
+      <input id="newTitle" placeholder="e.g. Advanced Python">
+      <label>Description</label>
+      <textarea id="newDescription" placeholder="Course description"></textarea>
+      <label>Instructor</label>
+      <input id="newInstructor" placeholder="Instructor name">
+      <button class="primary full" onclick="addCourse()">Create Course</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
